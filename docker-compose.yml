@@ -1,0 +1,26 @@
+version: '3'
+
+services: 
+  product:
+    build: './product-service'
+    ports:
+      - "5000:80"
+    networks: 
+      - ecommerce-network
+    depends_on:
+      - productdb
+  productdb:
+    image: mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: password
+    ports:
+      - 27017:27017
+    expose:
+      - '27017'
+    networks:
+      - ecommerce-network
+networks:
+  ecommerce-network:
+    name: ecommerce

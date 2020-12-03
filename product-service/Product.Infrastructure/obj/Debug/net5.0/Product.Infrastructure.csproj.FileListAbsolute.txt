@@ -1,0 +1,12 @@
+/Users/lewismarkwell/Projects/ecommerce/product-service/Product.Infrastructure/obj/Debug/net5.0/Product.Infrastructure.csprojAssemblyReference.cache
+/Users/lewismarkwell/Projects/ecommerce/product-service/Product.Infrastructure/obj/Debug/net5.0/Product.Infrastructure.GeneratedMSBuildEditorConfig.editorconfig
+/Users/lewismarkwell/Projects/ecommerce/product-service/Product.Infrastructure/obj/Debug/net5.0/Product.Infrastructure.AssemblyInfoInputs.cache
+/Users/lewismarkwell/Projects/ecommerce/product-service/Product.Infrastructure/obj/Debug/net5.0/Product.Infrastructure.AssemblyInfo.cs
+/Users/lewismarkwell/Projects/ecommerce/product-service/Product.Infrastructure/obj/Debug/net5.0/Product.Infrastructure.csproj.CoreCompileInputs.cache
+/Users/lewismarkwell/Projects/ecommerce/product-service/Product.Infrastructure/bin/Debug/net5.0/Product.Infrastructure.deps.json
+/Users/lewismarkwell/Projects/ecommerce/product-service/Product.Infrastructure/bin/Debug/net5.0/Product.Infrastructure.dll
+/Users/lewismarkwell/Projects/ecommerce/product-service/Product.Infrastructure/bin/Debug/net5.0/ref/Product.Infrastructure.dll
+/Users/lewismarkwell/Projects/ecommerce/product-service/Product.Infrastructure/bin/Debug/net5.0/Product.Infrastructure.pdb
+/Users/lewismarkwell/Projects/ecommerce/product-service/Product.Infrastructure/obj/Debug/net5.0/Product.Infrastructure.dll
+/Users/lewismarkwell/Projects/ecommerce/product-service/Product.Infrastructure/obj/Debug/net5.0/ref/Product.Infrastructure.dll
+/Users/lewismarkwell/Projects/ecommerce/product-service/Product.Infrastructure/obj/Debug/net5.0/Product.Infrastructure.pdb

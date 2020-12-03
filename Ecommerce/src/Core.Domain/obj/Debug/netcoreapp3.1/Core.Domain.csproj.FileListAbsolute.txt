@@ -1,8 +1,0 @@
-C:\Users\lewis\Projects\ecommerce\Ecommerce\src\Core.Domain\bin\Debug\netcoreapp3.1\Core.Domain.deps.json
-C:\Users\lewis\Projects\ecommerce\Ecommerce\src\Core.Domain\bin\Debug\netcoreapp3.1\Core.Domain.dll
-C:\Users\lewis\Projects\ecommerce\Ecommerce\src\Core.Domain\bin\Debug\netcoreapp3.1\Core.Domain.pdb
-C:\Users\lewis\Projects\ecommerce\Ecommerce\src\Core.Domain\obj\Debug\netcoreapp3.1\Core.Domain.csprojAssemblyReference.cache
-C:\Users\lewis\Projects\ecommerce\Ecommerce\src\Core.Domain\obj\Debug\netcoreapp3.1\Core.Domain.AssemblyInfoInputs.cache
-C:\Users\lewis\Projects\ecommerce\Ecommerce\src\Core.Domain\obj\Debug\netcoreapp3.1\Core.Domain.AssemblyInfo.cs
-C:\Users\lewis\Projects\ecommerce\Ecommerce\src\Core.Domain\obj\Debug\netcoreapp3.1\Core.Domain.dll
-C:\Users\lewis\Projects\ecommerce\Ecommerce\src\Core.Domain\obj\Debug\netcoreapp3.1\Core.Domain.pdb

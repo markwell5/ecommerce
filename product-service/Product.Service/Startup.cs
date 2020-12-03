@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
+using AutoMapper;
+using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -11,6 +14,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using Product.Application;
+using Product.Application.Commands;
 using Product.Infrastructure;
 
 namespace Product.Service
@@ -28,6 +33,9 @@ namespace Product.Service
         public void ConfigureServices(IServiceCollection services)
         {
             services.RegisterInfrastructure(Configuration);
+            services.AddMediatR(typeof(CreateProductCommand).Assembly);
+            services.AddAutoMapper(typeof(MapperProfile).Assembly);
+
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {

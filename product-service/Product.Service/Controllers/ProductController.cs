@@ -1,12 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Ecommerce.Model.Product.Request;
+﻿using Ecommerce.Model.Product.Request;
 using Ecommerce.Model.Product.Response;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using Product.Infrastructure;
+using Product.Application.Commands;
+using Product.Application.Queries;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Product.Service.Controllers
 {
@@ -15,42 +15,43 @@ namespace Product.Service.Controllers
     public class ProductController : ControllerBase
     {
         private readonly ILogger<ProductController> _logger;
-        private readonly IProductRepository _repo;
+        private readonly IMediator _mediator;
 
-        public ProductController(ILogger<ProductController> logger, IProductRepository repo)
+        public ProductController(ILogger<ProductController> logger, IMediator mediator)
         {
             _logger = logger;
-            _repo = repo;
+            _mediator = mediator;
         }
 
         [HttpGet]
-        public async Task<IEnumerable<ProductResponse>> GetProducts()
+        [ProducesResponseType(200, Type = typeof(IEnumerable<ProductResponse>))]
+        public async Task<IActionResult> GetProducts()
         {
-            return (await _repo.Get()).Select(d => new ProductResponse { Id = d.Id, Name = d.Name });
+            var products = await _mediator.Send(new GetProductsQuery());
+            
+            return Ok(products);
         }
 
-        [HttpGet("{id}")]
-        public async Task<ProductResponse> GetProduct(long id)
+        [HttpGet("{key}")]
+        [ProducesResponseType(200, Type = typeof(ProductResponse))]
+        [ProducesResponseType(404)]
+        public async Task<IActionResult> GetProduct(long key)
         {
-            var d = await _repo.GetProduct(id);
+            var product = await _mediator.Send(new GetProductQuery(key));
 
-            return new ProductResponse
-            {
-                Id = d.Id,
-                Name = d.Name
-            };
+            if (product == null)
+                return NotFound();
+
+            return Ok(product);
         }
 
         [HttpPost]
-        public async Task<ProductResponse> Create([FromBody] CreateProductRequest req)
+        [ProducesResponseType(201, Type = typeof(ProductResponse))]
+        public async Task<IActionResult> Create([FromBody] CreateProductRequest req)
         {
-            var d = await _repo.Create(req.Name);
+            var product = await _mediator.Send(new CreateProductCommand(req));
 
-            return new ProductResponse
-            {
-                Id = d.Id,
-                Name = d.Name
-            };
+            return Created(product.Key.ToString(), product);
         }
     }
 }

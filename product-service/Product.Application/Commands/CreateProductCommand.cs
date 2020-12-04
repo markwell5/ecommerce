@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
+using Ecommerce.Events.Product;
 using Ecommerce.Model.Product.Request;
 using Ecommerce.Model.Product.Response;
+using Ecommerce.Shared.Infrastructure;
 using MediatR;
 using Product.Application.Domain;
 using Product.Application.Repositories;
@@ -27,17 +29,24 @@ namespace Product.Application.Commands
     {
         private readonly IProductRepository productRepository;
         private readonly IMapper mapper;
+        private readonly IEventNotifier eventNotifier;
 
-        public CreateProductCommandHandler(IProductRepository productRepository, IMapper mapper)
+        public CreateProductCommandHandler(IProductRepository productRepository, IMapper mapper, IEventNotifier eventNotifier)
         {
             this.productRepository = productRepository;
             this.mapper = mapper;
+            this.eventNotifier = eventNotifier;
         }
 
         public async Task<ProductResponse> Handle(CreateProductCommand request, CancellationToken cancellationToken)
         {
             var dto = mapper.Map<ProductDto>(request.Request);
             var created = await productRepository.Create(dto);
+
+            await eventNotifier.Notify(new ProductCreated
+            {
+                Key = created.Key
+            });
 
             return mapper.Map<ProductResponse>(created);
         }

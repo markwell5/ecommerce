@@ -12,7 +12,6 @@ namespace Product.Infrastructure
         public static IServiceCollection RegisterInfrastructure(this IServiceCollection services, IConfiguration configuration)
         {
             services.Configure<Settings>(configuration);
-            var ms = new MongoSettings();
 
             services.AddTransient<MongoClient>(x =>
                 new MongoClient(x.GetService<IOptions<Settings>>().Value.Mongo.ConnectionString));

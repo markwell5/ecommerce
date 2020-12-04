@@ -44,4 +44,3 @@ services:
 
 networks:
   ecommerce-network:
-    name: ecommerce

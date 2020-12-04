@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using MongoDB.Driver;
 using Microsoft.Extensions.Options;
+using Product.Application.Repositories;
 
 namespace Product.Infrastructure
 {

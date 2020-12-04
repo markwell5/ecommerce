@@ -3,41 +3,39 @@ using System.Threading.Tasks;
 using MongoDB.Driver;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
+using Product.Application.Repositories;
+using Product.Application.Domain;
+using System.Linq;
 
 namespace Product.Infrastructure
 {
-    public interface IProductRepository
-    {
-        Task<List<ProductDto>> Get();
-        Task<ProductDto> Create(string name);
-        Task<ProductDto> GetProduct(long id);
-    }
-
     public class MongoProductRepository : IProductRepository
     {
-        IMongoCollection<ProductDto> products;
+        IMongoCollection<MongoProductDto> products;
         public MongoProductRepository(MongoClient client)
         {
             products = client.GetDatabase("product-service")
-                .GetCollection<ProductDto>("products");
+                .GetCollection<MongoProductDto>("products");
         }
 
-        public async Task<ProductDto> Create(string name)
+        public async Task<ProductDto> Create(ProductDto product)
         {
-            var product = new ProductDto { Name = name, Id = await GetNextId() };
-            await products.InsertOneAsync(product);
+            var mp = new MongoProductDto { Name = product.Name, Key = await GetNextId() };
+            await products.InsertOneAsync(mp);
 
-            return product;
+            return mp;
         }
 
         public async Task<List<ProductDto>> Get()
         {
-            return await products.Find(_ => true).ToListAsync();
+            return (await products.Find(_ => true).ToListAsync())
+                .Cast<ProductDto>()
+                .ToList();
         }
 
-        public async Task<ProductDto> GetProduct(long id)
+        public async Task<ProductDto> Get(long id)
         {
-            return await products.Find(x => x.Id == id).FirstOrDefaultAsync();
+            return await products.Find(x => x.Key == id).FirstOrDefaultAsync();
         }
 
         private async Task<long> GetNextId()
@@ -46,11 +44,9 @@ namespace Product.Infrastructure
         }
     }
 
-    public class ProductDto
+    public class MongoProductDto : ProductDto
     {
         [BsonId]
         public ObjectId MongoId { get; set; }
-        public long Id { get; set; }
-        public string Name { get; set; }
     }
 }

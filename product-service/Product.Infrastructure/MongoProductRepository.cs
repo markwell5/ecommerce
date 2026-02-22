@@ -20,7 +20,7 @@ namespace Product.Infrastructure
 
         public async Task<ProductDto> Create(ProductDto product)
         {
-            var mp = new MongoProductDto { Name = product.Name, Key = await GetNextId() };
+            var mp = new MongoProductDto { Name = product.Name, Description = product.Description, Price = product.Price, Key = await GetNextId() };
             await products.InsertOneAsync(mp);
 
             return mp;

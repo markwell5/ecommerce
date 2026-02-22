@@ -1,29 +1,107 @@
 # Ecommerce
 
-A micro-service ecommerce based platform using data from instacart. 
+A microservice ecommerce platform using data from Instacart.
 
-The centre of this application is Kafka as the message broker, which is faciliating delivery of messages to other parts of the platform. 
+## Architecture
 
-## Running to application
-Use `docker-compose up -d` to configure all the external dependancies. 
+The platform uses an event-driven microservice architecture with RabbitMQ (via MassTransit) as the message broker. Each service owns its own PostgreSQL database and communicates asynchronously through domain events and commands.
 
-## Overview
-### Data Seeder
-Responsible for reading input data and raising commands for other services to create initial data. 
+```
+                        ┌─────────────┐
+                        │  RabbitMQ   │
+                        └──────┬──────┘
+              ┌────────────────┼────────────────┐
+              ▼                ▼                ▼
+     ┌────────────────┐ ┌───────────────┐ ┌───────────────┐
+     │ Product Service│ │ Order Service │ │ Stock Service │
+     │   :5001        │ │   :5002       │ │   :5003       │
+     └───────┬────────┘ └───────┬───────┘ └───────┬───────┘
+             ▼                  ▼                  ▼
+         product_db          order_db           stock_db
+              └────────────────┼────────────────┘
+                          PostgreSQL
+```
 
-### Product Service
-Create and manages product information. Uses MySQL to store data and is subscribed to events to create a product. Makes use of Mediator library to help implement CQRS pattern. 
+### Services
+
+| Service | Port | Description |
+|---------|------|-------------|
+| **Product Service** | 5001 | CRUD for product catalogue. Publishes `ProductCreated`/`Updated`/`Deleted` events. |
+| **Order Service** | 5002 | Orchestrates order lifecycle via MassTransit state machine saga with event sourcing. |
+| **Stock Service** | 5003 | Manages inventory. Consumes `ReserveStock`/`ReleaseStock` from the Order saga. |
+| **Data Seeder** | — | Console app that seeds initial product and stock data. |
+
+### Tech Stack
+
+- **.NET 8** — All services
+- **PostgreSQL 16** — Persistence (each service has its own database)
+- **RabbitMQ** — Message broker (via MassTransit 8.x)
+- **MediatR** — CQRS command/query handling
+- **Entity Framework Core** — ORM and migrations
+- **FluentValidation** — Request validation via MediatR pipeline
+- **AutoMapper** — Entity-to-DTO mapping
+- **Serilog + Seq** — Structured logging and log viewer
+- **Docker Compose** — Container orchestration
+
+### Order Saga Flow
+
+```
+PlaceOrder → [Placed] → ReserveStock → [ReservingStock]
+  StockReserved → ProcessPayment → [Paying]
+    PaymentSucceeded → [Confirmed] → Ship → Deliver → Return
+    PaymentFailed → ReleaseStock → [PaymentFailed]
+  StockReservationFailed → [Rejected]
+  CancelOrder → ReleaseStock → [Cancelled]
+```
+
+## Running the Application
+
+### Full stack (Docker)
+
+```bash
+docker compose up -d
+```
+
+This starts all services, PostgreSQL, RabbitMQ, and Seq.
+
+### Local development
+
+Start infrastructure only:
+
+```bash
+docker compose -f docker-compose.local.yml up -d
+```
+
+Then run individual services:
+
+```bash
+dotnet run --project product-service/Product.Service
+dotnet run --project order-service/Order.Service
+dotnet run --project stock-service/Stock.Service
+```
+
+### Seed data
+
+After services are running:
+
+```bash
+dotnet run --project data-seeder/DataSeeder
+```
+
+### Useful URLs
+
+| URL | Description |
+|-----|-------------|
+| http://localhost:5001/swagger | Product Service API docs |
+| http://localhost:5002/swagger | Order Service API docs |
+| http://localhost:5003/swagger | Stock Service API docs |
+| http://localhost:8081 | Seq log viewer |
+| http://localhost:15672 | RabbitMQ management (guest/guest) |
 
 ## Future Developments
-1. Product service
-    1. Methods to retrieve product info
-    1. gRPC for inter-service communications
-1. Order service
-    1. Event sourcing for managing state of the order
-1. Stock service
-1. Create react/node.js front end
-    1. Elasticsearch for search page
-    1. Investigate graphql for product info pages
-1. Recommendation Service
-    1. ML based to suggest products other users have bought
-    1. Suggest to buy products based on frequency between purchases and since last purchase
+
+1. Auth Service — user and service-to-service authentication
+1. gRPC for inter-service communication
+1. GraphQL API gateway layer
+1. React/Node.js frontend with Elasticsearch
+1. Recommendation service (ML-based product suggestions)

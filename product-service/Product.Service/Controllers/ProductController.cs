@@ -1,3 +1,4 @@
+using Ecommerce.Model;
 using Ecommerce.Model.Product.Request;
 using Ecommerce.Model.Product.Response;
 using MediatR;
@@ -5,7 +6,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Product.Application.Commands;
 using Product.Application.Queries;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Product.Service.Controllers
@@ -24,10 +24,22 @@ namespace Product.Service.Controllers
         }
 
         [HttpGet]
-        [ProducesResponseType(200, Type = typeof(IEnumerable<ProductResponse>))]
-        public async Task<IActionResult> GetProducts()
+        [ProducesResponseType(200, Type = typeof(PagedResponse<ProductResponse>))]
+        public async Task<IActionResult> GetProducts(
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 20,
+            [FromQuery] string sortBy = null,
+            [FromQuery] string sortDirection = "asc",
+            [FromQuery] string search = null)
         {
-            var products = await _mediator.Send(new GetProductsQuery());
+            var products = await _mediator.Send(new GetProductsQuery
+            {
+                Page = page,
+                PageSize = pageSize,
+                SortBy = sortBy,
+                SortDirection = sortDirection,
+                Search = search
+            });
 
             return Ok(products);
         }

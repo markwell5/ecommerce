@@ -37,6 +37,25 @@ services:
       rabbitmq:
         condition: service_healthy
 
+  stock:
+    build:
+      context: .
+      dockerfile: stock-service/Dockerfile
+    ports:
+      - "5003:8080"
+    environment:
+      - ConnectionStrings__StockDb=Host=postgres;Database=stock_db;Username=ecommerce;Password=ecommerce
+      - RabbitMq__Host=rabbitmq
+      - Serilog__WriteTo__1__Name=Seq
+      - Serilog__WriteTo__1__Args__serverUrl=http://seq:5341
+    networks:
+      - ecommerce-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
   postgres:
     image: postgres:16
     restart: always

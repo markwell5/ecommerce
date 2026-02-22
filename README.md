@@ -56,25 +56,19 @@ PlaceOrder → [Placed] → ReserveStock → [ReservingStock]
 
 ## Running the Application
 
-### Full stack (Docker)
+A single `docker-compose.yml` uses **profiles** to support different workflows:
 
-```bash
-docker compose up -d
-```
-
-This starts all services, PostgreSQL, RabbitMQ, and Seq.
+| Command | What it does |
+|---------|-------------|
+| `docker compose up -d` | Infrastructure only (Postgres, RabbitMQ, Seq) — for local `dotnet run` development |
+| `docker compose --profile app up -d` | Full stack — all services + infrastructure |
+| `docker compose --profile app --profile tools up -d` | Full stack + dev tools (pgAdmin) |
+| `docker compose down -v` | Tear everything down including volumes |
 
 ### Local development
 
-Start infrastructure only:
-
 ```bash
-docker compose -f docker-compose.local.yml up -d
-```
-
-Then run individual services:
-
-```bash
+docker compose up -d
 dotnet run --project product-service/Product.Service
 dotnet run --project order-service/Order.Service
 dotnet run --project stock-service/Stock.Service
@@ -88,6 +82,12 @@ After services are running:
 dotnet run --project data-seeder/DataSeeder
 ```
 
+### Run tests
+
+```bash
+dotnet test
+```
+
 ### Useful URLs
 
 | URL | Description |
@@ -97,6 +97,7 @@ dotnet run --project data-seeder/DataSeeder
 | http://localhost:5003/swagger | Stock Service API docs |
 | http://localhost:8081 | Seq log viewer |
 | http://localhost:15672 | RabbitMQ management (guest/guest) |
+| http://localhost:8080 | pgAdmin (tools profile, admin@local.dev / admin) |
 
 ## Future Developments
 

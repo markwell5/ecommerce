@@ -8,7 +8,8 @@ namespace Product.Application
     {
         public MapperProfile()
         {
-            CreateMap<CreateProductRequest, Entities.Product>();
+            CreateMap<CreateProductRequest, Entities.Product>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore());
             CreateMap<Entities.Product, ProductResponse>();
         }
     }

@@ -1,73 +1,17 @@
 services:
-  product:
-    build:
-      context: .
-      dockerfile: product-service/Dockerfile
-    ports:
-      - "5001:8080"
-    environment:
-      - ConnectionStrings__ProductDb=Host=postgres;Database=product_db;Username=ecommerce;Password=ecommerce
-      - RabbitMq__Host=rabbitmq
-      - Serilog__WriteTo__1__Name=Seq
-      - Serilog__WriteTo__1__Args__serverUrl=http://seq:5341
-    networks:
-      - ecommerce-network
-    depends_on:
-      postgres:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
-
-  order:
-    build:
-      context: .
-      dockerfile: order-service/Dockerfile
-    ports:
-      - "5002:8080"
-    environment:
-      - ConnectionStrings__OrderDb=Host=postgres;Database=order_db;Username=ecommerce;Password=ecommerce
-      - RabbitMq__Host=rabbitmq
-      - Serilog__WriteTo__1__Name=Seq
-      - Serilog__WriteTo__1__Args__serverUrl=http://seq:5341
-    networks:
-      - ecommerce-network
-    depends_on:
-      postgres:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
-
-  stock:
-    build:
-      context: .
-      dockerfile: stock-service/Dockerfile
-    ports:
-      - "5003:8080"
-    environment:
-      - ConnectionStrings__StockDb=Host=postgres;Database=stock_db;Username=ecommerce;Password=ecommerce
-      - RabbitMq__Host=rabbitmq
-      - Serilog__WriteTo__1__Name=Seq
-      - Serilog__WriteTo__1__Args__serverUrl=http://seq:5341
-    networks:
-      - ecommerce-network
-    depends_on:
-      postgres:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
-
+  # ── Infrastructure (always runs) ──────────────────
   postgres:
     image: postgres:16
     restart: always
     environment:
       POSTGRES_USER: ecommerce
       POSTGRES_PASSWORD: ecommerce
-      POSTGRES_DB: product_db
+      POSTGRES_DB: ecommerce
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./postgres:/docker-entrypoint-initdb.d
+      - ./scripts/init-databases.sh:/docker-entrypoint-initdb.d/init-databases.sh
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ecommerce"]
       interval: 5s
@@ -101,6 +45,81 @@ services:
       ACCEPT_EULA: "Y"
     volumes:
       - seq_data:/data
+    networks:
+      - ecommerce-network
+
+  # ── Application services (profile: app) ──────────
+  product:
+    build:
+      context: .
+      dockerfile: product-service/Dockerfile
+    profiles: ["app"]
+    ports:
+      - "5001:8080"
+    environment:
+      - ConnectionStrings__ProductDb=Host=postgres;Database=product_db;Username=ecommerce;Password=ecommerce
+      - RabbitMq__Host=rabbitmq
+      - Serilog__WriteTo__1__Name=Seq
+      - Serilog__WriteTo__1__Args__serverUrl=http://seq:5341
+    networks:
+      - ecommerce-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  order:
+    build:
+      context: .
+      dockerfile: order-service/Dockerfile
+    profiles: ["app"]
+    ports:
+      - "5002:8080"
+    environment:
+      - ConnectionStrings__OrderDb=Host=postgres;Database=order_db;Username=ecommerce;Password=ecommerce
+      - RabbitMq__Host=rabbitmq
+      - Serilog__WriteTo__1__Name=Seq
+      - Serilog__WriteTo__1__Args__serverUrl=http://seq:5341
+    networks:
+      - ecommerce-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  stock:
+    build:
+      context: .
+      dockerfile: stock-service/Dockerfile
+    profiles: ["app"]
+    ports:
+      - "5003:8080"
+    environment:
+      - ConnectionStrings__StockDb=Host=postgres;Database=stock_db;Username=ecommerce;Password=ecommerce
+      - RabbitMq__Host=rabbitmq
+      - Serilog__WriteTo__1__Name=Seq
+      - Serilog__WriteTo__1__Args__serverUrl=http://seq:5341
+    networks:
+      - ecommerce-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  # ── Dev tools (profile: tools) ───────────────────
+  pgadmin:
+    image: dpage/pgadmin4
+    profiles: ["tools"]
+    ports:
+      - "8080:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@local.dev
+      PGADMIN_DEFAULT_PASSWORD: admin
+    depends_on:
+      - postgres
     networks:
       - ecommerce-network
 

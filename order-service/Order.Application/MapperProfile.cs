@@ -8,7 +8,8 @@ namespace Order.Application
     {
         public MapperProfile()
         {
-            CreateMap<Entities.Order, OrderResponse>();
+            CreateMap<Entities.Order, OrderResponse>()
+                .ForMember(dest => dest.Events, opt => opt.Ignore());
             CreateMap<OrderEvent, OrderEventResponse>();
         }
     }

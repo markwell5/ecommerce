@@ -7,11 +7,13 @@ services:
       - "5001:8080"
     environment:
       - ConnectionStrings__ProductDb=Host=postgres;Database=product_db;Username=ecommerce;Password=ecommerce
-      - Kafka__BootstrapServers=kafka:29092
+      - RabbitMq__Host=rabbitmq
     networks:
       - ecommerce-network
     depends_on:
       postgres:
+        condition: service_healthy
+      rabbitmq:
         condition: service_healthy
 
   postgres:
@@ -28,6 +30,22 @@ services:
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ecommerce"]
       interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ecommerce-network
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
       timeout: 5s
       retries: 5
     networks:

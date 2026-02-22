@@ -2,7 +2,7 @@ using AutoMapper;
 using Ecommerce.Events.Product;
 using Ecommerce.Model.Product.Request;
 using Ecommerce.Model.Product.Response;
-using Ecommerce.Shared.Infrastructure;
+using MassTransit;
 using MediatR;
 using System.Threading;
 using System.Threading.Tasks;
@@ -23,13 +23,13 @@ namespace Product.Application.Commands
     {
         private readonly ProductDbContext _dbContext;
         private readonly IMapper _mapper;
-        private readonly IEventNotifier _eventNotifier;
+        private readonly IPublishEndpoint _publishEndpoint;
 
-        public CreateProductCommandHandler(ProductDbContext dbContext, IMapper mapper, IEventNotifier eventNotifier)
+        public CreateProductCommandHandler(ProductDbContext dbContext, IMapper mapper, IPublishEndpoint publishEndpoint)
         {
             _dbContext = dbContext;
             _mapper = mapper;
-            _eventNotifier = eventNotifier;
+            _publishEndpoint = publishEndpoint;
         }
 
         public async Task<ProductResponse> Handle(CreateProductCommand request, CancellationToken cancellationToken)
@@ -39,10 +39,10 @@ namespace Product.Application.Commands
             _dbContext.Products.Add(product);
             await _dbContext.SaveChangesAsync(cancellationToken);
 
-            await _eventNotifier.Notify(new ProductCreated
+            await _publishEndpoint.Publish(new ProductCreated
             {
                 Key = product.Id
-            });
+            }, cancellationToken);
 
             return _mapper.Map<ProductResponse>(product);
         }

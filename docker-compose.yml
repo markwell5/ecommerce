@@ -109,6 +109,29 @@ services:
       rabbitmq:
         condition: service_healthy
 
+  user:
+    build:
+      context: .
+      dockerfile: user-service/Dockerfile
+    profiles: ["app"]
+    ports:
+      - "5004:8080"
+    environment:
+      - ConnectionStrings__UserDb=Host=postgres;Database=user_db;Username=ecommerce;Password=ecommerce
+      - RabbitMq__Host=rabbitmq
+      - JwtSettings__Secret=super-secret-key-that-should-be-at-least-32-characters-long!
+      - JwtSettings__Issuer=ecommerce
+      - JwtSettings__Audience=ecommerce
+      - Serilog__WriteTo__1__Name=Seq
+      - Serilog__WriteTo__1__Args__serverUrl=http://seq:5341
+    networks:
+      - ecommerce-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
   # ── Dev tools (profile: tools) ───────────────────
   pgadmin:
     image: dpage/pgadmin4

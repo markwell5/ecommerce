@@ -2,15 +2,15 @@ using Ecommerce.Shared.Infrastructure;
 using Ecommerce.Shared.Infrastructure.Middleware;
 using Ecommerce.Shared.Infrastructure.Validation;
 using FluentValidation;
-using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-using Order.Application;
-using Order.Application.Commands;
-using Order.Application.Entities;
-using Order.Application.Saga;
-using Order.Infrastructure;
+using Payment.Application;
+using Payment.Application.Commands;
+using Payment.Application.Consumers;
+using Payment.Application.Services;
+using Payment.Infrastructure;
 using Serilog;
+using Stripe;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj} {Properties:j}{NewLine}{Exception}")
@@ -25,49 +25,46 @@ try
         configuration
             .ReadFrom.Configuration(context.Configuration)
             .Enrich.FromLogContext()
-            .Enrich.WithProperty("Service", "Order.Service")
+            .Enrich.WithProperty("Service", "Payment.Service")
             .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj} {Properties:j}{NewLine}{Exception}");
     });
+
+    StripeConfiguration.ApiKey = builder.Configuration["StripeSettings:SecretKey"];
 
     builder.Services.RegisterInfrastructure(builder.Configuration);
     builder.Services.AddSharedInfrastructure(builder.Configuration, bus =>
     {
-        bus.AddSagaStateMachine<OrderStateMachine, OrderSagaState>()
-            .EntityFrameworkRepository(r =>
-            {
-                r.ConcurrencyMode = ConcurrencyMode.Pessimistic;
-                r.ExistingDbContext<OrderDbContext>();
-                r.UsePostgres();
-            });
-
-        // PaymentStubConsumer removed — real Payment Service now handles ProcessPayment
+        bus.AddConsumer<ProcessPaymentConsumer>();
+        bus.AddConsumer<RefundPaymentConsumer>();
     });
+
+    builder.Services.AddScoped<IPaymentGateway, StripePaymentGateway>();
 
     builder.Services.AddMediatR(cfg =>
     {
-        cfg.RegisterServicesFromAssembly(typeof(PlaceOrderCommand).Assembly);
+        cfg.RegisterServicesFromAssembly(typeof(RefundPaymentCommand).Assembly);
         cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
     });
-    builder.Services.AddValidatorsFromAssembly(typeof(PlaceOrderCommand).Assembly);
-    builder.Services.AddAutoMapper(typeof(Order.Application.MapperProfile).Assembly);
+    builder.Services.AddValidatorsFromAssembly(typeof(RefundPaymentCommand).Assembly);
+    builder.Services.AddAutoMapper(typeof(Payment.Application.MapperProfile).Assembly);
 
     builder.Services.AddExceptionHandler<ValidationExceptionHandler>();
     builder.Services.AddProblemDetails();
 
     builder.Services.AddHealthChecks()
-        .AddNpgSql(builder.Configuration.GetConnectionString("OrderDb")!, name: "postgresql");
+        .AddNpgSql(builder.Configuration.GetConnectionString("PaymentDb")!, name: "postgresql");
 
     builder.Services.AddControllers();
     builder.Services.AddSwaggerGen(c =>
     {
-        c.SwaggerDoc("v1", new OpenApiInfo { Title = "Order.Service", Version = "v1" });
+        c.SwaggerDoc("v1", new OpenApiInfo { Title = "Payment.Service", Version = "v1" });
     });
 
     var app = builder.Build();
 
     using (var scope = app.Services.CreateScope())
     {
-        var db = scope.ServiceProvider.GetRequiredService<OrderDbContext>();
+        var db = scope.ServiceProvider.GetRequiredService<PaymentDbContext>();
         db.Database.Migrate();
     }
 
@@ -78,7 +75,7 @@ try
     if (app.Environment.IsDevelopment())
     {
         app.UseSwagger();
-        app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Order.Service v1"));
+        app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Payment.Service v1"));
     }
 
     app.UseHttpsRedirection();

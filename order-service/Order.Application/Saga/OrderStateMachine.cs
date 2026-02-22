@@ -161,6 +161,10 @@ namespace Order.Application.Saga
                         OrderId = context.Saga.CorrelationId,
                         ItemsJson = context.Saga.ItemsJson
                     })
+                    .Send(context => new RefundPayment
+                    {
+                        OrderId = context.Saga.CorrelationId
+                    })
                     .TransitionTo(Cancelled));
 
             During(Shipped,

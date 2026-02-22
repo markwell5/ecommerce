@@ -8,6 +8,8 @@ services:
     environment:
       - ConnectionStrings__ProductDb=Host=postgres;Database=product_db;Username=ecommerce;Password=ecommerce
       - RabbitMq__Host=rabbitmq
+      - Serilog__WriteTo__1__Name=Seq
+      - Serilog__WriteTo__1__Args__serverUrl=http://seq:5341
     networks:
       - ecommerce-network
     depends_on:
@@ -51,8 +53,21 @@ services:
     networks:
       - ecommerce-network
 
+  seq:
+    image: datalust/seq
+    ports:
+      - "5341:5341"
+      - "8081:80"
+    environment:
+      ACCEPT_EULA: "Y"
+    volumes:
+      - seq_data:/data
+    networks:
+      - ecommerce-network
+
 volumes:
   postgres_data:
+  seq_data:
 
 networks:
   ecommerce-network:

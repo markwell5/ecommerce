@@ -1,7 +1,7 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Ecommerce.Model.Product.Response;
 using MediatR;
-using Product.Application.Repositories;
+using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -14,20 +14,20 @@ namespace Product.Application.Queries
 
     public class GetProductsQueryHandler : IRequestHandler<GetProductsQuery, IEnumerable<ProductResponse>>
     {
-        private readonly IProductRepository _productRepository;
+        private readonly ProductDbContext _dbContext;
         private readonly IMapper _mapper;
 
-        public GetProductsQueryHandler(IProductRepository productRepository, IMapper mapper)
+        public GetProductsQueryHandler(ProductDbContext dbContext, IMapper mapper)
         {
-            _productRepository = productRepository;
+            _dbContext = dbContext;
             _mapper = mapper;
         }
 
         public async Task<IEnumerable<ProductResponse>> Handle(GetProductsQuery request, CancellationToken cancellationToken)
         {
-            var ps = await _productRepository.Get();
+            var products = await _dbContext.Products.AsNoTracking().ToListAsync(cancellationToken);
 
-            return _mapper.Map<IEnumerable<ProductResponse>>(ps);
+            return _mapper.Map<IEnumerable<ProductResponse>>(products);
         }
     }
 }

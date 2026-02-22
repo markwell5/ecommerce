@@ -1,4 +1,4 @@
-﻿using Ecommerce.Model.Product.Request;
+using Ecommerce.Model.Product.Request;
 using Ecommerce.Model.Product.Response;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -28,7 +28,7 @@ namespace Product.Service.Controllers
         public async Task<IActionResult> GetProducts()
         {
             var products = await _mediator.Send(new GetProductsQuery());
-            
+
             return Ok(products);
         }
 
@@ -52,6 +52,32 @@ namespace Product.Service.Controllers
             var product = await _mediator.Send(new CreateProductCommand(req));
 
             return Created(product.Key.ToString(), product);
+        }
+
+        [HttpPut("{key}")]
+        [ProducesResponseType(200, Type = typeof(ProductResponse))]
+        [ProducesResponseType(404)]
+        public async Task<IActionResult> Update(long key, [FromBody] UpdateProductRequest req)
+        {
+            var product = await _mediator.Send(new UpdateProductCommand(key, req));
+
+            if (product == null)
+                return NotFound();
+
+            return Ok(product);
+        }
+
+        [HttpDelete("{key}")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(404)]
+        public async Task<IActionResult> Delete(long key)
+        {
+            var deleted = await _mediator.Send(new DeleteProductCommand(key));
+
+            if (!deleted)
+                return NotFound();
+
+            return NoContent();
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using Ecommerce.Model.Product.Request;
+using Ecommerce.Model.Product.Request;
 using Ecommerce.Model.Product.Response;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -28,16 +28,16 @@ namespace Product.Service.Controllers
         public async Task<IActionResult> GetProducts()
         {
             var products = await _mediator.Send(new GetProductsQuery());
-            
+
             return Ok(products);
         }
 
-        [HttpGet("{key}")]
+        [HttpGet("{id}")]
         [ProducesResponseType(200, Type = typeof(ProductResponse))]
         [ProducesResponseType(404)]
-        public async Task<IActionResult> GetProduct(long key)
+        public async Task<IActionResult> GetProduct(long id)
         {
-            var product = await _mediator.Send(new GetProductQuery(key));
+            var product = await _mediator.Send(new GetProductQuery(id));
 
             if (product == null)
                 return NotFound();
@@ -51,7 +51,33 @@ namespace Product.Service.Controllers
         {
             var product = await _mediator.Send(new CreateProductCommand(req));
 
-            return Created(product.Key.ToString(), product);
+            return Created(product.Id.ToString(), product);
+        }
+
+        [HttpPut("{id}")]
+        [ProducesResponseType(200, Type = typeof(ProductResponse))]
+        [ProducesResponseType(404)]
+        public async Task<IActionResult> Update(long id, [FromBody] UpdateProductRequest req)
+        {
+            var product = await _mediator.Send(new UpdateProductCommand(id, req));
+
+            if (product == null)
+                return NotFound();
+
+            return Ok(product);
+        }
+
+        [HttpDelete("{id}")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(404)]
+        public async Task<IActionResult> Delete(long id)
+        {
+            var deleted = await _mediator.Send(new DeleteProductCommand(id));
+
+            if (!deleted)
+                return NotFound();
+
+            return NoContent();
         }
     }
 }

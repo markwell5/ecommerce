@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(gh issue create:*)",
+      "Bash(gh issue edit:*)",
+      "Bash(dotnet restore:*)",
+      "Bash(dotnet build:*)",
+      "Bash(git commit:*)",
+      "Bash(gh pr:*)",
+      "Bash(dotnet ef migrations add:*)"
+    ]
+  }
+}

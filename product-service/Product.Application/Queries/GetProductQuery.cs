@@ -8,12 +8,12 @@ namespace Product.Application.Queries
 {
     public class GetProductQuery : IRequest<ProductResponse>
     {
-        public GetProductQuery(long key)
+        public GetProductQuery(long id)
         {
-            Key = key;
+            Id = id;
         }
 
-        public long Key { get; }
+        public long Id { get; }
     }
 
     public class GetProductQueryHandler : IRequestHandler<GetProductQuery, ProductResponse>
@@ -29,7 +29,7 @@ namespace Product.Application.Queries
 
         public async Task<ProductResponse> Handle(GetProductQuery request, CancellationToken cancellationToken)
         {
-            var product = await _dbContext.Products.FindAsync(new object[] { request.Key }, cancellationToken);
+            var product = await _dbContext.Products.FindAsync(new object[] { request.Id }, cancellationToken);
 
             return _mapper.Map<ProductResponse>(product);
         }

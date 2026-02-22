@@ -1,8 +1,7 @@
-namespace Ecommerce.Model.Product.Response
+namespace Ecommerce.Model.Product.Request
 {
-    public class ProductResponse
+    public class UpdateProductRequest
     {
-        public long Id { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
         public decimal Price { get; set; }

@@ -1,7 +1,6 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Ecommerce.Model.Product.Request;
 using Ecommerce.Model.Product.Response;
-using Product.Application.Domain;
 
 namespace Product.Application
 {
@@ -9,8 +8,9 @@ namespace Product.Application
     {
         public MapperProfile()
         {
-            CreateMap<CreateProductRequest, ProductDto>();
-            CreateMap<ProductDto, ProductResponse>();
+            CreateMap<CreateProductRequest, Entities.Product>();
+            CreateMap<Entities.Product, ProductResponse>()
+                .ForMember(dest => dest.Key, opt => opt.MapFrom(src => src.Id));
         }
     }
 }

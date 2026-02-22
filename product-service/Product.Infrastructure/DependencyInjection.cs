@@ -1,23 +1,18 @@
-
-using Microsoft.Extensions.DependencyInjection;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using MongoDB.Driver;
-using Microsoft.Extensions.Options;
-using Product.Application.Repositories;
+using Microsoft.Extensions.DependencyInjection;
+using Product.Application;
 
-namespace Product.Infrastructure
+namespace Product.Infrastructure;
+
+public static class DependencyInjection
 {
-    public static class DependencyInjection
+    public static IServiceCollection RegisterInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
-        public static IServiceCollection RegisterInfrastructure(this IServiceCollection services, IConfiguration configuration)
-        {
-            services.Configure<Settings>(configuration);
+        services.AddDbContext<ProductDbContext>(options =>
+            options.UseNpgsql(configuration.GetConnectionString("ProductDb"),
+                b => b.MigrationsAssembly(typeof(DependencyInjection).Assembly.FullName)));
 
-            services.AddTransient<MongoClient>(x =>
-                new MongoClient(x.GetService<IOptions<Settings>>().Value.Mongo.ConnectionString));
-            
-            services.AddTransient<IProductRepository, MongoProductRepository>();
-            return services;
-        }
+        return services;
     }
 }

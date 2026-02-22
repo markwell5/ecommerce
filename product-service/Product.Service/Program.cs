@@ -1,4 +1,5 @@
 using Ecommerce.Shared.Infrastructure;
+using Ecommerce.Shared.Infrastructure.Middleware;
 using Ecommerce.Shared.Infrastructure.Validation;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
@@ -6,46 +7,77 @@ using Microsoft.OpenApi.Models;
 using Product.Application;
 using Product.Application.Commands;
 using Product.Infrastructure;
+using Serilog;
 
-var builder = WebApplication.CreateBuilder(args);
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj} {Properties:j}{NewLine}{Exception}")
+    .CreateBootstrapLogger();
 
-builder.Services.RegisterInfrastructure(builder.Configuration);
-builder.Services.AddSharedInfrastructure(builder.Configuration);
-builder.Services.AddMediatR(cfg =>
+try
 {
-    cfg.RegisterServicesFromAssembly(typeof(CreateProductCommand).Assembly);
-    cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
-});
-builder.Services.AddValidatorsFromAssembly(typeof(CreateProductCommand).Assembly);
-builder.Services.AddAutoMapper(typeof(MapperProfile).Assembly);
+    var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddExceptionHandler<ValidationExceptionHandler>();
-builder.Services.AddProblemDetails();
+    builder.Host.UseSerilog((context, configuration) =>
+    {
+        configuration
+            .ReadFrom.Configuration(context.Configuration)
+            .Enrich.FromLogContext()
+            .Enrich.WithProperty("Service", "Product.Service")
+            .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj} {Properties:j}{NewLine}{Exception}");
+    });
 
-builder.Services.AddControllers();
-builder.Services.AddSwaggerGen(c =>
-{
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Product.Service", Version = "v1" });
-});
+    builder.Services.RegisterInfrastructure(builder.Configuration);
+    builder.Services.AddSharedInfrastructure(builder.Configuration);
+    builder.Services.AddMediatR(cfg =>
+    {
+        cfg.RegisterServicesFromAssembly(typeof(CreateProductCommand).Assembly);
+        cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
+    });
+    builder.Services.AddValidatorsFromAssembly(typeof(CreateProductCommand).Assembly);
+    builder.Services.AddAutoMapper(typeof(MapperProfile).Assembly);
 
-var app = builder.Build();
+    builder.Services.AddExceptionHandler<ValidationExceptionHandler>();
+    builder.Services.AddProblemDetails();
 
-using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<ProductDbContext>();
-    db.Database.Migrate();
+    builder.Services.AddHealthChecks()
+        .AddNpgSql(builder.Configuration.GetConnectionString("ProductDb")!, name: "postgresql");
+
+    builder.Services.AddControllers();
+    builder.Services.AddSwaggerGen(c =>
+    {
+        c.SwaggerDoc("v1", new OpenApiInfo { Title = "Product.Service", Version = "v1" });
+    });
+
+    var app = builder.Build();
+
+    using (var scope = app.Services.CreateScope())
+    {
+        var db = scope.ServiceProvider.GetRequiredService<ProductDbContext>();
+        db.Database.Migrate();
+    }
+
+    app.UseMiddleware<CorrelationIdMiddleware>();
+    app.UseSerilogRequestLogging();
+    app.UseExceptionHandler();
+
+    if (app.Environment.IsDevelopment())
+    {
+        app.UseSwagger();
+        app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Product.Service v1"));
+    }
+
+    app.UseHttpsRedirection();
+    app.UseAuthorization();
+    app.MapControllers();
+    app.MapHealthChecks("/health");
+
+    app.Run();
 }
-
-if (app.Environment.IsDevelopment())
+catch (Exception ex)
 {
-    app.UseDeveloperExceptionPage();
-    app.UseSwagger();
-    app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Product.Service v1"));
+    Log.Fatal(ex, "Application terminated unexpectedly");
 }
-
-app.UseExceptionHandler();
-app.UseHttpsRedirection();
-app.UseAuthorization();
-app.MapControllers();
-
-app.Run();
+finally
+{
+    Log.CloseAndFlush();
+}

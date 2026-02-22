@@ -1,4 +1,6 @@
 using Ecommerce.Shared.Infrastructure;
+using Ecommerce.Shared.Infrastructure.Validation;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Product.Application;
@@ -9,8 +11,16 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.RegisterInfrastructure(builder.Configuration);
 builder.Services.AddSharedInfrastructure(builder.Configuration);
-builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(CreateProductCommand).Assembly));
+builder.Services.AddMediatR(cfg =>
+{
+    cfg.RegisterServicesFromAssembly(typeof(CreateProductCommand).Assembly);
+    cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
+});
+builder.Services.AddValidatorsFromAssembly(typeof(CreateProductCommand).Assembly);
 builder.Services.AddAutoMapper(typeof(MapperProfile).Assembly);
+
+builder.Services.AddExceptionHandler<ValidationExceptionHandler>();
+builder.Services.AddProblemDetails();
 
 builder.Services.AddControllers();
 builder.Services.AddSwaggerGen(c =>
@@ -33,6 +43,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Product.Service v1"));
 }
 
+app.UseExceptionHandler();
 app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();

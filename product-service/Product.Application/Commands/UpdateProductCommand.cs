@@ -11,13 +11,13 @@ namespace Product.Application.Commands
 {
     public class UpdateProductCommand : IRequest<ProductResponse>
     {
-        public UpdateProductCommand(long key, UpdateProductRequest request)
+        public UpdateProductCommand(long id, UpdateProductRequest request)
         {
-            Key = key;
+            Id = id;
             Request = request;
         }
 
-        public long Key { get; }
+        public long Id { get; }
         public UpdateProductRequest Request { get; }
     }
 
@@ -36,7 +36,7 @@ namespace Product.Application.Commands
 
         public async Task<ProductResponse> Handle(UpdateProductCommand request, CancellationToken cancellationToken)
         {
-            var product = await _dbContext.Products.FindAsync(new object[] { request.Key }, cancellationToken);
+            var product = await _dbContext.Products.FindAsync(new object[] { request.Id }, cancellationToken);
 
             if (product == null)
                 return null;
@@ -49,7 +49,7 @@ namespace Product.Application.Commands
 
             await _publishEndpoint.Publish(new ProductUpdated
             {
-                Key = product.Id
+                Id = product.Id
             }, cancellationToken);
 
             return _mapper.Map<ProductResponse>(product);

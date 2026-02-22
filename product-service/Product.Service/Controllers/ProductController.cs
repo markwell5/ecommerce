@@ -32,12 +32,12 @@ namespace Product.Service.Controllers
             return Ok(products);
         }
 
-        [HttpGet("{key}")]
+        [HttpGet("{id}")]
         [ProducesResponseType(200, Type = typeof(ProductResponse))]
         [ProducesResponseType(404)]
-        public async Task<IActionResult> GetProduct(long key)
+        public async Task<IActionResult> GetProduct(long id)
         {
-            var product = await _mediator.Send(new GetProductQuery(key));
+            var product = await _mediator.Send(new GetProductQuery(id));
 
             if (product == null)
                 return NotFound();
@@ -51,15 +51,15 @@ namespace Product.Service.Controllers
         {
             var product = await _mediator.Send(new CreateProductCommand(req));
 
-            return Created(product.Key.ToString(), product);
+            return Created(product.Id.ToString(), product);
         }
 
-        [HttpPut("{key}")]
+        [HttpPut("{id}")]
         [ProducesResponseType(200, Type = typeof(ProductResponse))]
         [ProducesResponseType(404)]
-        public async Task<IActionResult> Update(long key, [FromBody] UpdateProductRequest req)
+        public async Task<IActionResult> Update(long id, [FromBody] UpdateProductRequest req)
         {
-            var product = await _mediator.Send(new UpdateProductCommand(key, req));
+            var product = await _mediator.Send(new UpdateProductCommand(id, req));
 
             if (product == null)
                 return NotFound();
@@ -67,12 +67,12 @@ namespace Product.Service.Controllers
             return Ok(product);
         }
 
-        [HttpDelete("{key}")]
+        [HttpDelete("{id}")]
         [ProducesResponseType(204)]
         [ProducesResponseType(404)]
-        public async Task<IActionResult> Delete(long key)
+        public async Task<IActionResult> Delete(long id)
         {
-            var deleted = await _mediator.Send(new DeleteProductCommand(key));
+            var deleted = await _mediator.Send(new DeleteProductCommand(id));
 
             if (!deleted)
                 return NotFound();

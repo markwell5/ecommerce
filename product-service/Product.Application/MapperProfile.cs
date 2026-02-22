@@ -9,8 +9,7 @@ namespace Product.Application
         public MapperProfile()
         {
             CreateMap<CreateProductRequest, Entities.Product>();
-            CreateMap<Entities.Product, ProductResponse>()
-                .ForMember(dest => dest.Key, opt => opt.MapFrom(src => src.Id));
+            CreateMap<Entities.Product, ProductResponse>();
         }
     }
 }

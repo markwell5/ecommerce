@@ -8,12 +8,12 @@ namespace Product.Application.Commands
 {
     public class DeleteProductCommand : IRequest<bool>
     {
-        public DeleteProductCommand(long key)
+        public DeleteProductCommand(long id)
         {
-            Key = key;
+            Id = id;
         }
 
-        public long Key { get; }
+        public long Id { get; }
     }
 
     public class DeleteProductCommandHandler : IRequestHandler<DeleteProductCommand, bool>
@@ -29,7 +29,7 @@ namespace Product.Application.Commands
 
         public async Task<bool> Handle(DeleteProductCommand request, CancellationToken cancellationToken)
         {
-            var product = await _dbContext.Products.FindAsync(new object[] { request.Key }, cancellationToken);
+            var product = await _dbContext.Products.FindAsync(new object[] { request.Id }, cancellationToken);
 
             if (product == null)
                 return false;
@@ -39,7 +39,7 @@ namespace Product.Application.Commands
 
             await _publishEndpoint.Publish(new ProductDeleted
             {
-                Key = request.Key
+                Id = request.Id
             }, cancellationToken);
 
             return true;

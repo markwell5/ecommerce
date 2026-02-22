@@ -41,7 +41,7 @@ namespace Product.Application.Commands
 
             await _publishEndpoint.Publish(new ProductCreated
             {
-                Key = product.Id
+                Id = product.Id
             }, cancellationToken);
 
             return _mapper.Map<ProductResponse>(product);

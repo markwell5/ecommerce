@@ -2,6 +2,6 @@
 {
     public class ProductCreated : EventBase
     {
-        public long Key { get; init; }
+        public long Id { get; init; }
     }
 }

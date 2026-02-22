@@ -2,15 +2,13 @@ using Ecommerce.Shared.Infrastructure;
 using Ecommerce.Shared.Infrastructure.Middleware;
 using Ecommerce.Shared.Infrastructure.Validation;
 using FluentValidation;
-using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-using Order.Application;
-using Order.Application.Commands;
-using Order.Application.Entities;
-using Order.Application.Saga;
-using Order.Infrastructure;
 using Serilog;
+using Stock.Application;
+using Stock.Application.Commands;
+using Stock.Application.Consumers;
+using Stock.Infrastructure;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj} {Properties:j}{NewLine}{Exception}")
@@ -25,49 +23,43 @@ try
         configuration
             .ReadFrom.Configuration(context.Configuration)
             .Enrich.FromLogContext()
-            .Enrich.WithProperty("Service", "Order.Service")
+            .Enrich.WithProperty("Service", "Stock.Service")
             .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj} {Properties:j}{NewLine}{Exception}");
     });
 
     builder.Services.RegisterInfrastructure(builder.Configuration);
     builder.Services.AddSharedInfrastructure(builder.Configuration, bus =>
     {
-        bus.AddSagaStateMachine<OrderStateMachine, OrderSagaState>()
-            .EntityFrameworkRepository(r =>
-            {
-                r.ConcurrencyMode = ConcurrencyMode.Pessimistic;
-                r.ExistingDbContext<OrderDbContext>();
-                r.UsePostgres();
-            });
-
-        bus.AddConsumer<PaymentStubConsumer>();
+        bus.AddConsumer<ReserveStockConsumer>();
+        bus.AddConsumer<ReleaseStockConsumer>();
+        bus.AddConsumer<ProductCreatedConsumer>();
     });
 
     builder.Services.AddMediatR(cfg =>
     {
-        cfg.RegisterServicesFromAssembly(typeof(PlaceOrderCommand).Assembly);
+        cfg.RegisterServicesFromAssembly(typeof(UpdateStockCommand).Assembly);
         cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
     });
-    builder.Services.AddValidatorsFromAssembly(typeof(PlaceOrderCommand).Assembly);
-    builder.Services.AddAutoMapper(typeof(Order.Application.MapperProfile).Assembly);
+    builder.Services.AddValidatorsFromAssembly(typeof(UpdateStockCommand).Assembly);
+    builder.Services.AddAutoMapper(typeof(Stock.Application.MapperProfile).Assembly);
 
     builder.Services.AddExceptionHandler<ValidationExceptionHandler>();
     builder.Services.AddProblemDetails();
 
     builder.Services.AddHealthChecks()
-        .AddNpgSql(builder.Configuration.GetConnectionString("OrderDb")!, name: "postgresql");
+        .AddNpgSql(builder.Configuration.GetConnectionString("StockDb")!, name: "postgresql");
 
     builder.Services.AddControllers();
     builder.Services.AddSwaggerGen(c =>
     {
-        c.SwaggerDoc("v1", new OpenApiInfo { Title = "Order.Service", Version = "v1" });
+        c.SwaggerDoc("v1", new OpenApiInfo { Title = "Stock.Service", Version = "v1" });
     });
 
     var app = builder.Build();
 
     using (var scope = app.Services.CreateScope())
     {
-        var db = scope.ServiceProvider.GetRequiredService<OrderDbContext>();
+        var db = scope.ServiceProvider.GetRequiredService<StockDbContext>();
         db.Database.Migrate();
     }
 
@@ -78,7 +70,7 @@ try
     if (app.Environment.IsDevelopment())
     {
         app.UseSwagger();
-        app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Order.Service v1"));
+        app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Stock.Service v1"));
     }
 
     app.UseHttpsRedirection();

@@ -36,6 +36,18 @@ services:
     networks:
       - ecommerce-network
 
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ecommerce-network
+
   seq:
     image: datalust/seq
     ports:
@@ -185,6 +197,35 @@ services:
       postgres:
         condition: service_healthy
       rabbitmq:
+        condition: service_healthy
+
+  cart:
+    build:
+      context: .
+      dockerfile: cart-service/Dockerfile
+    profiles: ["app"]
+    ports:
+      - "5006:8080"
+    environment:
+      - ConnectionStrings__Redis=redis:6379
+      - ProductService__BaseUrl=http://product:8080
+      - RabbitMq__Host=rabbitmq
+      - Serilog__WriteTo__1__Name=Seq
+      - Serilog__WriteTo__1__Args__serverUrl=http://seq:5341
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8080/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    networks:
+      - ecommerce-network
+    depends_on:
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      product:
         condition: service_healthy
 
   # ── Dev tools (profile: tools) ───────────────────

@@ -1,8 +1,8 @@
+using System.Threading;
+using System.Threading.Tasks;
 using Ecommerce.Events.Product;
 using MassTransit;
 using MediatR;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Product.Application.Commands
 {

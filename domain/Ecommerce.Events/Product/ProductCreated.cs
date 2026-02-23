@@ -1,4 +1,4 @@
-﻿namespace Ecommerce.Events.Product
+namespace Ecommerce.Events.Product
 {
     public class ProductCreated : EventBase
     {

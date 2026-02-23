@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using Ecommerce.Model;
 using Ecommerce.Model.Product.Request;
 using Ecommerce.Model.Product.Response;
@@ -6,7 +7,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Product.Application.Commands;
 using Product.Application.Queries;
-using System.Threading.Tasks;
 
 namespace Product.Service.Controllers
 {

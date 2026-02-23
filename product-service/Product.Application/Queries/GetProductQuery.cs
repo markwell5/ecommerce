@@ -1,8 +1,8 @@
+using System.Threading;
+using System.Threading.Tasks;
 using AutoMapper;
 using Ecommerce.Model.Product.Response;
 using MediatR;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Product.Application.Queries
 {

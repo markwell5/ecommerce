@@ -1,3 +1,10 @@
+x-app-healthcheck: &app-healthcheck
+  test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8080/health || exit 1"]
+  interval: 30s
+  timeout: 10s
+  retries: 3
+  start_period: 30s
+
 services:
   # ── Infrastructure (always runs) ──────────────────
   postgres:
@@ -68,17 +75,10 @@ services:
     profiles: ["app"]
     ports:
       - "5001:8080"
+    env_file: .env.docker
     environment:
       - ConnectionStrings__ProductDb=Host=postgres;Database=product_db;Username=ecommerce;Password=ecommerce
-      - RabbitMq__Host=rabbitmq
-      - Serilog__WriteTo__1__Name=Seq
-      - Serilog__WriteTo__1__Args__serverUrl=http://seq:5341
-    healthcheck:
-      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8080/health || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
+    healthcheck: *app-healthcheck
     networks:
       - ecommerce-network
     depends_on:
@@ -94,17 +94,10 @@ services:
     profiles: ["app"]
     ports:
       - "5002:8080"
+    env_file: .env.docker
     environment:
       - ConnectionStrings__OrderDb=Host=postgres;Database=order_db;Username=ecommerce;Password=ecommerce
-      - RabbitMq__Host=rabbitmq
-      - Serilog__WriteTo__1__Name=Seq
-      - Serilog__WriteTo__1__Args__serverUrl=http://seq:5341
-    healthcheck:
-      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8080/health || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
+    healthcheck: *app-healthcheck
     networks:
       - ecommerce-network
     depends_on:
@@ -124,17 +117,10 @@ services:
     profiles: ["app"]
     ports:
       - "5003:8080"
+    env_file: .env.docker
     environment:
       - ConnectionStrings__StockDb=Host=postgres;Database=stock_db;Username=ecommerce;Password=ecommerce
-      - RabbitMq__Host=rabbitmq
-      - Serilog__WriteTo__1__Name=Seq
-      - Serilog__WriteTo__1__Args__serverUrl=http://seq:5341
-    healthcheck:
-      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8080/health || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
+    healthcheck: *app-healthcheck
     networks:
       - ecommerce-network
     depends_on:
@@ -150,20 +136,10 @@ services:
     profiles: ["app"]
     ports:
       - "5004:8080"
+    env_file: .env.docker
     environment:
       - ConnectionStrings__UserDb=Host=postgres;Database=user_db;Username=ecommerce;Password=ecommerce
-      - RabbitMq__Host=rabbitmq
-      - JwtSettings__Secret=super-secret-key-that-should-be-at-least-32-characters-long!
-      - JwtSettings__Issuer=ecommerce
-      - JwtSettings__Audience=ecommerce
-      - Serilog__WriteTo__1__Name=Seq
-      - Serilog__WriteTo__1__Args__serverUrl=http://seq:5341
-    healthcheck:
-      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8080/health || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
+    healthcheck: *app-healthcheck
     networks:
       - ecommerce-network
     depends_on:
@@ -179,18 +155,11 @@ services:
     profiles: ["app"]
     ports:
       - "5005:8080"
+    env_file: .env.docker
     environment:
       - ConnectionStrings__PaymentDb=Host=postgres;Database=payment_db;Username=ecommerce;Password=ecommerce
-      - RabbitMq__Host=rabbitmq
       - StripeSettings__SecretKey=${STRIPE_SECRET_KEY:-}
-      - Serilog__WriteTo__1__Name=Seq
-      - Serilog__WriteTo__1__Args__serverUrl=http://seq:5341
-    healthcheck:
-      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8080/health || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
+    healthcheck: *app-healthcheck
     networks:
       - ecommerce-network
     depends_on:
@@ -206,18 +175,11 @@ services:
     profiles: ["app"]
     ports:
       - "5006:8080"
+    env_file: .env.docker
     environment:
       - ConnectionStrings__Redis=redis:6379
       - ProductService__BaseUrl=http://product:8080
-      - RabbitMq__Host=rabbitmq
-      - Serilog__WriteTo__1__Name=Seq
-      - Serilog__WriteTo__1__Args__serverUrl=http://seq:5341
-    healthcheck:
-      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8080/health || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
+    healthcheck: *app-healthcheck
     networks:
       - ecommerce-network
     depends_on:

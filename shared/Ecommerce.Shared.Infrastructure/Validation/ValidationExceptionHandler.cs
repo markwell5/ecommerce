@@ -1,8 +1,8 @@
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Ecommerce.Shared.Infrastructure.Validation;
 

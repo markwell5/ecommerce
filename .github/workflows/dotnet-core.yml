@@ -19,6 +19,8 @@ jobs:
         dotnet-version: 8.0.x
     - name: Install dependencies
       run: dotnet restore
+    - name: Check formatting
+      run: dotnet format --verify-no-changes --verbosity diagnostic
     - name: Build
       run: dotnet build --configuration Release --no-restore
     - name: Test

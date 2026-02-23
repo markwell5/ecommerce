@@ -1,8 +1,8 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Ecommerce.Model.Payment.Response;
 using AutoMapper;
+using Ecommerce.Model.Payment.Response;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Payment.Application.Services;

@@ -1,11 +1,11 @@
+using System.Threading;
+using System.Threading.Tasks;
 using AutoMapper;
 using Ecommerce.Events.Product;
 using Ecommerce.Model.Product.Request;
 using Ecommerce.Model.Product.Response;
 using MassTransit;
 using MediatR;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Product.Application.Commands
 {

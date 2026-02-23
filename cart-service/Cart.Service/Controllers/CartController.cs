@@ -2,9 +2,9 @@ using Cart.Application.Commands;
 using Cart.Application.DTOs;
 using Cart.Application.Queries;
 using Ecommerce.Shared.Infrastructure.RateLimiting;
-using Microsoft.AspNetCore.RateLimiting;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace Cart.Service.Controllers;
 

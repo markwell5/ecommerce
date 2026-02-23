@@ -1,8 +1,8 @@
 using Ecommerce.Model.User.Request;
 using Ecommerce.Shared.Infrastructure.RateLimiting;
-using Microsoft.AspNetCore.RateLimiting;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using User.Application.Commands;
 
 namespace User.Service.Controllers

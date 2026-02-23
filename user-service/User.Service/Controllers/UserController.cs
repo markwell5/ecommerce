@@ -1,10 +1,10 @@
 using System.Security.Claims;
 using Ecommerce.Model.User.Request;
 using Ecommerce.Shared.Infrastructure.RateLimiting;
-using Microsoft.AspNetCore.RateLimiting;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using User.Application.Commands;
 using User.Application.Queries;
 

@@ -28,6 +28,7 @@ try
 
     builder.Services.RegisterInfrastructure(builder.Configuration);
     builder.Services.AddSharedInfrastructure(builder.Configuration);
+    builder.Services.AddCorsConfiguration(builder.Configuration);
     builder.Services.AddMediatR(cfg =>
     {
         cfg.RegisterServicesFromAssembly(typeof(CreateProductCommand).Assembly);
@@ -67,6 +68,7 @@ try
     }
 
     app.UseHttpsRedirection();
+    app.UseCors(Ecommerce.Shared.Infrastructure.DependencyInjection.CorsPolicyName);
     app.UseAuthorization();
     app.MapControllers();
     app.MapHealthChecks("/health");

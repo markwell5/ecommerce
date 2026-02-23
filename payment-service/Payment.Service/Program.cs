@@ -32,6 +32,7 @@ try
     StripeConfiguration.ApiKey = builder.Configuration["StripeSettings:SecretKey"];
 
     builder.Services.RegisterInfrastructure(builder.Configuration);
+    builder.Services.AddCorsConfiguration(builder.Configuration);
     builder.Services.AddSharedInfrastructure(builder.Configuration, bus =>
     {
         bus.AddConsumer<ProcessPaymentConsumer>();
@@ -79,6 +80,7 @@ try
     }
 
     app.UseHttpsRedirection();
+    app.UseCors(Ecommerce.Shared.Infrastructure.DependencyInjection.CorsPolicyName);
     app.UseAuthorization();
     app.MapControllers();
     app.MapHealthChecks("/health");

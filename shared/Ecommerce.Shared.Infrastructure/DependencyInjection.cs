@@ -1,6 +1,7 @@
 using System;
 using System.Text;
 using Ecommerce.Shared.Infrastructure.Authentication;
+using Ecommerce.Shared.Infrastructure.Cors;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
@@ -72,6 +73,37 @@ public static class DependencyInjection
         });
 
         services.AddAuthorization();
+
+        return services;
+    }
+
+    public const string CorsPolicyName = "AllowedOrigins";
+
+    public static IServiceCollection AddCorsConfiguration(
+        this IServiceCollection services,
+        IConfiguration configuration)
+    {
+        var corsSettings = configuration.GetSection("Cors").Get<CorsSettings>() ?? new CorsSettings();
+
+        services.AddCors(options =>
+        {
+            options.AddPolicy(CorsPolicyName, policy =>
+            {
+                if (corsSettings.AllowedOrigins.Length > 0)
+                {
+                    policy.WithOrigins(corsSettings.AllowedOrigins)
+                        .WithMethods(corsSettings.AllowedMethods)
+                        .WithHeaders(corsSettings.AllowedHeaders)
+                        .AllowCredentials();
+                }
+                else
+                {
+                    policy.AllowAnyOrigin()
+                        .WithMethods(corsSettings.AllowedMethods)
+                        .WithHeaders(corsSettings.AllowedHeaders);
+                }
+            });
+        });
 
         return services;
     }

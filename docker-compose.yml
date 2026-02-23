@@ -27,6 +27,24 @@ services:
     networks:
       - ecommerce-network
 
+  pgbouncer:
+    image: edoburu/pgbouncer:1.23.1-p2
+    ports:
+      - "6432:6432"
+    volumes:
+      - ./scripts/pgbouncer/pgbouncer.ini:/etc/pgbouncer/pgbouncer.ini:ro
+      - ./scripts/pgbouncer/userlist.txt:/etc/pgbouncer/userlist.txt:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h localhost -p 6432 -U ecommerce -d product_db || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - ecommerce-network
+
   rabbitmq:
     image: rabbitmq:3-management
     ports:
@@ -77,12 +95,12 @@ services:
       - "5001:8080"
     env_file: .env.docker
     environment:
-      - ConnectionStrings__ProductDb=Host=postgres;Database=product_db;Username=ecommerce;Password=ecommerce
+      - ConnectionStrings__ProductDb=Host=pgbouncer;Port=6432;Database=product_db;Username=ecommerce;Password=ecommerce
     healthcheck: *app-healthcheck
     networks:
       - ecommerce-network
     depends_on:
-      postgres:
+      pgbouncer:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
@@ -96,12 +114,12 @@ services:
       - "5002:8080"
     env_file: .env.docker
     environment:
-      - ConnectionStrings__OrderDb=Host=postgres;Database=order_db;Username=ecommerce;Password=ecommerce
+      - ConnectionStrings__OrderDb=Host=pgbouncer;Port=6432;Database=order_db;Username=ecommerce;Password=ecommerce
     healthcheck: *app-healthcheck
     networks:
       - ecommerce-network
     depends_on:
-      postgres:
+      pgbouncer:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
@@ -119,12 +137,12 @@ services:
       - "5003:8080"
     env_file: .env.docker
     environment:
-      - ConnectionStrings__StockDb=Host=postgres;Database=stock_db;Username=ecommerce;Password=ecommerce
+      - ConnectionStrings__StockDb=Host=pgbouncer;Port=6432;Database=stock_db;Username=ecommerce;Password=ecommerce
     healthcheck: *app-healthcheck
     networks:
       - ecommerce-network
     depends_on:
-      postgres:
+      pgbouncer:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
@@ -138,12 +156,12 @@ services:
       - "5004:8080"
     env_file: .env.docker
     environment:
-      - ConnectionStrings__UserDb=Host=postgres;Database=user_db;Username=ecommerce;Password=ecommerce
+      - ConnectionStrings__UserDb=Host=pgbouncer;Port=6432;Database=user_db;Username=ecommerce;Password=ecommerce
     healthcheck: *app-healthcheck
     networks:
       - ecommerce-network
     depends_on:
-      postgres:
+      pgbouncer:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
@@ -157,13 +175,13 @@ services:
       - "5005:8080"
     env_file: .env.docker
     environment:
-      - ConnectionStrings__PaymentDb=Host=postgres;Database=payment_db;Username=ecommerce;Password=ecommerce
+      - ConnectionStrings__PaymentDb=Host=pgbouncer;Port=6432;Database=payment_db;Username=ecommerce;Password=ecommerce
       - StripeSettings__SecretKey=${STRIPE_SECRET_KEY:-}
     healthcheck: *app-healthcheck
     networks:
       - ecommerce-network
     depends_on:
-      postgres:
+      pgbouncer:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy

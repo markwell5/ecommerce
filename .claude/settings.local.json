@@ -7,7 +7,9 @@
       "Bash(dotnet build:*)",
       "Bash(git commit:*)",
       "Bash(gh pr:*)",
-      "Bash(dotnet ef migrations add:*)"
+      "Bash(dotnet ef migrations add:*)",
+      "Bash(cd /c/Users/lewis/src/ecommerce && docker compose config --quiet 2>&1 && echo \"Valid\" && git add docker-compose.yml && git rebase --continue 2>&1)",
+      "Bash(cd /c/Users/lewis/src/ecommerce && git add -A && GIT_EDITOR=true git rebase --continue 2>&1)"
     ]
   }
 }

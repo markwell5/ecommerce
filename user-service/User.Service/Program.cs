@@ -29,6 +29,7 @@ try
 
     builder.Services.RegisterInfrastructure(builder.Configuration);
     builder.Services.AddSharedInfrastructure(builder.Configuration);
+    builder.Services.AddCorsConfiguration(builder.Configuration);
     builder.Services.AddJwtAuthentication(builder.Configuration);
 
     builder.Services.AddScoped<ITokenService, TokenService>();
@@ -94,6 +95,7 @@ try
     }
 
     app.UseHttpsRedirection();
+    app.UseCors(Ecommerce.Shared.Infrastructure.DependencyInjection.CorsPolicyName);
     app.UseAuthentication();
     app.UseAuthorization();
     app.MapControllers();

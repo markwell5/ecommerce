@@ -29,6 +29,7 @@ try
 
     builder.Services.RegisterInfrastructure(builder.Configuration);
     builder.Services.AddCorsConfiguration(builder.Configuration);
+    builder.Services.AddRateLimiting(builder.Configuration);
     builder.Services.AddSharedInfrastructure(builder.Configuration, bus =>
     {
         bus.AddConsumer<ReserveStockConsumer>();
@@ -65,6 +66,7 @@ try
     }
 
     app.UseMiddleware<CorrelationIdMiddleware>();
+    app.UseRateLimiter();
     app.UseSerilogRequestLogging();
     app.UseExceptionHandler();
 

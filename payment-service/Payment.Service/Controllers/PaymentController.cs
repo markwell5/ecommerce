@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Ecommerce.Model.Payment.Response;
+using Ecommerce.Shared.Infrastructure.RateLimiting;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Logging;
 using Payment.Application.Commands;
 using Payment.Application.Queries;
@@ -12,6 +14,7 @@ namespace Payment.Service.Controllers
 {
     [ApiController]
     [Route("api/payments")]
+    [EnableRateLimiting(RateLimitPolicies.Read)]
     public class PaymentController : ControllerBase
     {
         private readonly ILogger<PaymentController> _logger;
@@ -45,6 +48,7 @@ namespace Payment.Service.Controllers
         }
 
         [HttpPost("{paymentId:long}/refund")]
+        [EnableRateLimiting(RateLimitPolicies.Write)]
         [ProducesResponseType(200, Type = typeof(PaymentResponse))]
         [ProducesResponseType(404)]
         public async Task<IActionResult> RefundPayment(long paymentId)

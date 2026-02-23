@@ -30,6 +30,7 @@ try
     builder.Services.RegisterInfrastructure(builder.Configuration);
     builder.Services.AddSharedInfrastructure(builder.Configuration);
     builder.Services.AddCorsConfiguration(builder.Configuration);
+    builder.Services.AddRateLimiting(builder.Configuration);
     builder.Services.AddJwtAuthentication(builder.Configuration);
 
     builder.Services.AddScoped<ITokenService, TokenService>();
@@ -85,6 +86,7 @@ try
     }
 
     app.UseMiddleware<CorrelationIdMiddleware>();
+    app.UseRateLimiter();
     app.UseSerilogRequestLogging();
     app.UseExceptionHandler();
 

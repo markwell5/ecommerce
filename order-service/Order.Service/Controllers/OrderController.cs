@@ -2,8 +2,10 @@ using System;
 using System.Threading.Tasks;
 using Ecommerce.Model.Order.Request;
 using Ecommerce.Model.Order.Response;
+using Ecommerce.Shared.Infrastructure.RateLimiting;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Logging;
 using Order.Application.Commands;
 using Order.Application.Queries;
@@ -12,6 +14,7 @@ namespace Order.Service.Controllers
 {
     [ApiController]
     [Route("api/orders")]
+    [EnableRateLimiting(RateLimitPolicies.Read)]
     public class OrderController : ControllerBase
     {
         private readonly ILogger<OrderController> _logger;
@@ -24,6 +27,7 @@ namespace Order.Service.Controllers
         }
 
         [HttpPost]
+        [EnableRateLimiting(RateLimitPolicies.Write)]
         [ProducesResponseType(202, Type = typeof(OrderResponse))]
         public async Task<IActionResult> PlaceOrder([FromBody] PlaceOrderRequest request)
         {
@@ -45,6 +49,7 @@ namespace Order.Service.Controllers
         }
 
         [HttpPost("{id}/cancel")]
+        [EnableRateLimiting(RateLimitPolicies.Write)]
         [ProducesResponseType(202)]
         [ProducesResponseType(409)]
         public async Task<IActionResult> CancelOrder(Guid id)
@@ -54,6 +59,7 @@ namespace Order.Service.Controllers
         }
 
         [HttpPost("{id}/ship")]
+        [EnableRateLimiting(RateLimitPolicies.Write)]
         [ProducesResponseType(202)]
         [ProducesResponseType(409)]
         public async Task<IActionResult> ShipOrder(Guid id)
@@ -63,6 +69,7 @@ namespace Order.Service.Controllers
         }
 
         [HttpPost("{id}/deliver")]
+        [EnableRateLimiting(RateLimitPolicies.Write)]
         [ProducesResponseType(202)]
         [ProducesResponseType(409)]
         public async Task<IActionResult> DeliverOrder(Guid id)
@@ -72,6 +79,7 @@ namespace Order.Service.Controllers
         }
 
         [HttpPost("{id}/return")]
+        [EnableRateLimiting(RateLimitPolicies.Write)]
         [ProducesResponseType(202)]
         [ProducesResponseType(409)]
         public async Task<IActionResult> ReturnOrder(Guid id)

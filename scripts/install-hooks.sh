@@ -5,8 +5,19 @@ HOOK_FILE="$HOOK_DIR/pre-commit"
 
 cat > "$HOOK_FILE" << 'HOOK'
 #!/bin/bash
-echo "Running dotnet format check..."
-dotnet format --verify-no-changes --verbosity quiet
+# Get staged .cs files only
+STAGED_CS=$(git diff --cached --name-only --diff-filter=ACM -- '*.cs')
+if [ -z "$STAGED_CS" ]; then
+    exit 0
+fi
+
+echo "Running dotnet format check on staged files..."
+INCLUDE_ARGS=""
+for f in $STAGED_CS; do
+    INCLUDE_ARGS="$INCLUDE_ARGS --include $f"
+done
+
+dotnet format --verify-no-changes --verbosity quiet $INCLUDE_ARGS
 if [ $? -ne 0 ]; then
     echo ""
     echo "ERROR: Code formatting violations found."

@@ -1,8 +1,10 @@
 using System.Security.Claims;
 using Ecommerce.Model.User.Request;
+using Ecommerce.Shared.Infrastructure.RateLimiting;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using User.Application.Commands;
 using User.Application.Queries;
 
@@ -11,6 +13,7 @@ namespace User.Service.Controllers
     [ApiController]
     [Route("api/users/me/addresses")]
     [Authorize]
+    [EnableRateLimiting(RateLimitPolicies.Read)]
     public class AddressController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -34,6 +37,7 @@ namespace User.Service.Controllers
         }
 
         [HttpPost]
+        [EnableRateLimiting(RateLimitPolicies.Write)]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> AddAddress([FromBody] AddressRequest request)
@@ -43,6 +47,7 @@ namespace User.Service.Controllers
         }
 
         [HttpPut("{id:long}")]
+        [EnableRateLimiting(RateLimitPolicies.Write)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> UpdateAddress(long id, [FromBody] AddressRequest request)
@@ -55,6 +60,7 @@ namespace User.Service.Controllers
         }
 
         [HttpDelete("{id:long}")]
+        [EnableRateLimiting(RateLimitPolicies.Write)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> DeleteAddress(long id)

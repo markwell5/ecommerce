@@ -1,12 +1,15 @@
 using Ecommerce.Model.User.Request;
+using Ecommerce.Shared.Infrastructure.RateLimiting;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using User.Application.Commands;
 
 namespace User.Service.Controllers
 {
     [ApiController]
     [Route("api/auth")]
+    [EnableRateLimiting(RateLimitPolicies.Write)]
     public class AuthController : ControllerBase
     {
         private readonly IMediator _mediator;

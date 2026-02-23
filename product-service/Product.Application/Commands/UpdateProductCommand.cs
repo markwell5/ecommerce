@@ -43,6 +43,7 @@ namespace Product.Application.Commands
 
             product.Name = request.Request.Name;
             product.Description = request.Request.Description;
+            product.Category = request.Request.Category;
             product.Price = request.Request.Price;
 
             await _dbContext.SaveChangesAsync(cancellationToken);

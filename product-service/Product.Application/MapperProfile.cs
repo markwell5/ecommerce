@@ -9,7 +9,8 @@ namespace Product.Application
         public MapperProfile()
         {
             CreateMap<CreateProductRequest, Entities.Product>()
-                .ForMember(dest => dest.Id, opt => opt.Ignore());
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.SearchVector, opt => opt.Ignore());
             CreateMap<Entities.Product, ProductResponse>();
         }
     }

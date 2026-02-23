@@ -23,6 +23,33 @@ namespace Product.Service.Controllers
             _mediator = mediator;
         }
 
+        [HttpGet("search")]
+        [ProducesResponseType(200, Type = typeof(PagedResponse<ProductResponse>))]
+        public async Task<IActionResult> SearchProducts(
+            [FromQuery] string q = null,
+            [FromQuery] string category = null,
+            [FromQuery] decimal? minPrice = null,
+            [FromQuery] decimal? maxPrice = null,
+            [FromQuery] string sortBy = null,
+            [FromQuery] string sortDirection = "asc",
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 20)
+        {
+            var products = await _mediator.Send(new SearchProductsQuery
+            {
+                Query = q,
+                Category = category,
+                MinPrice = minPrice,
+                MaxPrice = maxPrice,
+                SortBy = sortBy,
+                SortDirection = sortDirection,
+                Page = page,
+                PageSize = pageSize
+            });
+
+            return Ok(products);
+        }
+
         [HttpGet]
         [ProducesResponseType(200, Type = typeof(PagedResponse<ProductResponse>))]
         public async Task<IActionResult> GetProducts(

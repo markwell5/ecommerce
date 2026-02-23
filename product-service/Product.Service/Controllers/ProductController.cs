@@ -2,6 +2,8 @@ using System.Threading.Tasks;
 using Ecommerce.Model;
 using Ecommerce.Model.Product.Request;
 using Ecommerce.Model.Product.Response;
+using Ecommerce.Shared.Infrastructure.RateLimiting;
+using Microsoft.AspNetCore.RateLimiting;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -12,6 +14,7 @@ namespace Product.Service.Controllers
 {
     [ApiController]
     [Route("[controller]")]
+    [EnableRateLimiting(RateLimitPolicies.Read)]
     public class ProductController : ControllerBase
     {
         private readonly ILogger<ProductController> _logger;
@@ -85,6 +88,7 @@ namespace Product.Service.Controllers
         }
 
         [HttpPost]
+        [EnableRateLimiting(RateLimitPolicies.Write)]
         [ProducesResponseType(201, Type = typeof(ProductResponse))]
         public async Task<IActionResult> Create([FromBody] CreateProductRequest req)
         {
@@ -94,6 +98,7 @@ namespace Product.Service.Controllers
         }
 
         [HttpPut("{id}")]
+        [EnableRateLimiting(RateLimitPolicies.Write)]
         [ProducesResponseType(200, Type = typeof(ProductResponse))]
         [ProducesResponseType(404)]
         public async Task<IActionResult> Update(long id, [FromBody] UpdateProductRequest req)
@@ -107,6 +112,7 @@ namespace Product.Service.Controllers
         }
 
         [HttpDelete("{id}")]
+        [EnableRateLimiting(RateLimitPolicies.Write)]
         [ProducesResponseType(204)]
         [ProducesResponseType(404)]
         public async Task<IActionResult> Delete(long id)

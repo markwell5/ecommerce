@@ -1,9 +1,15 @@
 using System;
 using System.Text;
+using System.Threading;
+using System.Threading.RateLimiting;
+using System.Threading.Tasks;
 using Ecommerce.Shared.Infrastructure.Authentication;
 using Ecommerce.Shared.Infrastructure.Cors;
+using Ecommerce.Shared.Infrastructure.RateLimiting;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
@@ -78,6 +84,55 @@ public static class DependencyInjection
     }
 
     public const string CorsPolicyName = "AllowedOrigins";
+
+    public static IServiceCollection AddRateLimiting(
+        this IServiceCollection services,
+        IConfiguration configuration)
+    {
+        var settings = configuration.GetSection("RateLimiting").Get<RateLimitSettings>() ?? new RateLimitSettings();
+
+        services.AddRateLimiter(options =>
+        {
+            options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+            options.OnRejected = (context, cancellationToken) =>
+            {
+                if (context.Lease.TryGetMetadata(MetadataName.RetryAfter, out var retryAfter))
+                {
+                    context.HttpContext.Response.Headers.RetryAfter =
+                        ((int)retryAfter.TotalSeconds).ToString();
+                }
+
+                return ValueTask.CompletedTask;
+            };
+
+            options.AddPolicy(RateLimitPolicies.Read, httpContext =>
+                RateLimitPartition.GetSlidingWindowLimiter(
+                    partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+                    factory: _ => new SlidingWindowRateLimiterOptions
+                    {
+                        PermitLimit = settings.Read.PermitLimit,
+                        Window = TimeSpan.FromSeconds(settings.Read.WindowSeconds),
+                        SegmentsPerWindow = settings.Read.SegmentsPerWindow,
+                        QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                        QueueLimit = 0
+                    }));
+
+            options.AddPolicy(RateLimitPolicies.Write, httpContext =>
+                RateLimitPartition.GetSlidingWindowLimiter(
+                    partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+                    factory: _ => new SlidingWindowRateLimiterOptions
+                    {
+                        PermitLimit = settings.Write.PermitLimit,
+                        Window = TimeSpan.FromSeconds(settings.Write.WindowSeconds),
+                        SegmentsPerWindow = settings.Write.SegmentsPerWindow,
+                        QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                        QueueLimit = 0
+                    }));
+        });
+
+        return services;
+    }
 
     public static IServiceCollection AddCorsConfiguration(
         this IServiceCollection services,

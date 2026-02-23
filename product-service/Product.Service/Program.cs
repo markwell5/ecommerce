@@ -29,6 +29,7 @@ try
     builder.Services.RegisterInfrastructure(builder.Configuration);
     builder.Services.AddSharedInfrastructure(builder.Configuration);
     builder.Services.AddCorsConfiguration(builder.Configuration);
+    builder.Services.AddRateLimiting(builder.Configuration);
     builder.Services.AddMediatR(cfg =>
     {
         cfg.RegisterServicesFromAssembly(typeof(CreateProductCommand).Assembly);
@@ -58,6 +59,7 @@ try
     }
 
     app.UseMiddleware<CorrelationIdMiddleware>();
+    app.UseRateLimiter();
     app.UseSerilogRequestLogging();
     app.UseExceptionHandler();
 

@@ -27,6 +27,7 @@ try
 
     builder.Services.RegisterInfrastructure(builder.Configuration);
     builder.Services.AddSharedInfrastructure(builder.Configuration);
+    builder.Services.AddRateLimiting(builder.Configuration);
     builder.Services.AddMediatR(cfg =>
     {
         cfg.RegisterServicesFromAssembly(typeof(AddToCartCommand).Assembly);
@@ -50,6 +51,7 @@ try
     var app = builder.Build();
 
     app.UseMiddleware<CorrelationIdMiddleware>();
+    app.UseRateLimiter();
     app.UseSerilogRequestLogging();
     app.UseExceptionHandler();
 

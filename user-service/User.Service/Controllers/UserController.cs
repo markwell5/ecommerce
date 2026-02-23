@@ -1,5 +1,7 @@
 using System.Security.Claims;
 using Ecommerce.Model.User.Request;
+using Ecommerce.Shared.Infrastructure.RateLimiting;
+using Microsoft.AspNetCore.RateLimiting;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -11,6 +13,7 @@ namespace User.Service.Controllers
     [ApiController]
     [Route("api/users")]
     [Authorize]
+    [EnableRateLimiting(RateLimitPolicies.Read)]
     public class UserController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -38,6 +41,7 @@ namespace User.Service.Controllers
         }
 
         [HttpPut("me")]
+        [EnableRateLimiting(RateLimitPolicies.Write)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileRequest request)
@@ -50,6 +54,7 @@ namespace User.Service.Controllers
         }
 
         [HttpPut("me/password")]
+        [EnableRateLimiting(RateLimitPolicies.Write)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)

@@ -40,7 +40,8 @@ namespace Product.Application.Queries
             if (!string.IsNullOrWhiteSpace(request.Search))
             {
                 var search = request.Search.ToLower();
-                query = query.Where(p => p.Name.ToLower().Contains(search));
+                query = query.Where(p => p.Name.ToLower().Contains(search)
+                    || p.Description.ToLower().Contains(search));
             }
 
             query = request.SortBy?.ToLower() switch

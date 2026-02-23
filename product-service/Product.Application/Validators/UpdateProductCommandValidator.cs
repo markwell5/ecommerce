@@ -16,5 +16,8 @@ public class UpdateProductCommandValidator : AbstractValidator<UpdateProductComm
 
         RuleFor(x => x.Request.Description)
             .MaximumLength(2000).WithMessage("Description must not exceed 2000 characters");
+
+        RuleFor(x => x.Request.Category)
+            .MaximumLength(100).WithMessage("Category must not exceed 100 characters");
     }
 }

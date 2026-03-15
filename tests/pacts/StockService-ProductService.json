@@ -1,0 +1,31 @@
+{
+  "consumer": {
+    "name": "StockService"
+  },
+  "interactions": [
+    {
+      "contents": {
+        "content": {
+          "id": 42
+        },
+        "contentType": "application/json",
+        "encoded": false
+      },
+      "description": "a ProductCreated event",
+      "pending": false,
+      "type": "Asynchronous/Messages"
+    }
+  ],
+  "metadata": {
+    "pactRust": {
+      "ffi": "0.4.23",
+      "models": "1.2.5"
+    },
+    "pactSpecification": {
+      "version": "4.0"
+    }
+  },
+  "provider": {
+    "name": "ProductService"
+  }
+}

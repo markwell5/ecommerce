@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Asp.Versioning;
 using Ecommerce.Model.Payment.Response;
 using Ecommerce.Shared.Infrastructure.Idempotency;
 using Ecommerce.Shared.Infrastructure.RateLimiting;
@@ -15,7 +16,8 @@ using Payment.Application.Queries;
 namespace Payment.Service.Controllers
 {
     [ApiController]
-    [Route("api/payments")]
+    [ApiVersion("1.0")]
+    [Route("api/v{version:apiVersion}/payments")]
     [Authorize]
     [EnableRateLimiting(RateLimitPolicies.Read)]
     public class PaymentController : ControllerBase

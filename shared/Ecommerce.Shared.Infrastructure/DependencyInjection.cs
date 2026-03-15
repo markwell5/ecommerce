@@ -3,6 +3,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.RateLimiting;
 using System.Threading.Tasks;
+using Asp.Versioning;
 using Ecommerce.Shared.Infrastructure.Authentication;
 using Ecommerce.Shared.Infrastructure.Cors;
 using Ecommerce.Shared.Infrastructure.Idempotency;
@@ -142,6 +143,27 @@ public static class DependencyInjection
         services.Configure<IdempotencySettings>(
             configuration.GetSection("IdempotencySettings"));
         services.AddScoped<IdempotencyFilter>();
+
+        return services;
+    }
+
+    public static IServiceCollection AddApiVersioningConfiguration(
+        this IServiceCollection services)
+    {
+        services.AddApiVersioning(options =>
+        {
+            options.DefaultApiVersion = new ApiVersion(1, 0);
+            options.AssumeDefaultVersionWhenUnspecified = true;
+            options.ReportApiVersions = true;
+            options.ApiVersionReader = ApiVersionReader.Combine(
+                new UrlSegmentApiVersionReader(),
+                new HeaderApiVersionReader("X-Api-Version"));
+        })
+        .AddApiExplorer(options =>
+        {
+            options.GroupNameFormat = "'v'VVV";
+            options.SubstituteApiVersionInUrl = true;
+        });
 
         return services;
     }

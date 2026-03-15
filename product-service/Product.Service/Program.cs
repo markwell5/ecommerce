@@ -61,6 +61,7 @@ try
         .AddNpgSql(builder.Configuration.GetConnectionString("ProductDb")!, name: "postgresql")
         .AddRedis(builder.Configuration.GetConnectionString("Redis") ?? "localhost:6379", name: "redis");
 
+    builder.Services.AddApiVersioningConfiguration();
     builder.Services.AddGrpc();
     builder.Services.AddControllers(options =>
     {

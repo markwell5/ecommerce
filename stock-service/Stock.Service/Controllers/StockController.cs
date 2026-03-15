@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using Asp.Versioning;
 using Ecommerce.Model.Stock.Request;
 using Ecommerce.Model.Stock.Response;
 using Ecommerce.Shared.Infrastructure.Idempotency;
@@ -14,7 +15,8 @@ using Stock.Application.Queries;
 namespace Stock.Service.Controllers
 {
     [ApiController]
-    [Route("api/stock")]
+    [ApiVersion("1.0")]
+    [Route("api/v{version:apiVersion}/stock")]
     [EnableRateLimiting(RateLimitPolicies.Read)]
     public class StockController : ControllerBase
     {

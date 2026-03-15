@@ -58,6 +58,7 @@ try
     builder.Services.AddHealthChecks()
         .AddNpgSql(builder.Configuration.GetConnectionString("UserDb")!, name: "postgresql");
 
+    builder.Services.AddApiVersioningConfiguration();
     builder.Services.AddGrpc();
     builder.Services.AddControllers();
     builder.Services.AddSwaggerGen(c =>

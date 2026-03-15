@@ -44,6 +44,7 @@ try
     builder.Services.AddHealthChecks()
         .AddRedis(builder.Configuration.GetConnectionString("Redis") ?? "localhost:6379", name: "redis");
 
+    builder.Services.AddApiVersioningConfiguration();
     builder.Services.AddGrpc();
     builder.Services.AddProductGrpcClient(builder.Configuration);
     builder.Services.AddControllers();

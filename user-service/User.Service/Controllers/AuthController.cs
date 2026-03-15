@@ -1,3 +1,4 @@
+using Asp.Versioning;
 using Ecommerce.Model.User.Request;
 using Ecommerce.Shared.Infrastructure.RateLimiting;
 using MediatR;
@@ -8,7 +9,8 @@ using User.Application.Commands;
 namespace User.Service.Controllers
 {
     [ApiController]
-    [Route("api/auth")]
+    [ApiVersion("1.0")]
+    [Route("api/v{version:apiVersion}/auth")]
     [EnableRateLimiting(RateLimitPolicies.Write)]
     public class AuthController : ControllerBase
     {

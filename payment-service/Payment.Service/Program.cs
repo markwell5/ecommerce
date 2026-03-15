@@ -74,6 +74,7 @@ try
     builder.Services.AddHealthChecks()
         .AddNpgSql(builder.Configuration.GetConnectionString("PaymentDb")!, name: "postgresql");
 
+    builder.Services.AddApiVersioningConfiguration();
     builder.Services.AddGrpc();
     builder.Services.AddControllers(options =>
     {

@@ -77,6 +77,7 @@ try
     builder.Services.AddHealthChecks()
         .AddNpgSql(builder.Configuration.GetConnectionString("OrderDb")!, name: "postgresql");
 
+    builder.Services.AddApiVersioningConfiguration();
     builder.Services.AddGrpc();
     builder.Services.AddProductGrpcClient(builder.Configuration);
     builder.Services.AddControllers(options =>

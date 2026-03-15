@@ -1,9 +1,15 @@
+using System.Security.Claims;
+using System.Text.Encodings.Web;
 using MassTransit;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Product.Application;
 using StackExchange.Redis;
 using Testcontainers.PostgreSql;
@@ -47,6 +53,23 @@ public class ProductServiceFactory : WebApplicationFactory<Program>, IAsyncLifet
             services.AddSingleton<IConnectionMultiplexer>(_ =>
                 ConnectionMultiplexer.Connect(_redis.GetConnectionString()));
 
+            // Replace distributed cache with Redis testcontainer
+            var cacheDescriptors = services
+                .Where(d => d.ServiceType == typeof(IDistributedCache))
+                .ToList();
+            foreach (var d in cacheDescriptors)
+                services.Remove(d);
+
+            services.AddStackExchangeRedisCache(options =>
+            {
+                options.Configuration = _redis.GetConnectionString();
+                options.InstanceName = "product:";
+            });
+
+            // Replace authentication with test scheme
+            services.AddAuthentication("Test")
+                .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>("Test", _ => { });
+
             // Replace MassTransit with test harness
             services.AddMassTransitTestHarness();
         });
@@ -64,5 +87,31 @@ public class ProductServiceFactory : WebApplicationFactory<Program>, IAsyncLifet
     {
         await _postgres.DisposeAsync();
         await _redis.DisposeAsync();
+    }
+}
+
+public class TestAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions>
+{
+    public TestAuthHandler(
+        IOptionsMonitor<AuthenticationSchemeOptions> options,
+        ILoggerFactory logger,
+        UrlEncoder encoder)
+        : base(options, logger, encoder)
+    {
+    }
+
+    protected override Task<AuthenticateResult> HandleAuthenticateAsync()
+    {
+        var claims = new[]
+        {
+            new Claim(ClaimTypes.NameIdentifier, "test-user"),
+            new Claim(ClaimTypes.Name, "Test User"),
+            new Claim(ClaimTypes.Role, "Admin")
+        };
+        var identity = new ClaimsIdentity(claims, "Test");
+        var principal = new ClaimsPrincipal(identity);
+        var ticket = new AuthenticationTicket(principal, "Test");
+
+        return Task.FromResult(AuthenticateResult.Success(ticket));
     }
 }

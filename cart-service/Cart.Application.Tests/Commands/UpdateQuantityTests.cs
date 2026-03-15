@@ -4,6 +4,7 @@ using Cart.Application.Interfaces;
 using Cart.Application.Mappings;
 using Cart.Application.Models;
 using FluentAssertions;
+using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 
 namespace Cart.Application.Tests.Commands;
@@ -17,7 +18,9 @@ public class UpdateQuantityTests
     public UpdateQuantityTests()
     {
         _repository = Substitute.For<ICartRepository>();
-        var config = new MapperConfiguration(cfg => cfg.AddProfile<CartMappingProfile>());
+        var expr = new MapperConfigurationExpression();
+        expr.AddProfile<CartMappingProfile>();
+        var config = new MapperConfiguration(expr, NullLoggerFactory.Instance);
         _mapper = config.CreateMapper();
         _handler = new UpdateQuantityHandler(_repository, _mapper);
     }

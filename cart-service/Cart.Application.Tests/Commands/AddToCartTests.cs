@@ -5,6 +5,7 @@ using Cart.Application.Mappings;
 using Cart.Application.Models;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 
 namespace Cart.Application.Tests.Commands;
@@ -23,7 +24,9 @@ public class AddToCartTests
         _productCatalog = Substitute.For<IProductCatalogClient>();
         _logger = Substitute.For<ILogger<AddToCartHandler>>();
 
-        var config = new MapperConfiguration(cfg => cfg.AddProfile<CartMappingProfile>());
+        var expr = new MapperConfigurationExpression();
+        expr.AddProfile<CartMappingProfile>();
+        var config = new MapperConfiguration(expr, NullLoggerFactory.Instance);
         _mapper = config.CreateMapper();
 
         _handler = new AddToCartHandler(_repository, _productCatalog, _mapper, _logger);

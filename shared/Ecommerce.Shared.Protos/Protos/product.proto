@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+option csharp_namespace = "Ecommerce.Shared.Protos";
+
+package ecommerce.product;
+
+service ProductGrpc {
+  rpc GetProduct (GetProductRequest) returns (ProductReply);
+  rpc GetProducts (GetProductsRequest) returns (GetProductsReply);
+}
+
+message GetProductRequest {
+  int64 id = 1;
+}
+
+message GetProductsRequest {
+  int32 page = 1;
+  int32 page_size = 2;
+}
+
+message ProductReply {
+  int64 id = 1;
+  string name = 2;
+  string description = 3;
+  string category = 4;
+  string price = 5;
+}
+
+message GetProductsReply {
+  repeated ProductReply products = 1;
+  int32 total_count = 2;
+  int32 page = 3;
+  int32 page_size = 4;
+}

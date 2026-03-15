@@ -79,6 +79,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cart.Service", "cart-servic
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cart.Application.Tests", "cart-service\Cart.Application.Tests\Cart.Application.Tests.csproj", "{62220B06-F461-477B-ACD3-7FAC46D26143}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ecommerce.Shared.Protos", "shared\Ecommerce.Shared.Protos\Ecommerce.Shared.Protos.csproj", "{702886C9-7EDB-4C71-9C37-105438204E34}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ecommerce.Shared.GrpcClients", "shared\Ecommerce.Shared.GrpcClients\Ecommerce.Shared.GrpcClients.csproj", "{2E40D078-506F-4679-B0AF-FF4F42511504}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -437,6 +441,30 @@ Global
 		{62220B06-F461-477B-ACD3-7FAC46D26143}.Release|x64.Build.0 = Release|Any CPU
 		{62220B06-F461-477B-ACD3-7FAC46D26143}.Release|x86.ActiveCfg = Release|Any CPU
 		{62220B06-F461-477B-ACD3-7FAC46D26143}.Release|x86.Build.0 = Release|Any CPU
+		{702886C9-7EDB-4C71-9C37-105438204E34}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{702886C9-7EDB-4C71-9C37-105438204E34}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{702886C9-7EDB-4C71-9C37-105438204E34}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{702886C9-7EDB-4C71-9C37-105438204E34}.Debug|x64.Build.0 = Debug|Any CPU
+		{702886C9-7EDB-4C71-9C37-105438204E34}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{702886C9-7EDB-4C71-9C37-105438204E34}.Debug|x86.Build.0 = Debug|Any CPU
+		{702886C9-7EDB-4C71-9C37-105438204E34}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{702886C9-7EDB-4C71-9C37-105438204E34}.Release|Any CPU.Build.0 = Release|Any CPU
+		{702886C9-7EDB-4C71-9C37-105438204E34}.Release|x64.ActiveCfg = Release|Any CPU
+		{702886C9-7EDB-4C71-9C37-105438204E34}.Release|x64.Build.0 = Release|Any CPU
+		{702886C9-7EDB-4C71-9C37-105438204E34}.Release|x86.ActiveCfg = Release|Any CPU
+		{702886C9-7EDB-4C71-9C37-105438204E34}.Release|x86.Build.0 = Release|Any CPU
+		{2E40D078-506F-4679-B0AF-FF4F42511504}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2E40D078-506F-4679-B0AF-FF4F42511504}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2E40D078-506F-4679-B0AF-FF4F42511504}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{2E40D078-506F-4679-B0AF-FF4F42511504}.Debug|x64.Build.0 = Debug|Any CPU
+		{2E40D078-506F-4679-B0AF-FF4F42511504}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{2E40D078-506F-4679-B0AF-FF4F42511504}.Debug|x86.Build.0 = Debug|Any CPU
+		{2E40D078-506F-4679-B0AF-FF4F42511504}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2E40D078-506F-4679-B0AF-FF4F42511504}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2E40D078-506F-4679-B0AF-FF4F42511504}.Release|x64.ActiveCfg = Release|Any CPU
+		{2E40D078-506F-4679-B0AF-FF4F42511504}.Release|x64.Build.0 = Release|Any CPU
+		{2E40D078-506F-4679-B0AF-FF4F42511504}.Release|x86.ActiveCfg = Release|Any CPU
+		{2E40D078-506F-4679-B0AF-FF4F42511504}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -471,6 +499,8 @@ Global
 		{D3A8EFD8-A470-4D24-95B0-C534F2406EC4} = {245AC2C2-169F-7439-7A17-46DCAF344A17}
 		{23F6C82B-C89E-4051-AD0C-FD2EE6EFE9C3} = {245AC2C2-169F-7439-7A17-46DCAF344A17}
 		{62220B06-F461-477B-ACD3-7FAC46D26143} = {245AC2C2-169F-7439-7A17-46DCAF344A17}
+		{702886C9-7EDB-4C71-9C37-105438204E34} = {15FF4A91-B3F4-410F-9317-CC23EDF60D0F}
+		{2E40D078-506F-4679-B0AF-FF4F42511504} = {15FF4A91-B3F4-410F-9317-CC23EDF60D0F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FE3BEF9D-AF6C-4272-863D-F91D8916A0C6}

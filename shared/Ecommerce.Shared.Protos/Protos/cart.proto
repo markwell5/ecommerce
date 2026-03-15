@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+option csharp_namespace = "Ecommerce.Shared.Protos";
+
+package ecommerce.cart;
+
+service CartGrpc {
+  rpc GetCart (GetCartRequest) returns (CartReply);
+}
+
+message GetCartRequest {
+  string cart_id = 1;
+}
+
+message CartItemReply {
+  int64 product_id = 1;
+  string product_name = 2;
+  int32 quantity = 3;
+  string unit_price = 4;
+  string line_total = 5;
+}
+
+message CartReply {
+  string id = 1;
+  repeated CartItemReply items = 2;
+  string total_price = 3;
+  string last_modified_at = 4;
+}

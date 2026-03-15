@@ -18,12 +18,7 @@ public static class DependencyInjection
         });
 
         services.AddScoped<ICartRepository, RedisCartRepository>();
-
-        services.AddHttpClient<IProductCatalogClient, ProductCatalogClient>(client =>
-        {
-            var baseUrl = configuration["ProductService:BaseUrl"] ?? "http://product:8080";
-            client.BaseAddress = new Uri(baseUrl);
-        });
+        services.AddScoped<IProductCatalogClient, ProductCatalogClient>();
 
         return services;
     }

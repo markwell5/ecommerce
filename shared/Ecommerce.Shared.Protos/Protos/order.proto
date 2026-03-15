@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+option csharp_namespace = "Ecommerce.Shared.Protos";
+
+package ecommerce.order;
+
+service OrderGrpc {
+  rpc GetOrder (GetOrderRequest) returns (OrderReply);
+}
+
+message GetOrderRequest {
+  string order_id = 1;
+}
+
+message OrderReply {
+  string order_id = 1;
+  string customer_id = 2;
+  string status = 3;
+  string total_amount = 4;
+  string items_json = 5;
+  string created_at = 6;
+  string updated_at = 7;
+}

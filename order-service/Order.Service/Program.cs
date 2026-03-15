@@ -1,3 +1,4 @@
+using Ecommerce.Shared.GrpcClients;
 using Ecommerce.Shared.Infrastructure;
 using Ecommerce.Shared.Infrastructure.Middleware;
 using Ecommerce.Shared.Infrastructure.Validation;
@@ -10,6 +11,7 @@ using Order.Application.Commands;
 using Order.Application.Entities;
 using Order.Application.Saga;
 using Order.Infrastructure;
+using Order.Service.Services;
 using Serilog;
 
 Log.Logger = new LoggerConfiguration()
@@ -59,6 +61,8 @@ try
     builder.Services.AddHealthChecks()
         .AddNpgSql(builder.Configuration.GetConnectionString("OrderDb")!, name: "postgresql");
 
+    builder.Services.AddGrpc();
+    builder.Services.AddProductGrpcClient(builder.Configuration);
     builder.Services.AddControllers();
     builder.Services.AddSwaggerGen(c =>
     {
@@ -87,6 +91,7 @@ try
     app.UseHttpsRedirection();
     app.UseCors(Ecommerce.Shared.Infrastructure.DependencyInjection.CorsPolicyName);
     app.UseAuthorization();
+    app.MapGrpcService<OrderGrpcService>();
     app.MapControllers();
     app.MapHealthChecks("/health");
 

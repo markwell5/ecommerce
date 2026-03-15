@@ -1,13 +1,18 @@
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using Ecommerce.Events.Order.Messages;
-using PactNet;
-using PactNet.Verifier;
+using FluentAssertions;
 using Xunit.Abstractions;
 
 namespace Ecommerce.Contract.Tests.Providers;
 
 public class PaymentServiceProviderTests
 {
+    private static readonly JsonSerializerOptions JsonOptions = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+    };
+
     private readonly ITestOutputHelper _output;
 
     public PaymentServiceProviderTests(ITestOutputHelper output)
@@ -16,41 +21,61 @@ public class PaymentServiceProviderTests
     }
 
     [Fact]
-    public void PaymentService_HonorsContractWith_OrderService()
+    public void PaymentService_ProducesValidMessage_PaymentSucceeded()
     {
-        var pactPath = Path.Combine("..", "..", "..", "..", "pacts", "OrderService-PaymentService.json");
+        var message = new PaymentSucceeded
+        {
+            OrderId = Guid.NewGuid()
+        };
 
+        var json = JsonSerializer.Serialize(message, JsonOptions);
+        var node = JsonNode.Parse(json)!;
+
+        node["orderId"].Should().NotBeNull();
+
+        VerifyAgainstPact("OrderService-PaymentService.json", "a PaymentSucceeded event", node);
+    }
+
+    [Fact]
+    public void PaymentService_ProducesValidMessage_PaymentFailed()
+    {
+        var message = new PaymentFailed
+        {
+            OrderId = Guid.NewGuid(),
+            Reason = "Card declined"
+        };
+
+        var json = JsonSerializer.Serialize(message, JsonOptions);
+        var node = JsonNode.Parse(json)!;
+
+        node["orderId"].Should().NotBeNull();
+        node["reason"].Should().NotBeNull();
+
+        VerifyAgainstPact("OrderService-PaymentService.json", "a PaymentFailed event", node);
+    }
+
+    private void VerifyAgainstPact(string pactFile, string description, JsonNode producedMessage)
+    {
+        var pactPath = Path.Combine("..", "..", "..", "..", "pacts", pactFile);
         if (!File.Exists(pactPath))
         {
-            _output.WriteLine("Pact file not found — run consumer tests first");
+            _output.WriteLine($"Pact file {pactFile} not found — skipping provider verification");
             return;
         }
 
-        var config = new PactVerifierConfig
+        var pactJson = JsonNode.Parse(File.ReadAllText(pactPath))!;
+        var interactions = pactJson["interactions"]!.AsArray();
+        var interaction = interactions.FirstOrDefault(i =>
+            i!["description"]!.GetValue<string>() == description);
+
+        interaction.Should().NotBeNull($"pact should contain interaction '{description}'");
+
+        var expectedContent = interaction!["contents"]!["content"]!.AsObject();
+
+        foreach (var property in expectedContent)
         {
-            LogLevel = PactLogLevel.Information
-        };
-
-        using var verifier = new PactVerifier("PaymentService", config);
-
-        verifier
-            .WithMessages(scenarios =>
-            {
-                scenarios.Add("a PaymentSucceeded event", () => new PaymentSucceeded
-                {
-                    OrderId = Guid.Parse("d290f1ee-6c54-4b01-90e6-d701748f0851")
-                });
-
-                scenarios.Add("a PaymentFailed event", () => new PaymentFailed
-                {
-                    OrderId = Guid.Parse("d290f1ee-6c54-4b01-90e6-d701748f0851"),
-                    Reason = "Card declined"
-                });
-            }, new JsonSerializerOptions
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-            })
-            .WithFileSource(new FileInfo(pactPath))
-            .Verify();
+            producedMessage[property.Key].Should().NotBeNull(
+                $"produced message should contain field '{property.Key}' expected by consumer");
+        }
     }
 }

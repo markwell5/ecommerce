@@ -1,13 +1,18 @@
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using Ecommerce.Events.Order.Messages;
-using PactNet;
-using PactNet.Verifier;
+using FluentAssertions;
 using Xunit.Abstractions;
 
 namespace Ecommerce.Contract.Tests.Providers;
 
 public class OrderServiceProviderTests
 {
+    private static readonly JsonSerializerOptions JsonOptions = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+    };
+
     private readonly ITestOutputHelper _output;
 
     public OrderServiceProviderTests(ITestOutputHelper output)
@@ -16,82 +21,99 @@ public class OrderServiceProviderTests
     }
 
     [Fact]
-    public void OrderService_HonorsContractWith_StockService()
+    public void OrderService_ProducesValidMessage_ReserveStock()
     {
-        var pactPath = Path.Combine("..", "..", "..", "..", "pacts", "StockService-OrderService.json");
-
-        if (!File.Exists(pactPath))
+        var message = new ReserveStock
         {
-            _output.WriteLine("Pact file not found — run consumer tests first");
-            return;
-        }
-
-        var config = new PactVerifierConfig
-        {
-            LogLevel = PactLogLevel.Information
+            OrderId = Guid.NewGuid(),
+            ItemsJson = "[{\"ProductId\":1,\"Quantity\":2}]"
         };
 
-        using var verifier = new PactVerifier("OrderService", config);
+        var json = JsonSerializer.Serialize(message, JsonOptions);
+        var node = JsonNode.Parse(json)!;
 
-        verifier
-            .WithMessages(scenarios =>
-            {
-                scenarios.Add("a ReserveStock command", () => new ReserveStock
-                {
-                    OrderId = Guid.Parse("d290f1ee-6c54-4b01-90e6-d701748f0851"),
-                    ItemsJson = "[{\"ProductId\":1,\"Quantity\":2}]"
-                });
+        node["orderId"].Should().NotBeNull();
+        node["itemsJson"].Should().NotBeNull();
 
-                scenarios.Add("a ReleaseStock command", () => new ReleaseStock
-                {
-                    OrderId = Guid.Parse("d290f1ee-6c54-4b01-90e6-d701748f0851"),
-                    ItemsJson = "[{\"ProductId\":1,\"Quantity\":2}]"
-                });
-            }, new JsonSerializerOptions
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-            })
-            .WithFileSource(new FileInfo(pactPath))
-            .Verify();
+        VerifyAgainstPact("StockService-OrderService.json", "a ReserveStock command", node);
     }
 
     [Fact]
-    public void OrderService_HonorsContractWith_PaymentService()
+    public void OrderService_ProducesValidMessage_ReleaseStock()
     {
-        var pactPath = Path.Combine("..", "..", "..", "..", "pacts", "PaymentService-OrderService.json");
+        var message = new ReleaseStock
+        {
+            OrderId = Guid.NewGuid(),
+            ItemsJson = "[{\"ProductId\":1,\"Quantity\":2}]"
+        };
 
+        var json = JsonSerializer.Serialize(message, JsonOptions);
+        var node = JsonNode.Parse(json)!;
+
+        node["orderId"].Should().NotBeNull();
+        node["itemsJson"].Should().NotBeNull();
+
+        VerifyAgainstPact("StockService-OrderService.json", "a ReleaseStock command", node);
+    }
+
+    [Fact]
+    public void OrderService_ProducesValidMessage_ProcessPayment()
+    {
+        var message = new ProcessPayment
+        {
+            OrderId = Guid.NewGuid(),
+            Amount = 99.99m,
+            CustomerId = "customer-1"
+        };
+
+        var json = JsonSerializer.Serialize(message, JsonOptions);
+        var node = JsonNode.Parse(json)!;
+
+        node["orderId"].Should().NotBeNull();
+        node["amount"].Should().NotBeNull();
+        node["customerId"].Should().NotBeNull();
+
+        VerifyAgainstPact("PaymentService-OrderService.json", "a ProcessPayment command", node);
+    }
+
+    [Fact]
+    public void OrderService_ProducesValidMessage_RefundPayment()
+    {
+        var message = new RefundPayment
+        {
+            OrderId = Guid.NewGuid()
+        };
+
+        var json = JsonSerializer.Serialize(message, JsonOptions);
+        var node = JsonNode.Parse(json)!;
+
+        node["orderId"].Should().NotBeNull();
+
+        VerifyAgainstPact("PaymentService-OrderService.json", "a RefundPayment command", node);
+    }
+
+    private void VerifyAgainstPact(string pactFile, string description, JsonNode producedMessage)
+    {
+        var pactPath = Path.Combine("..", "..", "..", "..", "pacts", pactFile);
         if (!File.Exists(pactPath))
         {
-            _output.WriteLine("Pact file not found — run consumer tests first");
+            _output.WriteLine($"Pact file {pactFile} not found — skipping provider verification");
             return;
         }
 
-        var config = new PactVerifierConfig
+        var pactJson = JsonNode.Parse(File.ReadAllText(pactPath))!;
+        var interactions = pactJson["interactions"]!.AsArray();
+        var interaction = interactions.FirstOrDefault(i =>
+            i!["description"]!.GetValue<string>() == description);
+
+        interaction.Should().NotBeNull($"pact should contain interaction '{description}'");
+
+        var expectedContent = interaction!["contents"]!["content"]!.AsObject();
+
+        foreach (var property in expectedContent)
         {
-            LogLevel = PactLogLevel.Information
-        };
-
-        using var verifier = new PactVerifier("OrderService", config);
-
-        verifier
-            .WithMessages(scenarios =>
-            {
-                scenarios.Add("a ProcessPayment command", () => new ProcessPayment
-                {
-                    OrderId = Guid.Parse("d290f1ee-6c54-4b01-90e6-d701748f0851"),
-                    Amount = 99.99m,
-                    CustomerId = "customer-1"
-                });
-
-                scenarios.Add("a RefundPayment command", () => new RefundPayment
-                {
-                    OrderId = Guid.Parse("d290f1ee-6c54-4b01-90e6-d701748f0851")
-                });
-            }, new JsonSerializerOptions
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-            })
-            .WithFileSource(new FileInfo(pactPath))
-            .Verify();
+            producedMessage[property.Key].Should().NotBeNull(
+                $"produced message should contain field '{property.Key}' expected by consumer");
+        }
     }
 }

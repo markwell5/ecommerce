@@ -134,6 +134,7 @@ try
     app.MapGrpcService<StockGrpcService>();
     app.MapControllers();
     app.MapHealthChecks("/health");
+    app.UseOpenTelemetryPrometheusScrapingEndpoint();
 
     app.Run();
 }

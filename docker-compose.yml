@@ -239,6 +239,38 @@ services:
         condition: service_healthy
 
   # ── Dev tools (profile: tools) ───────────────────
+  prometheus:
+    image: prom/prometheus:v2.51.0
+    profiles: ["tools"]
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./tools/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.retention.time=7d"
+    networks:
+      - ecommerce-network
+
+  grafana:
+    image: grafana/grafana:10.4.0
+    profiles: ["tools"]
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - ./tools/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./tools/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    networks:
+      - ecommerce-network
+
   pgadmin:
     image: dpage/pgadmin4
     profiles: ["tools"]
@@ -255,6 +287,8 @@ services:
 volumes:
   postgres_data:
   seq_data:
+  prometheus_data:
+  grafana_data:
 
 networks:
   ecommerce-network:

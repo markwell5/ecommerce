@@ -36,7 +36,7 @@ try
         cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
     });
     builder.Services.AddValidatorsFromAssembly(typeof(AddToCartCommand).Assembly);
-    builder.Services.AddAutoMapper(typeof(CartMappingProfile).Assembly);
+    builder.Services.AddAutoMapper(cfg => { }, typeof(CartMappingProfile).Assembly);
 
     builder.Services.AddExceptionHandler<ValidationExceptionHandler>();
     builder.Services.AddProblemDetails();

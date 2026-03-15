@@ -1,6 +1,7 @@
 using System.Threading.Tasks;
 using Ecommerce.Model.Stock.Request;
 using Ecommerce.Model.Stock.Response;
+using Ecommerce.Shared.Infrastructure.Idempotency;
 using Ecommerce.Shared.Infrastructure.RateLimiting;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -41,6 +42,7 @@ namespace Stock.Service.Controllers
 
         [HttpPut("{productId}")]
         [Authorize]
+        [IdempotentEndpoint]
         [EnableRateLimiting(RateLimitPolicies.Write)]
         [ProducesResponseType(200, Type = typeof(StockResponse))]
         [ProducesResponseType(404)]

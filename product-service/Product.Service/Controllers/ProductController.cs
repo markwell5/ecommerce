@@ -2,6 +2,7 @@ using System.Threading.Tasks;
 using Ecommerce.Model;
 using Ecommerce.Model.Product.Request;
 using Ecommerce.Model.Product.Response;
+using Ecommerce.Shared.Infrastructure.Idempotency;
 using Ecommerce.Shared.Infrastructure.RateLimiting;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -90,6 +91,7 @@ namespace Product.Service.Controllers
 
         [HttpPost]
         [Authorize]
+        [IdempotentEndpoint]
         [EnableRateLimiting(RateLimitPolicies.Write)]
         [ProducesResponseType(201, Type = typeof(ProductResponse))]
         public async Task<IActionResult> Create([FromBody] CreateProductRequest req)
@@ -101,6 +103,7 @@ namespace Product.Service.Controllers
 
         [HttpPut("{id}")]
         [Authorize]
+        [IdempotentEndpoint]
         [EnableRateLimiting(RateLimitPolicies.Write)]
         [ProducesResponseType(200, Type = typeof(ProductResponse))]
         [ProducesResponseType(404)]

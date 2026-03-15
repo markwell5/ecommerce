@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using Ecommerce.Model.Order.Request;
 using Ecommerce.Model.Order.Response;
+using Ecommerce.Shared.Infrastructure.Idempotency;
 using Ecommerce.Shared.Infrastructure.RateLimiting;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -29,6 +30,7 @@ namespace Order.Service.Controllers
         }
 
         [HttpPost]
+        [IdempotentEndpoint]
         [EnableRateLimiting(RateLimitPolicies.Write)]
         [ProducesResponseType(202, Type = typeof(OrderResponse))]
         public async Task<IActionResult> PlaceOrder([FromBody] PlaceOrderRequest request)

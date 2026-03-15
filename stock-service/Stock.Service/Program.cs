@@ -32,6 +32,15 @@ try
     builder.Services.AddCorsConfiguration(builder.Configuration);
     builder.Services.AddJwtAuthentication(builder.Configuration);
     builder.Services.AddRateLimiting(builder.Configuration);
+    builder.Services.AddIdempotency(builder.Configuration);
+
+    var redisConnection = builder.Configuration.GetConnectionString("Redis") ?? "localhost:6379";
+    builder.Services.AddStackExchangeRedisCache(options =>
+    {
+        options.Configuration = redisConnection;
+        options.InstanceName = "stock:";
+    });
+
     builder.Services.AddSharedInfrastructure(builder.Configuration, bus =>
     {
         bus.AddConsumer<ReserveStockConsumer>();
@@ -54,7 +63,10 @@ try
         .AddNpgSql(builder.Configuration.GetConnectionString("StockDb")!, name: "postgresql");
 
     builder.Services.AddGrpc();
-    builder.Services.AddControllers();
+    builder.Services.AddControllers(options =>
+    {
+        options.Filters.AddService<Ecommerce.Shared.Infrastructure.Idempotency.IdempotencyFilter>();
+    });
     builder.Services.AddSwaggerGen(c =>
     {
         c.SwaggerDoc("v1", new OpenApiInfo { Title = "Stock.Service", Version = "v1" });

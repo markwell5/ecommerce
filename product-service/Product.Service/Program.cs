@@ -124,6 +124,7 @@ try
     app.MapGrpcService<ProductGrpcService>();
     app.MapControllers();
     app.MapHealthChecks("/health");
+    app.UseOpenTelemetryPrometheusScrapingEndpoint();
 
     app.Run();
 }

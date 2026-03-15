@@ -8,6 +8,7 @@ using Ecommerce.Shared.Infrastructure.Authentication;
 using Ecommerce.Shared.Infrastructure.Cors;
 using Ecommerce.Shared.Infrastructure.Idempotency;
 using Ecommerce.Shared.Infrastructure.Logging;
+using Ecommerce.Shared.Infrastructure.Messaging;
 using Ecommerce.Shared.Infrastructure.RateLimiting;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -28,6 +29,8 @@ public static class DependencyInjection
         IConfiguration configuration,
         Action<IBusRegistrationConfigurator> configureBus = null)
     {
+        services.AddSingleton<FaultLoggingObserver>();
+
         services.AddMassTransit(bus =>
         {
             configureBus?.Invoke(bus);
@@ -48,11 +51,19 @@ public static class DependencyInjection
                     h.Password(password);
                 });
 
+                cfg.UseDelayedRedelivery(r => r.Intervals(
+                    TimeSpan.FromSeconds(5),
+                    TimeSpan.FromSeconds(30),
+                    TimeSpan.FromMinutes(2)));
+
                 cfg.UseMessageRetry(r => r.Exponential(
                     retryLimit: 3,
                     minInterval: TimeSpan.FromMilliseconds(500),
                     maxInterval: TimeSpan.FromSeconds(10),
                     intervalDelta: TimeSpan.FromMilliseconds(500)));
+
+                cfg.ConnectConsumeObserver(
+                    context.GetRequiredService<FaultLoggingObserver>());
 
                 cfg.ConfigureEndpoints(context);
             });

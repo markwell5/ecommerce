@@ -54,6 +54,8 @@ try
     {
         bus.AddConsumer<ProcessPaymentConsumer>();
         bus.AddConsumer<RefundPaymentConsumer>();
+        bus.AddConsumer<ProcessPaymentFaultConsumer>();
+        bus.AddConsumer<RefundPaymentFaultConsumer>();
 
         bus.AddEntityFrameworkOutbox<PaymentDbContext>(o =>
         {

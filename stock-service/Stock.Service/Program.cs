@@ -50,6 +50,8 @@ try
         bus.AddConsumer<ReserveStockConsumer>();
         bus.AddConsumer<ReleaseStockConsumer>();
         bus.AddConsumer<ProductCreatedConsumer>();
+        bus.AddConsumer<ReserveStockFaultConsumer>();
+        bus.AddConsumer<ReleaseStockFaultConsumer>();
 
         bus.AddEntityFrameworkOutbox<StockDbContext>(o =>
         {

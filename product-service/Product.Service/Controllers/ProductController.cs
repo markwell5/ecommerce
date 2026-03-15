@@ -31,7 +31,7 @@ namespace Product.Service.Controllers
         }
 
         [HttpGet("search")]
-        [ProducesResponseType(200, Type = typeof(PagedResponse<ProductResponse>))]
+        [ProducesResponseType(200, Type = typeof(ProductSearchResponse))]
         public async Task<IActionResult> SearchProducts(
             [FromQuery] string q = null,
             [FromQuery] string category = null,
@@ -132,6 +132,16 @@ namespace Product.Service.Controllers
                 return NotFound();
 
             return NoContent();
+        }
+
+        [HttpPost("reindex")]
+        [Authorize]
+        [EnableRateLimiting(RateLimitPolicies.Write)]
+        [ProducesResponseType(200)]
+        public async Task<IActionResult> Reindex()
+        {
+            var count = await _mediator.Send(new ReindexProductsCommand());
+            return Ok(new { IndexedCount = count });
         }
     }
 }

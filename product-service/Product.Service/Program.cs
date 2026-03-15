@@ -6,6 +6,8 @@ using Microsoft.EntityFrameworkCore;
 using Product.Application;
 using Product.Application.Caching;
 using Product.Application.Commands;
+using Product.Application.Consumers;
+using Product.Application.Search;
 using Product.Infrastructure;
 using Product.Service.Services;
 using Serilog;
@@ -22,6 +24,10 @@ try
     builder.Services.RegisterInfrastructure(builder.Configuration);
     builder.Services.AddSharedInfrastructure(builder.Configuration, bus =>
     {
+        bus.AddConsumer<ProductCreatedConsumer>();
+        bus.AddConsumer<ProductUpdatedConsumer>();
+        bus.AddConsumer<ProductDeletedConsumer>();
+
         bus.AddEntityFrameworkOutbox<ProductDbContext>(o =>
         {
             o.UsePostgres();
@@ -44,7 +50,8 @@ try
 
     builder.Services.AddHealthChecks()
         .AddNpgSql(builder.Configuration.GetConnectionString("ProductDb")!, name: "postgresql")
-        .AddRedis(builder.Configuration.GetConnectionString("Redis") ?? "localhost:6379", name: "redis");
+        .AddRedis(builder.Configuration.GetConnectionString("Redis") ?? "localhost:6379", name: "redis")
+        .AddElasticsearch(builder.Configuration["Elasticsearch:Url"] ?? "http://localhost:9200", name: "elasticsearch");
 
     var app = builder.Build();
 
@@ -52,6 +59,9 @@ try
     {
         var db = scope.ServiceProvider.GetRequiredService<ProductDbContext>();
         db.Database.Migrate();
+
+        var searchService = scope.ServiceProvider.GetRequiredService<IProductSearchService>();
+        searchService.CreateIndexIfNotExistsAsync().GetAwaiter().GetResult();
     }
 
     app.UseServiceDefaults();

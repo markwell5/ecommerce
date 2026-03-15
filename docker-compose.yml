@@ -115,6 +115,7 @@ services:
     env_file: .env.docker
     environment:
       - ConnectionStrings__OrderDb=Host=pgbouncer;Port=6432;Database=order_db;Username=ecommerce;Password=ecommerce
+      - GrpcClients__ProductService=http://product:8080
     healthcheck: *app-healthcheck
     networks:
       - ecommerce-network
@@ -196,7 +197,7 @@ services:
     env_file: .env.docker
     environment:
       - ConnectionStrings__Redis=redis:6379
-      - ProductService__BaseUrl=http://product:8080
+      - GrpcClients__ProductService=http://product:8080
     healthcheck: *app-healthcheck
     networks:
       - ecommerce-network

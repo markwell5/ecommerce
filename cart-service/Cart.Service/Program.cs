@@ -1,6 +1,8 @@
 using Cart.Application.Commands;
 using Cart.Application.Mappings;
 using Cart.Infrastructure;
+using Cart.Service.Services;
+using Ecommerce.Shared.GrpcClients;
 using Ecommerce.Shared.Infrastructure;
 using Ecommerce.Shared.Infrastructure.Middleware;
 using Ecommerce.Shared.Infrastructure.Validation;
@@ -42,6 +44,8 @@ try
     builder.Services.AddHealthChecks()
         .AddRedis(builder.Configuration.GetConnectionString("Redis") ?? "localhost:6379", name: "redis");
 
+    builder.Services.AddGrpc();
+    builder.Services.AddProductGrpcClient(builder.Configuration);
     builder.Services.AddControllers();
     builder.Services.AddSwaggerGen(c =>
     {
@@ -63,6 +67,7 @@ try
 
     app.UseHttpsRedirection();
     app.UseAuthorization();
+    app.MapGrpcService<CartGrpcService>();
     app.MapControllers();
     app.MapHealthChecks("/health");
 

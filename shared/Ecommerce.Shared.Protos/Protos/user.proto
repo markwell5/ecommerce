@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+option csharp_namespace = "Ecommerce.Shared.Protos";
+
+package ecommerce.user;
+
+service UserGrpc {
+  rpc GetUser (GetUserRequest) returns (UserReply);
+  rpc GetAddresses (GetAddressesRequest) returns (GetAddressesReply);
+}
+
+message GetUserRequest {
+  string user_id = 1;
+}
+
+message UserReply {
+  string id = 1;
+  string email = 2;
+  string first_name = 3;
+  string last_name = 4;
+  string phone = 5;
+  string created_at = 6;
+}
+
+message GetAddressesRequest {
+  string user_id = 1;
+}
+
+message AddressReply {
+  int64 id = 1;
+  string line1 = 2;
+  string line2 = 3;
+  string city = 4;
+  string county = 5;
+  string post_code = 6;
+  string country = 7;
+  bool is_default = 8;
+}
+
+message GetAddressesReply {
+  repeated AddressReply addresses = 1;
+}

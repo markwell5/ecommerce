@@ -9,6 +9,7 @@ using User.Application;
 using User.Application.Commands;
 using User.Application.Services;
 using User.Infrastructure;
+using User.Service.Services;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj} {Properties:j}{NewLine}{Exception}")
@@ -49,6 +50,7 @@ try
     builder.Services.AddHealthChecks()
         .AddNpgSql(builder.Configuration.GetConnectionString("UserDb")!, name: "postgresql");
 
+    builder.Services.AddGrpc();
     builder.Services.AddControllers();
     builder.Services.AddSwaggerGen(c =>
     {
@@ -100,6 +102,7 @@ try
     app.UseCors(Ecommerce.Shared.Infrastructure.DependencyInjection.CorsPolicyName);
     app.UseAuthentication();
     app.UseAuthorization();
+    app.MapGrpcService<UserGrpcService>();
     app.MapControllers();
     app.MapHealthChecks("/health");
 

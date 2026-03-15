@@ -7,6 +7,7 @@ using Microsoft.OpenApi.Models;
 using Product.Application;
 using Product.Application.Commands;
 using Product.Infrastructure;
+using Product.Service.Services;
 using Serilog;
 
 Log.Logger = new LoggerConfiguration()
@@ -44,6 +45,7 @@ try
     builder.Services.AddHealthChecks()
         .AddNpgSql(builder.Configuration.GetConnectionString("ProductDb")!, name: "postgresql");
 
+    builder.Services.AddGrpc();
     builder.Services.AddControllers();
     builder.Services.AddSwaggerGen(c =>
     {
@@ -72,6 +74,7 @@ try
     app.UseHttpsRedirection();
     app.UseCors(Ecommerce.Shared.Infrastructure.DependencyInjection.CorsPolicyName);
     app.UseAuthorization();
+    app.MapGrpcService<ProductGrpcService>();
     app.MapControllers();
     app.MapHealthChecks("/health");
 

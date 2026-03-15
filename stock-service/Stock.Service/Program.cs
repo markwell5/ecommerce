@@ -9,6 +9,7 @@ using Stock.Application;
 using Stock.Application.Commands;
 using Stock.Application.Consumers;
 using Stock.Infrastructure;
+using Stock.Service.Services;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj} {Properties:j}{NewLine}{Exception}")
@@ -51,6 +52,7 @@ try
     builder.Services.AddHealthChecks()
         .AddNpgSql(builder.Configuration.GetConnectionString("StockDb")!, name: "postgresql");
 
+    builder.Services.AddGrpc();
     builder.Services.AddControllers();
     builder.Services.AddSwaggerGen(c =>
     {
@@ -79,6 +81,7 @@ try
     app.UseHttpsRedirection();
     app.UseCors(Ecommerce.Shared.Infrastructure.DependencyInjection.CorsPolicyName);
     app.UseAuthorization();
+    app.MapGrpcService<StockGrpcService>();
     app.MapControllers();
     app.MapHealthChecks("/health");
 

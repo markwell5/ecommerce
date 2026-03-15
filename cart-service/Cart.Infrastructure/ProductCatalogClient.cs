@@ -1,27 +1,31 @@
-using System.Net.Http.Json;
-using System.Text.Json;
 using Cart.Application.Interfaces;
+using Ecommerce.Shared.Protos;
+using Grpc.Core;
 
 namespace Cart.Infrastructure;
 
 public class ProductCatalogClient : IProductCatalogClient
 {
-    private readonly HttpClient _httpClient;
-    private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true };
+    private readonly ProductGrpc.ProductGrpcClient _grpcClient;
 
-    public ProductCatalogClient(HttpClient httpClient)
+    public ProductCatalogClient(ProductGrpc.ProductGrpcClient grpcClient)
     {
-        _httpClient = httpClient;
+        _grpcClient = grpcClient;
     }
 
     public async Task<ProductInfo?> GetProductAsync(long productId, CancellationToken cancellationToken = default)
     {
-        var response = await _httpClient.GetAsync($"/product/{productId}", cancellationToken);
-        if (!response.IsSuccessStatusCode) return null;
+        try
+        {
+            var reply = await _grpcClient.GetProductAsync(
+                new GetProductRequest { Id = productId },
+                cancellationToken: cancellationToken);
 
-        var product = await response.Content.ReadFromJsonAsync<ProductResponse>(JsonOptions, cancellationToken);
-        return product is null ? null : new ProductInfo(product.Id, product.Name, product.Price);
+            return new ProductInfo(reply.Id, reply.Name, decimal.Parse(reply.Price));
+        }
+        catch (RpcException ex) when (ex.StatusCode == StatusCode.NotFound)
+        {
+            return null;
+        }
     }
-
-    private record ProductResponse(long Id, string Name, decimal Price);
 }

@@ -7,16 +7,20 @@ using Ecommerce.Model;
 using Ecommerce.Model.Product.Response;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Product.Application.Caching;
 
 namespace Product.Application.Queries
 {
-    public class GetProductsQuery : IRequest<PagedResponse<ProductResponse>>
+    public class GetProductsQuery : IRequest<PagedResponse<ProductResponse>>, ICacheableQuery
     {
         public int Page { get; set; } = 1;
         public int PageSize { get; set; } = 20;
         public string SortBy { get; set; }
         public string SortDirection { get; set; } = "asc";
         public string Search { get; set; }
+
+        public string CacheKey =>
+            $"product:query:list:{Page}:{PageSize}:{SortBy}:{SortDirection}:{Search}";
     }
 
     public class GetProductsQueryHandler : IRequestHandler<GetProductsQuery, PagedResponse<ProductResponse>>

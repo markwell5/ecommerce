@@ -6,6 +6,7 @@ using Ecommerce.Model.Product.Request;
 using Ecommerce.Model.Product.Response;
 using MassTransit;
 using MediatR;
+using Product.Application.Caching;
 
 namespace Product.Application.Commands
 {
@@ -26,12 +27,18 @@ namespace Product.Application.Commands
         private readonly ProductDbContext _dbContext;
         private readonly IMapper _mapper;
         private readonly IPublishEndpoint _publishEndpoint;
+        private readonly IProductCacheInvalidator _cacheInvalidator;
 
-        public UpdateProductCommandHandler(ProductDbContext dbContext, IMapper mapper, IPublishEndpoint publishEndpoint)
+        public UpdateProductCommandHandler(
+            ProductDbContext dbContext,
+            IMapper mapper,
+            IPublishEndpoint publishEndpoint,
+            IProductCacheInvalidator cacheInvalidator)
         {
             _dbContext = dbContext;
             _mapper = mapper;
             _publishEndpoint = publishEndpoint;
+            _cacheInvalidator = cacheInvalidator;
         }
 
         public async Task<ProductResponse> Handle(UpdateProductCommand request, CancellationToken cancellationToken)
@@ -47,6 +54,8 @@ namespace Product.Application.Commands
             product.Price = request.Request.Price;
 
             await _dbContext.SaveChangesAsync(cancellationToken);
+
+            await _cacheInvalidator.InvalidateProductAsync(product.Id, cancellationToken);
 
             await _publishEndpoint.Publish(new ProductUpdated
             {

@@ -48,6 +48,12 @@ public static class DependencyInjection
                     h.Password(password);
                 });
 
+                cfg.UseMessageRetry(r => r.Exponential(
+                    retryLimit: 3,
+                    minInterval: TimeSpan.FromMilliseconds(500),
+                    maxInterval: TimeSpan.FromSeconds(10),
+                    intervalDelta: TimeSpan.FromMilliseconds(500)));
+
                 cfg.ConfigureEndpoints(context);
             });
         });

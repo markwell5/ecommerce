@@ -14,7 +14,7 @@ namespace Payment.Application.Services
             _logger = logger;
         }
 
-        public async Task<PaymentIntentResult> CreatePaymentIntentAsync(decimal amount, string currency, Dictionary<string, string> metadata)
+        public virtual async Task<PaymentIntentResult> CreatePaymentIntentAsync(decimal amount, string currency, Dictionary<string, string> metadata)
         {
             var options = new PaymentIntentCreateOptions
             {
@@ -42,7 +42,7 @@ namespace Payment.Application.Services
             };
         }
 
-        public async Task<RefundResult> CreateRefundAsync(string paymentIntentId, decimal amount)
+        public virtual async Task<RefundResult> CreateRefundAsync(string paymentIntentId, decimal amount)
         {
             var options = new RefundCreateOptions
             {

@@ -5,6 +5,7 @@ using Ecommerce.Shared.Infrastructure.Validation;
 using FluentValidation;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using Payment.Application;
 using Payment.Application.Commands;
@@ -61,7 +62,11 @@ try
         });
     });
 
-    builder.Services.AddScoped<IPaymentGateway, StripePaymentGateway>();
+    builder.Services.AddScoped<StripePaymentGateway>();
+    builder.Services.AddScoped<IPaymentGateway>(sp =>
+        new ResilientPaymentGateway(
+            sp.GetRequiredService<StripePaymentGateway>(),
+            sp.GetRequiredService<ILogger<ResilientPaymentGateway>>()));
 
     builder.Services.AddMediatR(cfg =>
     {

@@ -6,6 +6,7 @@ using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using NSubstitute;
 using Product.Application;
+using Product.Application.Caching;
 using Product.Application.Commands;
 
 namespace Product.Application.Tests.Commands;
@@ -15,6 +16,7 @@ public class CreateProductCommandTests
     private readonly ProductDbContext _dbContext;
     private readonly IMapper _mapper;
     private readonly IPublishEndpoint _publishEndpoint;
+    private readonly IProductCacheInvalidator _cacheInvalidator;
 
     public CreateProductCommandTests()
     {
@@ -27,12 +29,13 @@ public class CreateProductCommandTests
         _mapper = config.CreateMapper();
 
         _publishEndpoint = Substitute.For<IPublishEndpoint>();
+        _cacheInvalidator = Substitute.For<IProductCacheInvalidator>();
     }
 
     [Fact]
     public async Task Handle_ShouldCreateProduct_AndReturnResponse()
     {
-        var handler = new CreateProductCommandHandler(_dbContext, _mapper, _publishEndpoint);
+        var handler = new CreateProductCommandHandler(_dbContext, _mapper, _publishEndpoint, _cacheInvalidator);
         var command = new CreateProductCommand(new CreateProductRequest
         {
             Name = "Test Product",
@@ -55,7 +58,7 @@ public class CreateProductCommandTests
     [Fact]
     public async Task Handle_ShouldPublishProductCreatedEvent()
     {
-        var handler = new CreateProductCommandHandler(_dbContext, _mapper, _publishEndpoint);
+        var handler = new CreateProductCommandHandler(_dbContext, _mapper, _publishEndpoint, _cacheInvalidator);
         var command = new CreateProductCommand(new CreateProductRequest
         {
             Name = "Event Product",

@@ -1,11 +1,8 @@
 using Ecommerce.Shared.Infrastructure;
-using Ecommerce.Shared.Infrastructure.Logging;
-using Ecommerce.Shared.Infrastructure.Middleware;
 using Ecommerce.Shared.Infrastructure.Validation;
 using FluentValidation;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi.Models;
 using Serilog;
 using Stock.Application;
 using Stock.Application.Commands;
@@ -20,24 +17,9 @@ Log.Logger = new LoggerConfiguration()
 try
 {
     var builder = WebApplication.CreateBuilder(args);
-
-    builder.Host.UseSerilog((context, configuration) =>
-    {
-        configuration
-            .ReadFrom.Configuration(context.Configuration)
-            .Enrich.FromLogContext()
-            .Enrich.WithProperty("Service", "Stock.Service")
-            .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj} {Properties:j}{NewLine}{Exception}");
-    });
+    builder.AddServiceDefaults("Stock.Service");
 
     builder.Services.RegisterInfrastructure(builder.Configuration);
-    builder.Services.AddCorsConfiguration(builder.Configuration);
-    builder.Services.AddJwtAuthentication(builder.Configuration);
-    builder.Services.AddRateLimiting(builder.Configuration);
-    builder.Services.AddRequestResponseLogging(builder.Configuration);
-    builder.Services.AddRequestSizeLimits(builder.Configuration);
-    builder.Services.AddOpenTelemetryTracing(builder.Configuration, "Stock.Service");
-    builder.Services.AddIdempotency(builder.Configuration);
 
     var redisConnection = builder.Configuration.GetConnectionString("Redis") ?? "localhost:6379";
     builder.Services.AddStackExchangeRedisCache(options =>
@@ -70,44 +52,8 @@ try
     builder.Services.AddValidatorsFromAssembly(typeof(UpdateStockCommand).Assembly);
     builder.Services.AddAutoMapper(typeof(Stock.Application.MapperProfile).Assembly);
 
-    builder.Services.AddExceptionHandler<ValidationExceptionHandler>();
-    builder.Services.AddProblemDetails();
-
     builder.Services.AddHealthChecks()
         .AddNpgSql(builder.Configuration.GetConnectionString("StockDb")!, name: "postgresql");
-
-    builder.Services.AddApiVersioningConfiguration();
-    builder.Services.AddGrpc();
-    builder.Services.AddControllers(options =>
-    {
-        options.Filters.AddService<Ecommerce.Shared.Infrastructure.Idempotency.IdempotencyFilter>();
-    });
-    builder.Services.AddSwaggerGen(c =>
-    {
-        c.SwaggerDoc("v1", new OpenApiInfo { Title = "Stock.Service", Version = "v1" });
-        c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-        {
-            Description = "JWT Authorization header using the Bearer scheme",
-            Name = "Authorization",
-            In = ParameterLocation.Header,
-            Type = SecuritySchemeType.ApiKey,
-            Scheme = "Bearer"
-        });
-        c.AddSecurityRequirement(new OpenApiSecurityRequirement
-        {
-            {
-                new OpenApiSecurityScheme
-                {
-                    Reference = new OpenApiReference
-                    {
-                        Type = ReferenceType.SecurityScheme,
-                        Id = "Bearer"
-                    }
-                },
-                Array.Empty<string>()
-            }
-        });
-    });
 
     var app = builder.Build();
 
@@ -117,26 +63,8 @@ try
         db.Database.Migrate();
     }
 
-    app.UseMiddleware<CorrelationIdMiddleware>();
-    app.UseMiddleware<RequestResponseLoggingMiddleware>();
-    app.UseRateLimiter();
-    app.UseSerilogRequestLogging();
-    app.UseExceptionHandler();
-
-    if (app.Environment.IsDevelopment())
-    {
-        app.UseSwagger();
-        app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Stock.Service v1"));
-    }
-
-    app.UseHttpsRedirection();
-    app.UseCors(Ecommerce.Shared.Infrastructure.DependencyInjection.CorsPolicyName);
-    app.UseAuthentication();
-    app.UseAuthorization();
+    app.UseServiceDefaults();
     app.MapGrpcService<StockGrpcService>();
-    app.MapControllers();
-    app.MapHealthChecks("/health");
-    app.UseOpenTelemetryPrometheusScrapingEndpoint();
 
     app.Run();
 }

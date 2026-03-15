@@ -42,6 +42,7 @@ try
     builder.Services.AddCorsConfiguration(builder.Configuration);
     builder.Services.AddRateLimiting(builder.Configuration);
     builder.Services.AddRequestResponseLogging(builder.Configuration);
+    builder.Services.AddOpenTelemetryTracing(builder.Configuration, "User.Service");
     builder.Services.AddJwtAuthentication(builder.Configuration);
 
     builder.Services.AddScoped<ITokenService, TokenService>();

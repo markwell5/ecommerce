@@ -43,6 +43,7 @@ try
     builder.Services.AddJwtAuthentication(builder.Configuration);
     builder.Services.AddRateLimiting(builder.Configuration);
     builder.Services.AddRequestResponseLogging(builder.Configuration);
+    builder.Services.AddOpenTelemetryTracing(builder.Configuration, "Product.Service");
     builder.Services.AddIdempotency(builder.Configuration);
     builder.Services.Configure<CacheSettings>(
         builder.Configuration.GetSection("CacheSettings"));

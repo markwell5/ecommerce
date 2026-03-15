@@ -85,6 +85,17 @@ services:
     networks:
       - ecommerce-network
 
+  jaeger:
+    image: jaegertracing/all-in-one:1.62
+    profiles: ["tools"]
+    ports:
+      - "16686:16686"
+      - "4317:4317"
+    environment:
+      COLLECTOR_OTLP_ENABLED: "true"
+    networks:
+      - ecommerce-network
+
   # ── Application services (profile: app) ──────────
   product:
     build:
@@ -97,6 +108,7 @@ services:
     environment:
       - ConnectionStrings__ProductDb=Host=pgbouncer;Port=6432;Database=product_db;Username=ecommerce;Password=ecommerce
       - ConnectionStrings__Redis=redis:6379
+      - OpenTelemetry__OtlpEndpoint=http://jaeger:4317
     healthcheck: *app-healthcheck
     networks:
       - ecommerce-network
@@ -120,6 +132,7 @@ services:
       - ConnectionStrings__OrderDb=Host=pgbouncer;Port=6432;Database=order_db;Username=ecommerce;Password=ecommerce
       - ConnectionStrings__Redis=redis:6379
       - GrpcClients__ProductService=http://product:8080
+      - OpenTelemetry__OtlpEndpoint=http://jaeger:4317
     healthcheck: *app-healthcheck
     networks:
       - ecommerce-network
@@ -146,6 +159,7 @@ services:
     environment:
       - ConnectionStrings__StockDb=Host=pgbouncer;Port=6432;Database=stock_db;Username=ecommerce;Password=ecommerce
       - ConnectionStrings__Redis=redis:6379
+      - OpenTelemetry__OtlpEndpoint=http://jaeger:4317
     healthcheck: *app-healthcheck
     networks:
       - ecommerce-network
@@ -167,6 +181,7 @@ services:
     env_file: .env.docker
     environment:
       - ConnectionStrings__UserDb=Host=pgbouncer;Port=6432;Database=user_db;Username=ecommerce;Password=ecommerce
+      - OpenTelemetry__OtlpEndpoint=http://jaeger:4317
     healthcheck: *app-healthcheck
     networks:
       - ecommerce-network
@@ -188,6 +203,7 @@ services:
       - ConnectionStrings__PaymentDb=Host=pgbouncer;Port=6432;Database=payment_db;Username=ecommerce;Password=ecommerce
       - ConnectionStrings__Redis=redis:6379
       - StripeSettings__SecretKey=${STRIPE_SECRET_KEY:-}
+      - OpenTelemetry__OtlpEndpoint=http://jaeger:4317
     healthcheck: *app-healthcheck
     networks:
       - ecommerce-network
@@ -210,6 +226,7 @@ services:
     environment:
       - ConnectionStrings__Redis=redis:6379
       - GrpcClients__ProductService=http://product:8080
+      - OpenTelemetry__OtlpEndpoint=http://jaeger:4317
     healthcheck: *app-healthcheck
     networks:
       - ecommerce-network

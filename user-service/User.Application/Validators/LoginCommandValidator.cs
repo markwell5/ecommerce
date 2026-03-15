@@ -9,10 +9,12 @@ namespace User.Application.Validators
         {
             RuleFor(x => x.Request.Email)
                 .NotEmpty().WithMessage("Email is required")
+                .MaximumLength(254)
                 .EmailAddress().WithMessage("Invalid email format");
 
             RuleFor(x => x.Request.Password)
-                .NotEmpty().WithMessage("Password is required");
+                .NotEmpty().WithMessage("Password is required")
+                .MaximumLength(128);
         }
     }
 }

@@ -42,6 +42,7 @@ try
     builder.Services.AddCorsConfiguration(builder.Configuration);
     builder.Services.AddRateLimiting(builder.Configuration);
     builder.Services.AddRequestResponseLogging(builder.Configuration);
+    builder.Services.AddRequestSizeLimits(builder.Configuration);
     builder.Services.AddOpenTelemetryTracing(builder.Configuration, "User.Service");
     builder.Services.AddJwtAuthentication(builder.Configuration);
 
@@ -50,6 +51,7 @@ try
     builder.Services.AddMediatR(cfg =>
     {
         cfg.RegisterServicesFromAssembly(typeof(RegisterCommand).Assembly);
+        cfg.AddOpenBehavior(typeof(InputSanitizationBehavior<,>));
         cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
     });
     builder.Services.AddValidatorsFromAssembly(typeof(RegisterCommand).Assembly);

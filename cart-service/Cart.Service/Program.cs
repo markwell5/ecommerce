@@ -32,10 +32,12 @@ try
     builder.Services.AddSharedInfrastructure(builder.Configuration);
     builder.Services.AddRateLimiting(builder.Configuration);
     builder.Services.AddRequestResponseLogging(builder.Configuration);
+    builder.Services.AddRequestSizeLimits(builder.Configuration);
     builder.Services.AddOpenTelemetryTracing(builder.Configuration, "Cart.Service");
     builder.Services.AddMediatR(cfg =>
     {
         cfg.RegisterServicesFromAssembly(typeof(AddToCartCommand).Assembly);
+        cfg.AddOpenBehavior(typeof(InputSanitizationBehavior<,>));
         cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
     });
     builder.Services.AddValidatorsFromAssembly(typeof(AddToCartCommand).Assembly);

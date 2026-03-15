@@ -10,10 +10,12 @@ using Ecommerce.Shared.Infrastructure.Idempotency;
 using Ecommerce.Shared.Infrastructure.Logging;
 using Ecommerce.Shared.Infrastructure.Messaging;
 using Ecommerce.Shared.Infrastructure.RateLimiting;
+using Ecommerce.Shared.Infrastructure.Validation;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
@@ -257,6 +259,21 @@ public static class DependencyInjection
                         .WithHeaders(corsSettings.AllowedHeaders);
                 }
             });
+        });
+
+        return services;
+    }
+
+    public static IServiceCollection AddRequestSizeLimits(
+        this IServiceCollection services,
+        IConfiguration configuration)
+    {
+        var settings = configuration.GetSection("RequestSizeLimits").Get<RequestSizeLimitSettings>()
+                       ?? new RequestSizeLimitSettings();
+
+        services.Configure<KestrelServerOptions>(options =>
+        {
+            options.Limits.MaxRequestBodySize = settings.MaxRequestBodySizeBytes;
         });
 
         return services;

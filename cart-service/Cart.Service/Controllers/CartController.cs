@@ -1,3 +1,4 @@
+using Asp.Versioning;
 using Cart.Application.Commands;
 using Cart.Application.DTOs;
 using Cart.Application.Queries;
@@ -9,7 +10,8 @@ using Microsoft.AspNetCore.RateLimiting;
 namespace Cart.Service.Controllers;
 
 [ApiController]
-[Route("[controller]")]
+[ApiVersion("1.0")]
+[Route("api/v{version:apiVersion}/cart")]
 [EnableRateLimiting(RateLimitPolicies.Read)]
 public class CartController : ControllerBase
 {

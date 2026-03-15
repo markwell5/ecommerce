@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using Asp.Versioning;
 using Ecommerce.Model.User.Request;
 using Ecommerce.Shared.Infrastructure.RateLimiting;
 using MediatR;
@@ -11,7 +12,8 @@ using User.Application.Queries;
 namespace User.Service.Controllers
 {
     [ApiController]
-    [Route("api/users/me/addresses")]
+    [ApiVersion("1.0")]
+    [Route("api/v{version:apiVersion}/users/me/addresses")]
     [Authorize]
     [EnableRateLimiting(RateLimitPolicies.Read)]
     public class AddressController : ControllerBase

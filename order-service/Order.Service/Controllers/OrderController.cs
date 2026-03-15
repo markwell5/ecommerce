@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using Asp.Versioning;
 using Ecommerce.Model.Order.Request;
 using Ecommerce.Model.Order.Response;
 using Ecommerce.Shared.Infrastructure.Idempotency;
@@ -15,7 +16,8 @@ using Order.Application.Queries;
 namespace Order.Service.Controllers
 {
     [ApiController]
-    [Route("api/orders")]
+    [ApiVersion("1.0")]
+    [Route("api/v{version:apiVersion}/orders")]
     [Authorize]
     [EnableRateLimiting(RateLimitPolicies.Read)]
     public class OrderController : ControllerBase

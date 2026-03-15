@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using Asp.Versioning;
 using Ecommerce.Model;
 using Ecommerce.Model.Product.Request;
 using Ecommerce.Model.Product.Response;
@@ -15,7 +16,8 @@ using Product.Application.Queries;
 namespace Product.Service.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [ApiVersion("1.0")]
+    [Route("api/v{version:apiVersion}/products")]
     [EnableRateLimiting(RateLimitPolicies.Read)]
     public class ProductController : ControllerBase
     {

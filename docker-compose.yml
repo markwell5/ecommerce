@@ -118,6 +118,7 @@ services:
     env_file: .env.docker
     environment:
       - ConnectionStrings__OrderDb=Host=pgbouncer;Port=6432;Database=order_db;Username=ecommerce;Password=ecommerce
+      - ConnectionStrings__Redis=redis:6379
       - GrpcClients__ProductService=http://product:8080
     healthcheck: *app-healthcheck
     networks:
@@ -126,6 +127,8 @@ services:
       pgbouncer:
         condition: service_healthy
       rabbitmq:
+        condition: service_healthy
+      redis:
         condition: service_healthy
       product:
         condition: service_healthy
@@ -142,6 +145,7 @@ services:
     env_file: .env.docker
     environment:
       - ConnectionStrings__StockDb=Host=pgbouncer;Port=6432;Database=stock_db;Username=ecommerce;Password=ecommerce
+      - ConnectionStrings__Redis=redis:6379
     healthcheck: *app-healthcheck
     networks:
       - ecommerce-network
@@ -149,6 +153,8 @@ services:
       pgbouncer:
         condition: service_healthy
       rabbitmq:
+        condition: service_healthy
+      redis:
         condition: service_healthy
 
   user:
@@ -180,12 +186,15 @@ services:
     env_file: .env.docker
     environment:
       - ConnectionStrings__PaymentDb=Host=pgbouncer;Port=6432;Database=payment_db;Username=ecommerce;Password=ecommerce
+      - ConnectionStrings__Redis=redis:6379
       - StripeSettings__SecretKey=${STRIPE_SECRET_KEY:-}
     healthcheck: *app-healthcheck
     networks:
       - ecommerce-network
     depends_on:
       pgbouncer:
+        condition: service_healthy
+      redis:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy

@@ -5,6 +5,7 @@ using System.Threading.RateLimiting;
 using System.Threading.Tasks;
 using Ecommerce.Shared.Infrastructure.Authentication;
 using Ecommerce.Shared.Infrastructure.Cors;
+using Ecommerce.Shared.Infrastructure.Idempotency;
 using Ecommerce.Shared.Infrastructure.RateLimiting;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -130,6 +131,17 @@ public static class DependencyInjection
                         QueueLimit = 0
                     }));
         });
+
+        return services;
+    }
+
+    public static IServiceCollection AddIdempotency(
+        this IServiceCollection services,
+        IConfiguration configuration)
+    {
+        services.Configure<IdempotencySettings>(
+            configuration.GetSection("IdempotencySettings"));
+        services.AddScoped<IdempotencyFilter>();
 
         return services;
     }

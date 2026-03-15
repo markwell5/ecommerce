@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Ecommerce.Model.Payment.Response;
+using Ecommerce.Shared.Infrastructure.Idempotency;
 using Ecommerce.Shared.Infrastructure.RateLimiting;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -50,6 +51,7 @@ namespace Payment.Service.Controllers
         }
 
         [HttpPost("{paymentId:long}/refund")]
+        [IdempotentEndpoint]
         [EnableRateLimiting(RateLimitPolicies.Write)]
         [ProducesResponseType(200, Type = typeof(PaymentResponse))]
         [ProducesResponseType(404)]

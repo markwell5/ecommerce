@@ -35,6 +35,15 @@ try
     builder.Services.AddCorsConfiguration(builder.Configuration);
     builder.Services.AddJwtAuthentication(builder.Configuration);
     builder.Services.AddRateLimiting(builder.Configuration);
+    builder.Services.AddIdempotency(builder.Configuration);
+
+    var redisConnection = builder.Configuration.GetConnectionString("Redis") ?? "localhost:6379";
+    builder.Services.AddStackExchangeRedisCache(options =>
+    {
+        options.Configuration = redisConnection;
+        options.InstanceName = "order:";
+    });
+
     builder.Services.AddSharedInfrastructure(builder.Configuration, bus =>
     {
         bus.AddSagaStateMachine<OrderStateMachine, OrderSagaState>()
@@ -64,7 +73,10 @@ try
 
     builder.Services.AddGrpc();
     builder.Services.AddProductGrpcClient(builder.Configuration);
-    builder.Services.AddControllers();
+    builder.Services.AddControllers(options =>
+    {
+        options.Filters.AddService<Ecommerce.Shared.Infrastructure.Idempotency.IdempotencyFilter>();
+    });
     builder.Services.AddSwaggerGen(c =>
     {
         c.SwaggerDoc("v1", new OpenApiInfo { Title = "Order.Service", Version = "v1" });

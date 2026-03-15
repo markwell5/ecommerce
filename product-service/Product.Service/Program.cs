@@ -2,6 +2,7 @@ using Ecommerce.Shared.Infrastructure;
 using Ecommerce.Shared.Infrastructure.Middleware;
 using Ecommerce.Shared.Infrastructure.Validation;
 using FluentValidation;
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Product.Application;
@@ -29,7 +30,14 @@ try
     });
 
     builder.Services.RegisterInfrastructure(builder.Configuration);
-    builder.Services.AddSharedInfrastructure(builder.Configuration);
+    builder.Services.AddSharedInfrastructure(builder.Configuration, bus =>
+    {
+        bus.AddEntityFrameworkOutbox<ProductDbContext>(o =>
+        {
+            o.UsePostgres();
+            o.UseBusOutbox();
+        });
+    });
     builder.Services.AddCorsConfiguration(builder.Configuration);
     builder.Services.AddJwtAuthentication(builder.Configuration);
     builder.Services.AddRateLimiting(builder.Configuration);

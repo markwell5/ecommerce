@@ -2,6 +2,7 @@ using Ecommerce.Shared.Infrastructure;
 using Ecommerce.Shared.Infrastructure.Middleware;
 using Ecommerce.Shared.Infrastructure.Validation;
 using FluentValidation;
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Serilog;
@@ -46,6 +47,12 @@ try
         bus.AddConsumer<ReserveStockConsumer>();
         bus.AddConsumer<ReleaseStockConsumer>();
         bus.AddConsumer<ProductCreatedConsumer>();
+
+        bus.AddEntityFrameworkOutbox<StockDbContext>(o =>
+        {
+            o.UsePostgres();
+            o.UseBusOutbox();
+        });
     });
 
     builder.Services.AddMediatR(cfg =>

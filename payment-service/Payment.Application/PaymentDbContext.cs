@@ -1,3 +1,4 @@
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Payment.Application.Entities;
 
@@ -14,6 +15,10 @@ namespace Payment.Application
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.AddInboxStateEntity();
+            modelBuilder.AddOutboxMessageEntity();
+            modelBuilder.AddOutboxStateEntity();
+
             modelBuilder.Entity<Entities.Payment>(entity =>
             {
                 entity.HasKey(e => e.Id);

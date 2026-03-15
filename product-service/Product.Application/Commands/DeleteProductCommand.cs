@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Ecommerce.Events.Product;
 using MassTransit;
 using MediatR;
+using Product.Application.Caching;
 
 namespace Product.Application.Commands
 {
@@ -20,11 +21,16 @@ namespace Product.Application.Commands
     {
         private readonly ProductDbContext _dbContext;
         private readonly IPublishEndpoint _publishEndpoint;
+        private readonly IProductCacheInvalidator _cacheInvalidator;
 
-        public DeleteProductCommandHandler(ProductDbContext dbContext, IPublishEndpoint publishEndpoint)
+        public DeleteProductCommandHandler(
+            ProductDbContext dbContext,
+            IPublishEndpoint publishEndpoint,
+            IProductCacheInvalidator cacheInvalidator)
         {
             _dbContext = dbContext;
             _publishEndpoint = publishEndpoint;
+            _cacheInvalidator = cacheInvalidator;
         }
 
         public async Task<bool> Handle(DeleteProductCommand request, CancellationToken cancellationToken)
@@ -36,6 +42,8 @@ namespace Product.Application.Commands
 
             _dbContext.Products.Remove(product);
             await _dbContext.SaveChangesAsync(cancellationToken);
+
+            await _cacheInvalidator.InvalidateProductAsync(request.Id, cancellationToken);
 
             await _publishEndpoint.Publish(new ProductDeleted
             {

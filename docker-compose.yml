@@ -96,6 +96,7 @@ services:
     env_file: .env.docker
     environment:
       - ConnectionStrings__ProductDb=Host=pgbouncer;Port=6432;Database=product_db;Username=ecommerce;Password=ecommerce
+      - ConnectionStrings__Redis=redis:6379
     healthcheck: *app-healthcheck
     networks:
       - ecommerce-network
@@ -103,6 +104,8 @@ services:
       pgbouncer:
         condition: service_healthy
       rabbitmq:
+        condition: service_healthy
+      redis:
         condition: service_healthy
 
   order:

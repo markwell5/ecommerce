@@ -8,10 +8,11 @@ using Ecommerce.Model.Product.Response;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using NpgsqlTypes;
+using Product.Application.Caching;
 
 namespace Product.Application.Queries
 {
-    public class SearchProductsQuery : IRequest<PagedResponse<ProductResponse>>
+    public class SearchProductsQuery : IRequest<PagedResponse<ProductResponse>>, ICacheableQuery
     {
         public string Query { get; set; }
         public string Category { get; set; }
@@ -21,6 +22,9 @@ namespace Product.Application.Queries
         public string SortDirection { get; set; } = "asc";
         public int Page { get; set; } = 1;
         public int PageSize { get; set; } = 20;
+
+        public string CacheKey =>
+            $"product:query:search:{Query}:{Category}:{MinPrice}:{MaxPrice}:{SortBy}:{SortDirection}:{Page}:{PageSize}";
     }
 
     public class SearchProductsQueryHandler : IRequestHandler<SearchProductsQuery, PagedResponse<ProductResponse>>

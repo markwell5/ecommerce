@@ -5,6 +5,7 @@ using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Product.Application;
+using Product.Application.Caching;
 using Product.Application.Commands;
 using Product.Infrastructure;
 using Product.Service.Services;
@@ -31,9 +32,13 @@ try
     builder.Services.AddSharedInfrastructure(builder.Configuration);
     builder.Services.AddCorsConfiguration(builder.Configuration);
     builder.Services.AddRateLimiting(builder.Configuration);
+    builder.Services.Configure<CacheSettings>(
+        builder.Configuration.GetSection("CacheSettings"));
+
     builder.Services.AddMediatR(cfg =>
     {
         cfg.RegisterServicesFromAssembly(typeof(CreateProductCommand).Assembly);
+        cfg.AddOpenBehavior(typeof(CachingBehavior<,>));
         cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
     });
     builder.Services.AddValidatorsFromAssembly(typeof(CreateProductCommand).Assembly);
@@ -43,7 +48,8 @@ try
     builder.Services.AddProblemDetails();
 
     builder.Services.AddHealthChecks()
-        .AddNpgSql(builder.Configuration.GetConnectionString("ProductDb")!, name: "postgresql");
+        .AddNpgSql(builder.Configuration.GetConnectionString("ProductDb")!, name: "postgresql")
+        .AddRedis(builder.Configuration.GetConnectionString("Redis") ?? "localhost:6379", name: "redis");
 
     builder.Services.AddGrpc();
     builder.Services.AddControllers();

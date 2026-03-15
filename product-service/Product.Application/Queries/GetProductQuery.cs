@@ -3,10 +3,11 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Ecommerce.Model.Product.Response;
 using MediatR;
+using Product.Application.Caching;
 
 namespace Product.Application.Queries
 {
-    public class GetProductQuery : IRequest<ProductResponse>
+    public class GetProductQuery : IRequest<ProductResponse>, ICacheableQuery
     {
         public GetProductQuery(long id)
         {
@@ -14,6 +15,7 @@ namespace Product.Application.Queries
         }
 
         public long Id { get; }
+        public string CacheKey => $"product:item:{Id}";
     }
 
     public class GetProductQueryHandler : IRequestHandler<GetProductQuery, ProductResponse>

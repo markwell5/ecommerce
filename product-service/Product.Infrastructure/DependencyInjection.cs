@@ -1,9 +1,14 @@
+using System;
+using Elastic.Clients.Elasticsearch;
+using Elastic.Transport;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Product.Application;
 using Product.Application.Caching;
+using Product.Application.Search;
 using Product.Infrastructure.Caching;
+using Product.Infrastructure.Search;
 using StackExchange.Redis;
 
 namespace Product.Infrastructure;
@@ -28,6 +33,14 @@ public static class DependencyInjection
         });
 
         services.AddScoped<IProductCacheInvalidator, ProductCacheInvalidator>();
+
+        services.Configure<ElasticsearchSettings>(configuration.GetSection("Elasticsearch"));
+
+        var elasticsearchUrl = configuration["Elasticsearch:Url"] ?? "http://localhost:9200";
+        var settings = new ElasticsearchClientSettings(new Uri(elasticsearchUrl))
+            .DefaultIndex(configuration["Elasticsearch:IndexName"] ?? "products");
+        services.AddSingleton(new ElasticsearchClient(settings));
+        services.AddSingleton<IProductSearchService, ElasticsearchProductSearchService>();
 
         return services;
     }

@@ -73,6 +73,24 @@ services:
     networks:
       - ecommerce-network
 
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.0
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms256m -Xmx256m
+    ports:
+      - "9200:9200"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ecommerce-network
+
   seq:
     image: datalust/seq
     ports:
@@ -108,6 +126,7 @@ services:
     environment:
       - ConnectionStrings__ProductDb=Host=pgbouncer;Port=6432;Database=product_db;Username=ecommerce;Password=ecommerce
       - ConnectionStrings__Redis=redis:6379
+      - Elasticsearch__Url=http://elasticsearch:9200
       - OpenTelemetry__OtlpEndpoint=http://jaeger:4317
     healthcheck: *app-healthcheck
     networks:
@@ -118,6 +137,8 @@ services:
       rabbitmq:
         condition: service_healthy
       redis:
+        condition: service_healthy
+      elasticsearch:
         condition: service_healthy
 
   order:
@@ -286,6 +307,7 @@ services:
 
 volumes:
   postgres_data:
+  elasticsearch_data:
   seq_data:
   prometheus_data:
   grafana_data:

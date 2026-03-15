@@ -69,6 +69,11 @@ public class ProductServiceFactory : WebApplicationFactory<Program>, IAsyncLifet
             // Replace authentication with test scheme
             services.AddAuthentication("Test")
                 .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>("Test", _ => { });
+            services.PostConfigureAll<AuthenticationOptions>(options =>
+            {
+                options.DefaultAuthenticateScheme = "Test";
+                options.DefaultChallengeScheme = "Test";
+            });
 
             // Replace MassTransit with test harness
             services.AddMassTransitTestHarness();

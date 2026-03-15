@@ -9,11 +9,13 @@ namespace User.Application.Validators
         {
             RuleFor(x => x.Request.Email)
                 .NotEmpty().WithMessage("Email is required")
+                .MaximumLength(254)
                 .EmailAddress().WithMessage("Invalid email format");
 
             RuleFor(x => x.Request.Password)
                 .NotEmpty().WithMessage("Password is required")
-                .MinimumLength(8).WithMessage("Password must be at least 8 characters");
+                .MinimumLength(8).WithMessage("Password must be at least 8 characters")
+                .MaximumLength(128);
 
             RuleFor(x => x.Request.FirstName)
                 .NotEmpty().WithMessage("First name is required")

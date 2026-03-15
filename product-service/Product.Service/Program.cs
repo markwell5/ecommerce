@@ -43,6 +43,7 @@ try
     builder.Services.AddJwtAuthentication(builder.Configuration);
     builder.Services.AddRateLimiting(builder.Configuration);
     builder.Services.AddRequestResponseLogging(builder.Configuration);
+    builder.Services.AddRequestSizeLimits(builder.Configuration);
     builder.Services.AddOpenTelemetryTracing(builder.Configuration, "Product.Service");
     builder.Services.AddIdempotency(builder.Configuration);
     builder.Services.Configure<CacheSettings>(
@@ -52,6 +53,7 @@ try
     {
         cfg.RegisterServicesFromAssembly(typeof(CreateProductCommand).Assembly);
         cfg.AddOpenBehavior(typeof(CachingBehavior<,>));
+        cfg.AddOpenBehavior(typeof(InputSanitizationBehavior<,>));
         cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
     });
     builder.Services.AddValidatorsFromAssembly(typeof(CreateProductCommand).Assembly);

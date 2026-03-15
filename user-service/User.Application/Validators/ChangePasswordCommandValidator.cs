@@ -8,11 +8,13 @@ namespace User.Application.Validators
         public ChangePasswordCommandValidator()
         {
             RuleFor(x => x.Request.CurrentPassword)
-                .NotEmpty().WithMessage("Current password is required");
+                .NotEmpty().WithMessage("Current password is required")
+                .MaximumLength(128);
 
             RuleFor(x => x.Request.NewPassword)
                 .NotEmpty().WithMessage("New password is required")
-                .MinimumLength(8).WithMessage("New password must be at least 8 characters");
+                .MinimumLength(8).WithMessage("New password must be at least 8 characters")
+                .MaximumLength(128);
         }
     }
 }

@@ -44,7 +44,7 @@ public class OrderApiTests : IClassFixture<OrderServiceFactory>
     }
 
     [Fact]
-    public async Task GetOrder_AfterPlacing_ReturnsOrder()
+    public async Task PlaceOrder_ReturnsCorrectTotalAndItems()
     {
         var request = new PlaceOrderRequest
         {
@@ -55,20 +55,27 @@ public class OrderApiTests : IClassFixture<OrderServiceFactory>
                 {
                     ProductId = 2,
                     ProductName = "Another Product",
-                    Quantity = 1,
+                    Quantity = 3,
                     UnitPrice = 25.00m
+                },
+                new()
+                {
+                    ProductId = 3,
+                    ProductName = "Third Product",
+                    Quantity = 1,
+                    UnitPrice = 10.00m
                 }
             }
         };
 
-        var placeResponse = await _client.PostAsJsonAsync("/api/v1/orders", request);
-        var placed = await placeResponse.Content.ReadFromJsonAsync<OrderResponse>();
+        var response = await _client.PostAsJsonAsync("/api/v1/orders", request);
 
-        var response = await _client.GetAsync($"/api/v1/orders/{placed!.OrderId}");
-
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.StatusCode.Should().Be(HttpStatusCode.Accepted);
         var order = await response.Content.ReadFromJsonAsync<OrderResponse>();
+        order.Should().NotBeNull();
         order!.CustomerId.Should().Be("customer-2");
+        order.TotalAmount.Should().Be(85.00m);
+        order.Status.Should().Be("Placed");
     }
 
     [Fact]

@@ -4,6 +4,7 @@ using Ecommerce.Model.Product.Request;
 using Ecommerce.Model.Product.Response;
 using Ecommerce.Shared.Infrastructure.RateLimiting;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Logging;
@@ -88,6 +89,7 @@ namespace Product.Service.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         [EnableRateLimiting(RateLimitPolicies.Write)]
         [ProducesResponseType(201, Type = typeof(ProductResponse))]
         public async Task<IActionResult> Create([FromBody] CreateProductRequest req)
@@ -98,6 +100,7 @@ namespace Product.Service.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize]
         [EnableRateLimiting(RateLimitPolicies.Write)]
         [ProducesResponseType(200, Type = typeof(ProductResponse))]
         [ProducesResponseType(404)]
@@ -112,6 +115,7 @@ namespace Product.Service.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize]
         [EnableRateLimiting(RateLimitPolicies.Write)]
         [ProducesResponseType(204)]
         [ProducesResponseType(404)]

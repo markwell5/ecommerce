@@ -3,6 +3,7 @@ using Ecommerce.Model.Stock.Request;
 using Ecommerce.Model.Stock.Response;
 using Ecommerce.Shared.Infrastructure.RateLimiting;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Logging;
@@ -39,6 +40,7 @@ namespace Stock.Service.Controllers
         }
 
         [HttpPut("{productId}")]
+        [Authorize]
         [EnableRateLimiting(RateLimitPolicies.Write)]
         [ProducesResponseType(200, Type = typeof(StockResponse))]
         [ProducesResponseType(404)]

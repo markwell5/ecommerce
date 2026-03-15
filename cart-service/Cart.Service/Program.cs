@@ -4,6 +4,7 @@ using Cart.Infrastructure;
 using Cart.Service.Services;
 using Ecommerce.Shared.GrpcClients;
 using Ecommerce.Shared.Infrastructure;
+using Ecommerce.Shared.Infrastructure.Logging;
 using Ecommerce.Shared.Infrastructure.Middleware;
 using Ecommerce.Shared.Infrastructure.Validation;
 using FluentValidation;
@@ -30,6 +31,7 @@ try
     builder.Services.RegisterInfrastructure(builder.Configuration);
     builder.Services.AddSharedInfrastructure(builder.Configuration);
     builder.Services.AddRateLimiting(builder.Configuration);
+    builder.Services.AddRequestResponseLogging(builder.Configuration);
     builder.Services.AddMediatR(cfg =>
     {
         cfg.RegisterServicesFromAssembly(typeof(AddToCartCommand).Assembly);
@@ -56,6 +58,7 @@ try
     var app = builder.Build();
 
     app.UseMiddleware<CorrelationIdMiddleware>();
+    app.UseMiddleware<RequestResponseLoggingMiddleware>();
     app.UseRateLimiter();
     app.UseSerilogRequestLogging();
     app.UseExceptionHandler();

@@ -7,6 +7,7 @@ using Asp.Versioning;
 using Ecommerce.Shared.Infrastructure.Authentication;
 using Ecommerce.Shared.Infrastructure.Cors;
 using Ecommerce.Shared.Infrastructure.Idempotency;
+using Ecommerce.Shared.Infrastructure.Logging;
 using Ecommerce.Shared.Infrastructure.RateLimiting;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -164,6 +165,16 @@ public static class DependencyInjection
             options.GroupNameFormat = "'v'VVV";
             options.SubstituteApiVersionInUrl = true;
         });
+
+        return services;
+    }
+
+    public static IServiceCollection AddRequestResponseLogging(
+        this IServiceCollection services,
+        IConfiguration configuration)
+    {
+        services.Configure<RequestResponseLoggingSettings>(
+            configuration.GetSection("RequestResponseLogging"));
 
         return services;
     }

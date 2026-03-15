@@ -1,4 +1,5 @@
 using Ecommerce.Shared.Infrastructure;
+using Ecommerce.Shared.Infrastructure.Logging;
 using Ecommerce.Shared.Infrastructure.Middleware;
 using Ecommerce.Shared.Infrastructure.Validation;
 using FluentValidation;
@@ -33,6 +34,7 @@ try
     builder.Services.AddCorsConfiguration(builder.Configuration);
     builder.Services.AddJwtAuthentication(builder.Configuration);
     builder.Services.AddRateLimiting(builder.Configuration);
+    builder.Services.AddRequestResponseLogging(builder.Configuration);
     builder.Services.AddIdempotency(builder.Configuration);
 
     var redisConnection = builder.Configuration.GetConnectionString("Redis") ?? "localhost:6379";
@@ -111,6 +113,7 @@ try
     }
 
     app.UseMiddleware<CorrelationIdMiddleware>();
+    app.UseMiddleware<RequestResponseLoggingMiddleware>();
     app.UseRateLimiter();
     app.UseSerilogRequestLogging();
     app.UseExceptionHandler();

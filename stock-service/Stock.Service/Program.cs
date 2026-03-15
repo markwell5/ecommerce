@@ -35,6 +35,7 @@ try
     builder.Services.AddJwtAuthentication(builder.Configuration);
     builder.Services.AddRateLimiting(builder.Configuration);
     builder.Services.AddRequestResponseLogging(builder.Configuration);
+    builder.Services.AddOpenTelemetryTracing(builder.Configuration, "Stock.Service");
     builder.Services.AddIdempotency(builder.Configuration);
 
     var redisConnection = builder.Configuration.GetConnectionString("Redis") ?? "localhost:6379";

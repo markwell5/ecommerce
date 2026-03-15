@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Ecommerce.Model.Payment.Response;
 using Ecommerce.Shared.Infrastructure.RateLimiting;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Logging;
@@ -14,6 +15,7 @@ namespace Payment.Service.Controllers
 {
     [ApiController]
     [Route("api/payments")]
+    [Authorize]
     [EnableRateLimiting(RateLimitPolicies.Read)]
     public class PaymentController : ControllerBase
     {

@@ -30,6 +30,7 @@ try
 
     builder.Services.RegisterInfrastructure(builder.Configuration);
     builder.Services.AddCorsConfiguration(builder.Configuration);
+    builder.Services.AddJwtAuthentication(builder.Configuration);
     builder.Services.AddRateLimiting(builder.Configuration);
     builder.Services.AddSharedInfrastructure(builder.Configuration, bus =>
     {
@@ -57,6 +58,28 @@ try
     builder.Services.AddSwaggerGen(c =>
     {
         c.SwaggerDoc("v1", new OpenApiInfo { Title = "Stock.Service", Version = "v1" });
+        c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+        {
+            Description = "JWT Authorization header using the Bearer scheme",
+            Name = "Authorization",
+            In = ParameterLocation.Header,
+            Type = SecuritySchemeType.ApiKey,
+            Scheme = "Bearer"
+        });
+        c.AddSecurityRequirement(new OpenApiSecurityRequirement
+        {
+            {
+                new OpenApiSecurityScheme
+                {
+                    Reference = new OpenApiReference
+                    {
+                        Type = ReferenceType.SecurityScheme,
+                        Id = "Bearer"
+                    }
+                },
+                Array.Empty<string>()
+            }
+        });
     });
 
     var app = builder.Build();
@@ -80,6 +103,7 @@ try
 
     app.UseHttpsRedirection();
     app.UseCors(Ecommerce.Shared.Infrastructure.DependencyInjection.CorsPolicyName);
+    app.UseAuthentication();
     app.UseAuthorization();
     app.MapGrpcService<StockGrpcService>();
     app.MapControllers();

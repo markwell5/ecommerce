@@ -1,0 +1,45 @@
+{
+  "consumer": {
+    "name": "StockService"
+  },
+  "interactions": [
+    {
+      "contents": {
+        "content": {
+          "itemsJson": "[{\"ProductId\":1,\"Quantity\":2}]",
+          "orderId": "d290f1ee-6c54-4b01-90e6-d701748f0851"
+        },
+        "contentType": "application/json",
+        "encoded": false
+      },
+      "description": "a ReleaseStock command",
+      "pending": false,
+      "type": "Asynchronous/Messages"
+    },
+    {
+      "contents": {
+        "content": {
+          "itemsJson": "[{\"ProductId\":1,\"Quantity\":2}]",
+          "orderId": "d290f1ee-6c54-4b01-90e6-d701748f0851"
+        },
+        "contentType": "application/json",
+        "encoded": false
+      },
+      "description": "a ReserveStock command",
+      "pending": false,
+      "type": "Asynchronous/Messages"
+    }
+  ],
+  "metadata": {
+    "pactRust": {
+      "ffi": "0.4.23",
+      "models": "1.2.5"
+    },
+    "pactSpecification": {
+      "version": "4.0"
+    }
+  },
+  "provider": {
+    "name": "OrderService"
+  }
+}

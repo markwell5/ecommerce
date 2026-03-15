@@ -2,6 +2,8 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build-env
 WORKDIR /src
 
 COPY shared/Ecommerce.Shared.Infrastructure/Ecommerce.Shared.Infrastructure.csproj shared/Ecommerce.Shared.Infrastructure/
+COPY shared/Ecommerce.Shared.Protos/Ecommerce.Shared.Protos.csproj shared/Ecommerce.Shared.Protos/
+COPY shared/Ecommerce.Shared.GrpcClients/Ecommerce.Shared.GrpcClients.csproj shared/Ecommerce.Shared.GrpcClients/
 COPY domain/Ecommerce.Events/Ecommerce.Events.csproj domain/Ecommerce.Events/
 COPY domain/Ecommerce.Model/Ecommerce.Model.csproj domain/Ecommerce.Model/
 COPY cart-service/Cart.Application/Cart.Application.csproj cart-service/Cart.Application/

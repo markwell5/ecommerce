@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+option csharp_namespace = "Ecommerce.Shared.Protos";
+
+package ecommerce.payment;
+
+service PaymentGrpc {
+  rpc GetPaymentByOrder (GetPaymentByOrderRequest) returns (PaymentReply);
+  rpc GetPaymentsByCustomer (GetPaymentsByCustomerRequest) returns (GetPaymentsByCustomerReply);
+}
+
+message GetPaymentByOrderRequest {
+  string order_id = 1;
+}
+
+message GetPaymentsByCustomerRequest {
+  string customer_id = 1;
+}
+
+message PaymentReply {
+  int64 id = 1;
+  string order_id = 2;
+  string customer_id = 3;
+  string amount = 4;
+  string currency = 5;
+  string status = 6;
+  string stripe_payment_intent_id = 7;
+  string created_at = 8;
+}
+
+message GetPaymentsByCustomerReply {
+  repeated PaymentReply payments = 1;
+}

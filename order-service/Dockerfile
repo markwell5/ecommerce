@@ -4,6 +4,8 @@ WORKDIR /src
 COPY domain/Ecommerce.Events/Ecommerce.Events.csproj domain/Ecommerce.Events/
 COPY domain/Ecommerce.Model/Ecommerce.Model.csproj domain/Ecommerce.Model/
 COPY shared/Ecommerce.Shared.Infrastructure/Ecommerce.Shared.Infrastructure.csproj shared/Ecommerce.Shared.Infrastructure/
+COPY shared/Ecommerce.Shared.Protos/Ecommerce.Shared.Protos.csproj shared/Ecommerce.Shared.Protos/
+COPY shared/Ecommerce.Shared.GrpcClients/Ecommerce.Shared.GrpcClients.csproj shared/Ecommerce.Shared.GrpcClients/
 COPY order-service/Order.Application/Order.Application.csproj order-service/Order.Application/
 COPY order-service/Order.Infrastructure/Order.Infrastructure.csproj order-service/Order.Infrastructure/
 COPY order-service/Order.Service/Order.Service.csproj order-service/Order.Service/

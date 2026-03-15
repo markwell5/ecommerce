@@ -9,6 +9,7 @@ using Payment.Application.Commands;
 using Payment.Application.Consumers;
 using Payment.Application.Services;
 using Payment.Infrastructure;
+using Payment.Service.Services;
 using Serilog;
 using Stripe;
 
@@ -56,6 +57,7 @@ try
     builder.Services.AddHealthChecks()
         .AddNpgSql(builder.Configuration.GetConnectionString("PaymentDb")!, name: "postgresql");
 
+    builder.Services.AddGrpc();
     builder.Services.AddControllers();
     builder.Services.AddSwaggerGen(c =>
     {
@@ -84,6 +86,7 @@ try
     app.UseHttpsRedirection();
     app.UseCors(Ecommerce.Shared.Infrastructure.DependencyInjection.CorsPolicyName);
     app.UseAuthorization();
+    app.MapGrpcService<PaymentGrpcService>();
     app.MapControllers();
     app.MapHealthChecks("/health");
 

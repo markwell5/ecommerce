@@ -18,6 +18,8 @@
   <ItemGroup>
     <ProjectReference Include="..\Cart.Infrastructure\Cart.Infrastructure.csproj" />
     <ProjectReference Include="..\..\shared\Ecommerce.Shared.Infrastructure\Ecommerce.Shared.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\shared\Ecommerce.Shared.Protos\Ecommerce.Shared.Protos.csproj" />
+    <ProjectReference Include="..\..\shared\Ecommerce.Shared.GrpcClients\Ecommerce.Shared.GrpcClients.csproj" />
   </ItemGroup>
 
 </Project>

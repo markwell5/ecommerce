@@ -24,6 +24,10 @@ namespace Order.Application
         {
             base.OnModelCreating(modelBuilder);
 
+            modelBuilder.AddInboxStateEntity();
+            modelBuilder.AddOutboxMessageEntity();
+            modelBuilder.AddOutboxStateEntity();
+
             modelBuilder.Entity<Entities.Order>(entity =>
             {
                 entity.HasKey(e => e.OrderId);

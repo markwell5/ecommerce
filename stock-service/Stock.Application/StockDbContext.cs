@@ -1,3 +1,4 @@
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Stock.Application.Entities;
 
@@ -13,6 +14,10 @@ namespace Stock.Application
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.AddInboxStateEntity();
+            modelBuilder.AddOutboxMessageEntity();
+            modelBuilder.AddOutboxStateEntity();
+
             modelBuilder.Entity<StockItem>(entity =>
             {
                 entity.HasKey(e => e.Id);

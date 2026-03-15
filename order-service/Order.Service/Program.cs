@@ -54,6 +54,12 @@ try
                 r.UsePostgres();
             });
 
+        bus.AddEntityFrameworkOutbox<OrderDbContext>(o =>
+        {
+            o.UsePostgres();
+            o.UseBusOutbox();
+        });
+
         // PaymentStubConsumer removed — real Payment Service now handles ProcessPayment
     });
 

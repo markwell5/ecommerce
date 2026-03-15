@@ -2,6 +2,7 @@ using Ecommerce.Shared.Infrastructure;
 using Ecommerce.Shared.Infrastructure.Middleware;
 using Ecommerce.Shared.Infrastructure.Validation;
 using FluentValidation;
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Payment.Application;
@@ -49,6 +50,12 @@ try
     {
         bus.AddConsumer<ProcessPaymentConsumer>();
         bus.AddConsumer<RefundPaymentConsumer>();
+
+        bus.AddEntityFrameworkOutbox<PaymentDbContext>(o =>
+        {
+            o.UsePostgres();
+            o.UseBusOutbox();
+        });
     });
 
     builder.Services.AddScoped<IPaymentGateway, StripePaymentGateway>();

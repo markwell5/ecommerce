@@ -46,7 +46,7 @@ try
         cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
     });
     builder.Services.AddValidatorsFromAssembly(typeof(CreateProductCommand).Assembly);
-    builder.Services.AddAutoMapper(typeof(MapperProfile).Assembly);
+    builder.Services.AddAutoMapper(cfg => { }, typeof(MapperProfile).Assembly);
 
     builder.Services.AddHealthChecks()
         .AddNpgSql(builder.Configuration.GetConnectionString("ProductDb")!, name: "postgresql")

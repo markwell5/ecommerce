@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging.Abstractions;
 using Payment.Application;
 using Payment.Application.Queries;
 
@@ -21,7 +22,9 @@ public class GetPaymentByOrderQueryTests
             .Options;
         _dbContext = new PaymentDbContext(options);
 
-        var config = new MapperConfiguration(cfg => cfg.AddProfile<MapperProfile>());
+        var expr = new MapperConfigurationExpression();
+        expr.AddProfile<MapperProfile>();
+        var config = new MapperConfiguration(expr, NullLoggerFactory.Instance);
         _mapper = config.CreateMapper();
     }
 

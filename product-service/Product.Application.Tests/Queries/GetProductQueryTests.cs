@@ -1,6 +1,7 @@
 using AutoMapper;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging.Abstractions;
 using Product.Application;
 using Product.Application.Queries;
 
@@ -18,7 +19,9 @@ public class GetProductQueryTests
             .Options;
         _dbContext = new ProductDbContext(options);
 
-        var config = new MapperConfiguration(cfg => cfg.AddProfile<MapperProfile>());
+        var expr = new MapperConfigurationExpression();
+        expr.AddProfile<MapperProfile>();
+        var config = new MapperConfiguration(expr, NullLoggerFactory.Instance);
         _mapper = config.CreateMapper();
     }
 

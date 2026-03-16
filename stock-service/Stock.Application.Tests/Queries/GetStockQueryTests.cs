@@ -1,6 +1,7 @@
 using AutoMapper;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging.Abstractions;
 using Stock.Application;
 using Stock.Application.Entities;
 using Stock.Application.Queries;
@@ -19,7 +20,9 @@ public class GetStockQueryTests
             .Options;
         _dbContext = new StockDbContext(options);
 
-        var config = new MapperConfiguration(cfg => cfg.AddProfile<MapperProfile>());
+        var expr = new MapperConfigurationExpression();
+        expr.AddProfile<MapperProfile>();
+        var config = new MapperConfiguration(expr, NullLoggerFactory.Instance);
         _mapper = config.CreateMapper();
     }
 

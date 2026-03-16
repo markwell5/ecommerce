@@ -60,7 +60,7 @@ try
         cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
     });
     builder.Services.AddValidatorsFromAssembly(typeof(RefundPaymentCommand).Assembly);
-    builder.Services.AddAutoMapper(typeof(Payment.Application.MapperProfile).Assembly);
+    builder.Services.AddAutoMapper(cfg => { }, typeof(Payment.Application.MapperProfile).Assembly);
 
     builder.Services.AddHealthChecks()
         .AddNpgSql(builder.Configuration.GetConnectionString("PaymentDb")!, name: "postgresql");

@@ -50,7 +50,7 @@ try
         cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
     });
     builder.Services.AddValidatorsFromAssembly(typeof(UpdateStockCommand).Assembly);
-    builder.Services.AddAutoMapper(typeof(Stock.Application.MapperProfile).Assembly);
+    builder.Services.AddAutoMapper(cfg => { }, typeof(Stock.Application.MapperProfile).Assembly);
 
     builder.Services.AddHealthChecks()
         .AddNpgSql(builder.Configuration.GetConnectionString("StockDb")!, name: "postgresql");

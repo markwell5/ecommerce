@@ -54,7 +54,7 @@ try
         cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
     });
     builder.Services.AddValidatorsFromAssembly(typeof(PlaceOrderCommand).Assembly);
-    builder.Services.AddAutoMapper(typeof(Order.Application.MapperProfile).Assembly);
+    builder.Services.AddAutoMapper(cfg => { }, typeof(Order.Application.MapperProfile).Assembly);
 
     builder.Services.AddProductGrpcClient(builder.Configuration);
 

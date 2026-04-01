@@ -55,6 +55,76 @@ public class Mutation
         return reply.Success;
     }
 
+    // ── Categories ────────────────────────────────────
+
+    public async Task<Category> CreateCategory(
+        string name,
+        string slug,
+        long? parentId,
+        CategoryGrpc.CategoryGrpcClient client)
+    {
+        var reply = await client.CreateCategoryAsync(new CreateCategoryGrpcRequest
+        {
+            Name = name,
+            Slug = slug,
+            ParentId = parentId ?? 0
+        });
+
+        return MapCategory(reply);
+    }
+
+    public async Task<Category> UpdateCategory(
+        long id,
+        string name,
+        string slug,
+        long? parentId,
+        CategoryGrpc.CategoryGrpcClient client)
+    {
+        var reply = await client.UpdateCategoryAsync(new UpdateCategoryGrpcRequest
+        {
+            Id = id,
+            Name = name,
+            Slug = slug,
+            ParentId = parentId ?? 0
+        });
+
+        return MapCategory(reply);
+    }
+
+    public async Task<bool> DeleteCategory(
+        long id,
+        CategoryGrpc.CategoryGrpcClient client)
+    {
+        var reply = await client.DeleteCategoryAsync(new DeleteCategoryGrpcRequest { Id = id });
+        return reply.Success;
+    }
+
+    public async Task<bool> AssignProductCategory(
+        long productId,
+        long categoryId,
+        CategoryGrpc.CategoryGrpcClient client)
+    {
+        var reply = await client.AssignProductCategoryAsync(new ProductCategoryGrpcRequest
+        {
+            ProductId = productId,
+            CategoryId = categoryId
+        });
+        return reply.Success;
+    }
+
+    public async Task<bool> RemoveProductCategory(
+        long productId,
+        long categoryId,
+        CategoryGrpc.CategoryGrpcClient client)
+    {
+        var reply = await client.RemoveProductCategoryAsync(new ProductCategoryGrpcRequest
+        {
+            ProductId = productId,
+            CategoryId = categoryId
+        });
+        return reply.Success;
+    }
+
     // ── Orders ───────────────────────────────────────
 
     public async Task<Order> PlaceOrder(
@@ -190,6 +260,15 @@ public class Mutation
     }
 
     // ── Helpers ──────────────────────────────────────
+
+    private static Category MapCategory(CategoryReply reply) => new()
+    {
+        Id = reply.Id,
+        Name = reply.Name,
+        Slug = reply.Slug,
+        ParentId = reply.ParentId == 0 ? null : reply.ParentId,
+        Children = reply.Children.Select(MapCategory).ToList()
+    };
 
     private static Product MapProduct(ProductReply reply) => new()
     {

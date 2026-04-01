@@ -66,6 +66,7 @@ try
 
     app.UseServiceDefaults();
     app.MapGrpcService<ProductGrpcService>();
+    app.MapGrpcService<CategoryGrpcService>();
 
     app.Run();
 }

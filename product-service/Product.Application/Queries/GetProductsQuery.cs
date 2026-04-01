@@ -18,9 +18,10 @@ namespace Product.Application.Queries
         public string SortBy { get; set; }
         public string SortDirection { get; set; } = "asc";
         public string Search { get; set; }
+        public string Category { get; set; }
 
         public string CacheKey =>
-            $"product:query:list:{Page}:{PageSize}:{SortBy}:{SortDirection}:{Search}";
+            $"product:query:list:{Page}:{PageSize}:{SortBy}:{SortDirection}:{Search}:{Category}";
     }
 
     public class GetProductsQueryHandler : IRequestHandler<GetProductsQuery, PagedResponse<ProductResponse>>
@@ -46,6 +47,12 @@ namespace Product.Application.Queries
                 var search = request.Search.ToLower();
                 query = query.Where(p => p.Name.ToLower().Contains(search)
                     || p.Description.ToLower().Contains(search));
+            }
+
+            if (!string.IsNullOrWhiteSpace(request.Category))
+            {
+                var categorySlug = request.Category;
+                query = query.Where(p => p.ProductCategories.Any(pc => pc.Category.Slug == categorySlug));
             }
 
             query = request.SortBy?.ToLower() switch

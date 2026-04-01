@@ -64,7 +64,8 @@ namespace Product.Service.Controllers
             [FromQuery] int pageSize = 20,
             [FromQuery] string sortBy = null,
             [FromQuery] string sortDirection = "asc",
-            [FromQuery] string search = null)
+            [FromQuery] string search = null,
+            [FromQuery] string category = null)
         {
             var products = await _mediator.Send(new GetProductsQuery
             {
@@ -72,7 +73,8 @@ namespace Product.Service.Controllers
                 PageSize = pageSize,
                 SortBy = sortBy,
                 SortDirection = sortDirection,
-                Search = search
+                Search = search,
+                Category = category
             });
 
             return Ok(products);

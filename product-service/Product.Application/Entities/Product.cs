@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using NpgsqlTypes;
 
 namespace Product.Application.Entities;
@@ -10,4 +11,5 @@ public class Product
     public string Category { get; set; } = string.Empty;
     public decimal Price { get; set; }
     public NpgsqlTsVector SearchVector { get; set; }
+    public List<ProductCategory> ProductCategories { get; set; } = new();
 }

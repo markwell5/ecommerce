@@ -1,0 +1,14 @@
+services:
+  k6:
+    image: grafana/k6:0.50.0
+    volumes:
+      - ./scripts:/scripts
+      - ./results:/results
+    environment:
+      - BASE_URL=http://host.docker.internal:5002
+      - USER_SERVICE_URL=http://host.docker.internal:5004
+      - PRODUCT_SERVICE_URL=http://host.docker.internal:5001
+      - TEST_EMAIL=${TEST_EMAIL:-loadtest@example.com}
+      - TEST_PASSWORD=${TEST_PASSWORD:-LoadTest123!}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

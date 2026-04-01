@@ -13,7 +13,7 @@ using Product.Application;
 namespace Product.Infrastructure.Migrations
 {
     [DbContext(typeof(ProductDbContext))]
-    [Migration("20260401210510_AddCategoryEntityAndProductCategories")]
+    [Migration("20260401211940_AddCategoryEntityAndProductCategories")]
     partial class AddCategoryEntityAndProductCategories
     {
         /// <inheritdoc />

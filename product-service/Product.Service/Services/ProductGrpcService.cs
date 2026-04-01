@@ -1,6 +1,8 @@
+using Ecommerce.Model.Product.Request;
 using Ecommerce.Shared.Protos;
 using Grpc.Core;
 using MediatR;
+using Product.Application.Commands;
 using Product.Application.Queries;
 
 namespace Product.Service.Services;
@@ -21,14 +23,7 @@ public class ProductGrpcService : ProductGrpc.ProductGrpcBase
         if (result is null)
             throw new RpcException(new Status(StatusCode.NotFound, $"Product {request.Id} not found"));
 
-        return new ProductReply
-        {
-            Id = result.Id,
-            Name = result.Name ?? string.Empty,
-            Description = result.Description ?? string.Empty,
-            Category = result.Category ?? string.Empty,
-            Price = result.Price.ToString()
-        };
+        return MapToReply(result);
     }
 
     public override async Task<GetProductsReply> GetProducts(GetProductsRequest request, ServerCallContext context)
@@ -48,16 +43,54 @@ public class ProductGrpcService : ProductGrpc.ProductGrpcBase
 
         foreach (var p in result.Items)
         {
-            reply.Products.Add(new ProductReply
-            {
-                Id = p.Id,
-                Name = p.Name ?? string.Empty,
-                Description = p.Description ?? string.Empty,
-                Category = p.Category ?? string.Empty,
-                Price = p.Price.ToString()
-            });
+            reply.Products.Add(MapToReply(p));
         }
 
         return reply;
     }
+
+    public override async Task<ProductReply> CreateProduct(CreateProductGrpcRequest request, ServerCallContext context)
+    {
+        var result = await _mediator.Send(new CreateProductCommand(new CreateProductRequest
+        {
+            Name = request.Name,
+            Description = request.Description,
+            Category = request.Category,
+            Price = decimal.TryParse(request.Price, out var p) ? p : 0
+        }), context.CancellationToken);
+
+        return MapToReply(result);
+    }
+
+    public override async Task<ProductReply> UpdateProduct(UpdateProductGrpcRequest request, ServerCallContext context)
+    {
+        var result = await _mediator.Send(new UpdateProductCommand(request.Id, new UpdateProductRequest
+        {
+            Name = request.Name,
+            Description = request.Description,
+            Category = request.Category,
+            Price = decimal.TryParse(request.Price, out var p) ? p : 0
+        }), context.CancellationToken);
+
+        if (result is null)
+            throw new RpcException(new Status(StatusCode.NotFound, $"Product {request.Id} not found"));
+
+        return MapToReply(result);
+    }
+
+    public override async Task<DeleteProductGrpcReply> DeleteProduct(DeleteProductGrpcRequest request, ServerCallContext context)
+    {
+        var result = await _mediator.Send(new DeleteProductCommand(request.Id), context.CancellationToken);
+
+        return new DeleteProductGrpcReply { Success = result };
+    }
+
+    private static ProductReply MapToReply(Ecommerce.Model.Product.Response.ProductResponse result) => new()
+    {
+        Id = result.Id,
+        Name = result.Name ?? string.Empty,
+        Description = result.Description ?? string.Empty,
+        Category = result.Category ?? string.Empty,
+        Price = result.Price.ToString()
+    };
 }

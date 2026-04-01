@@ -1,6 +1,9 @@
+using Ecommerce.Model.Order.Request;
+using Ecommerce.Model.Order.Response;
 using Ecommerce.Shared.Protos;
 using Grpc.Core;
 using MediatR;
+using Order.Application.Commands;
 using Order.Application.Queries;
 
 namespace Order.Service.Services;
@@ -24,15 +27,70 @@ public class OrderGrpcService : OrderGrpc.OrderGrpcBase
         if (result is null)
             throw new RpcException(new Status(StatusCode.NotFound, $"Order {request.OrderId} not found"));
 
-        return new OrderReply
-        {
-            OrderId = result.OrderId.ToString(),
-            CustomerId = result.CustomerId ?? string.Empty,
-            Status = result.Status ?? string.Empty,
-            TotalAmount = result.TotalAmount.ToString(),
-            ItemsJson = result.ItemsJson ?? string.Empty,
-            CreatedAt = result.CreatedAt.ToString("O"),
-            UpdatedAt = result.UpdatedAt?.ToString("O") ?? string.Empty
-        };
+        return MapToReply(result);
     }
+
+    public override async Task<OrderReply> PlaceOrder(PlaceOrderGrpcRequest request, ServerCallContext context)
+    {
+        var orderRequest = new PlaceOrderRequest
+        {
+            CustomerId = request.CustomerId,
+            Items = request.Items.Select(i => new OrderLineItem
+            {
+                ProductId = i.ProductId,
+                ProductName = i.ProductName,
+                Quantity = i.Quantity,
+                UnitPrice = decimal.TryParse(i.UnitPrice, out var p) ? p : 0
+            }).ToList()
+        };
+
+        var result = await _mediator.Send(new PlaceOrderCommand(orderRequest), context.CancellationToken);
+        return MapToReply(result);
+    }
+
+    public override async Task<OrderActionReply> CancelOrder(OrderActionRequest request, ServerCallContext context)
+    {
+        var orderId = ParseOrderId(request.OrderId);
+        var result = await _mediator.Send(new CancelOrderCommand(orderId), context.CancellationToken);
+        return new OrderActionReply { Success = result };
+    }
+
+    public override async Task<OrderActionReply> ShipOrder(OrderActionRequest request, ServerCallContext context)
+    {
+        var orderId = ParseOrderId(request.OrderId);
+        var result = await _mediator.Send(new ShipOrderCommand(orderId), context.CancellationToken);
+        return new OrderActionReply { Success = result };
+    }
+
+    public override async Task<OrderActionReply> DeliverOrder(OrderActionRequest request, ServerCallContext context)
+    {
+        var orderId = ParseOrderId(request.OrderId);
+        var result = await _mediator.Send(new DeliverOrderCommand(orderId), context.CancellationToken);
+        return new OrderActionReply { Success = result };
+    }
+
+    public override async Task<OrderActionReply> ReturnOrder(OrderActionRequest request, ServerCallContext context)
+    {
+        var orderId = ParseOrderId(request.OrderId);
+        var result = await _mediator.Send(new ReturnOrderCommand(orderId), context.CancellationToken);
+        return new OrderActionReply { Success = result };
+    }
+
+    private static Guid ParseOrderId(string orderId)
+    {
+        if (!Guid.TryParse(orderId, out var parsed))
+            throw new RpcException(new Status(StatusCode.InvalidArgument, "Invalid order ID format"));
+        return parsed;
+    }
+
+    private static OrderReply MapToReply(OrderResponse result) => new()
+    {
+        OrderId = result.OrderId.ToString(),
+        CustomerId = result.CustomerId ?? string.Empty,
+        Status = result.Status ?? string.Empty,
+        TotalAmount = result.TotalAmount.ToString(),
+        ItemsJson = result.ItemsJson ?? string.Empty,
+        CreatedAt = result.CreatedAt.ToString("O"),
+        UpdatedAt = result.UpdatedAt?.ToString("O") ?? string.Empty
+    };
 }

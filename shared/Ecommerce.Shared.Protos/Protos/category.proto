@@ -1,0 +1,64 @@
+syntax = "proto3";
+
+option csharp_namespace = "Ecommerce.Shared.Protos";
+
+package ecommerce.category;
+
+service CategoryGrpc {
+  rpc GetCategories (GetCategoriesRequest) returns (GetCategoriesReply);
+  rpc GetCategoryBySlug (GetCategoryBySlugRequest) returns (CategoryReply);
+  rpc CreateCategory (CreateCategoryGrpcRequest) returns (CategoryReply);
+  rpc UpdateCategory (UpdateCategoryGrpcRequest) returns (CategoryReply);
+  rpc DeleteCategory (DeleteCategoryGrpcRequest) returns (DeleteCategoryGrpcReply);
+  rpc AssignProductCategory (ProductCategoryGrpcRequest) returns (ProductCategoryGrpcReply);
+  rpc RemoveProductCategory (ProductCategoryGrpcRequest) returns (ProductCategoryGrpcReply);
+}
+
+message GetCategoriesRequest {
+}
+
+message GetCategoriesReply {
+  repeated CategoryReply categories = 1;
+}
+
+message GetCategoryBySlugRequest {
+  string slug = 1;
+}
+
+message CategoryReply {
+  int64 id = 1;
+  string name = 2;
+  string slug = 3;
+  int64 parent_id = 4;
+  repeated CategoryReply children = 5;
+}
+
+message CreateCategoryGrpcRequest {
+  string name = 1;
+  string slug = 2;
+  int64 parent_id = 3;
+}
+
+message UpdateCategoryGrpcRequest {
+  int64 id = 1;
+  string name = 2;
+  string slug = 3;
+  int64 parent_id = 4;
+}
+
+message DeleteCategoryGrpcRequest {
+  int64 id = 1;
+}
+
+message DeleteCategoryGrpcReply {
+  bool success = 1;
+}
+
+message ProductCategoryGrpcRequest {
+  int64 product_id = 1;
+  int64 category_id = 2;
+}
+
+message ProductCategoryGrpcReply {
+  bool success = 1;
+}

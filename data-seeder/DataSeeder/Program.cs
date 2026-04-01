@@ -81,6 +81,7 @@ try
                 {
                     name = product.Name,
                     description = product.Description,
+                    category = product.Category,
                     price = product.Price
                 });
 
@@ -182,7 +183,7 @@ static async Task WaitForService(HttpClient client, string healthUrl, string ser
     throw new Exception($"{serviceName} did not become healthy after {maxRetries} attempts");
 }
 
-record SeedProduct(string Name, string Description, decimal Price);
+record SeedProduct(string Name, string Description, decimal Price, string Category);
 
 class PagedResult
 {

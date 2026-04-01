@@ -43,6 +43,23 @@ public class Query
         };
     }
 
+    // ── Categories ────────────────────────────────────
+
+    public async Task<List<Category>> GetCategories(
+        CategoryGrpc.CategoryGrpcClient client)
+    {
+        var reply = await client.GetCategoriesAsync(new GetCategoriesRequest());
+        return reply.Categories.Select(MapCategory).ToList();
+    }
+
+    public async Task<Category?> GetCategoryBySlug(
+        string slug,
+        CategoryGrpc.CategoryGrpcClient client)
+    {
+        var reply = await client.GetCategoryBySlugAsync(new GetCategoryBySlugRequest { Slug = slug });
+        return MapCategory(reply);
+    }
+
     // ── Orders ───────────────────────────────────────
 
     [Authorize]
@@ -159,6 +176,15 @@ public class Query
     }
 
     // ── Helpers ──────────────────────────────────────
+
+    private static Category MapCategory(CategoryReply reply) => new()
+    {
+        Id = reply.Id,
+        Name = reply.Name,
+        Slug = reply.Slug,
+        ParentId = reply.ParentId == 0 ? null : reply.ParentId,
+        Children = reply.Children.Select(MapCategory).ToList()
+    };
 
     private static Order MapOrder(OrderReply reply) => new()
     {

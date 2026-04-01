@@ -83,4 +83,17 @@ public static class DependencyInjection
 
         return services;
     }
+
+    public static IServiceCollection AddCategoryGrpcClient(
+        this IServiceCollection services, IConfiguration configuration)
+    {
+        var address = configuration["GrpcClients:ProductService"] ?? "http://product:8080";
+
+        services.AddGrpcClient<CategoryGrpc.CategoryGrpcClient>(o =>
+        {
+            o.Address = new Uri(address);
+        });
+
+        return services;
+    }
 }

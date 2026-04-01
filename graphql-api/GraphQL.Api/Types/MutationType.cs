@@ -125,6 +125,54 @@ public class Mutation
         return reply.Success;
     }
 
+    // ── Discounts ─────────────────────────────────────
+
+    public async Task<Coupon> CreateCoupon(
+        string code,
+        string discountType,
+        decimal value,
+        decimal minOrderAmount,
+        int maxUses,
+        string expiresAt,
+        DiscountGrpc.DiscountGrpcClient client)
+    {
+        var reply = await client.CreateCouponAsync(new CreateCouponGrpcRequest
+        {
+            Code = code,
+            DiscountType = discountType,
+            Value = value.ToString(),
+            MinOrderAmount = minOrderAmount.ToString(),
+            MaxUses = maxUses,
+            ExpiresAt = expiresAt
+        });
+
+        return MapCoupon(reply);
+    }
+
+    public async Task<Coupon> UpdateCoupon(
+        long id,
+        string discountType,
+        decimal value,
+        decimal minOrderAmount,
+        int maxUses,
+        string expiresAt,
+        bool isActive,
+        DiscountGrpc.DiscountGrpcClient client)
+    {
+        var reply = await client.UpdateCouponAsync(new UpdateCouponGrpcRequest
+        {
+            Id = id,
+            DiscountType = discountType,
+            Value = value.ToString(),
+            MinOrderAmount = minOrderAmount.ToString(),
+            MaxUses = maxUses,
+            ExpiresAt = expiresAt,
+            IsActive = isActive
+        });
+
+        return MapCoupon(reply);
+    }
+
     // ── Orders ───────────────────────────────────────
 
     public async Task<Order> PlaceOrder(
@@ -293,6 +341,20 @@ public class Mutation
     }
 
     // ── Helpers ──────────────────────────────────────
+
+    private static Coupon MapCoupon(CouponReply c) => new()
+    {
+        Id = c.Id,
+        Code = c.Code,
+        DiscountType = c.DiscountType,
+        Value = decimal.TryParse(c.Value, out var v) ? v : 0,
+        MinOrderAmount = decimal.TryParse(c.MinOrderAmount, out var m) ? m : 0,
+        MaxUses = c.MaxUses,
+        CurrentUses = c.CurrentUses,
+        ExpiresAt = c.ExpiresAt,
+        IsActive = c.IsActive,
+        CreatedAt = c.CreatedAt
+    };
 
     private static Category MapCategory(CategoryReply reply) => new()
     {

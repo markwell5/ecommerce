@@ -10,6 +10,8 @@ namespace Order.Application.Entities
         public string CustomerId { get; set; }
         public decimal TotalAmount { get; set; }
         public string ItemsJson { get; set; }
+        public string CouponCode { get; set; }
+        public decimal DiscountAmount { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
     }

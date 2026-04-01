@@ -3,6 +3,7 @@ using Ecommerce.Events.Order.Messages;
 using Ecommerce.Model.Order.Request;
 using FluentAssertions;
 using MassTransit;
+using Microsoft.EntityFrameworkCore;
 using NSubstitute;
 using Order.Application.Commands;
 
@@ -10,6 +11,14 @@ namespace Order.Application.Tests.Commands;
 
 public class PlaceOrderCommandTests
 {
+    private static OrderDbContext CreateInMemoryDb()
+    {
+        var options = new DbContextOptionsBuilder<OrderDbContext>()
+            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+            .Options;
+        return new OrderDbContext(options);
+    }
+
     [Fact]
     public async Task Handle_ShouldReturnOrderResponse_WithCorrectTotalAmount()
     {
@@ -17,7 +26,7 @@ public class PlaceOrderCommandTests
         var sendEndpointProvider = Substitute.For<ISendEndpointProvider>();
         sendEndpointProvider.GetSendEndpoint(Arg.Any<Uri>()).Returns(sendEndpoint);
 
-        var handler = new PlaceOrderCommandHandler(sendEndpointProvider);
+        var handler = new PlaceOrderCommandHandler(sendEndpointProvider, CreateInMemoryDb());
         var command = new PlaceOrderCommand(new PlaceOrderRequest
         {
             CustomerId = "customer-1",
@@ -44,7 +53,7 @@ public class PlaceOrderCommandTests
         var sendEndpointProvider = Substitute.For<ISendEndpointProvider>();
         sendEndpointProvider.GetSendEndpoint(Arg.Any<Uri>()).Returns(sendEndpoint);
 
-        var handler = new PlaceOrderCommandHandler(sendEndpointProvider);
+        var handler = new PlaceOrderCommandHandler(sendEndpointProvider, CreateInMemoryDb());
         var command = new PlaceOrderCommand(new PlaceOrderRequest
         {
             CustomerId = "customer-1",

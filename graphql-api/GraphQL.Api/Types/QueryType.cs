@@ -198,6 +198,37 @@ public class Query
         }).ToList();
     }
 
+    // ── Discounts ─────────────────────────────────────
+
+    [Authorize]
+    public async Task<List<Coupon>> GetCoupons(
+        DiscountGrpc.DiscountGrpcClient client)
+    {
+        var reply = await client.GetCouponsAsync(new GetCouponsRequest());
+        return reply.Coupons.Select(c => MapCoupon(c)).ToList();
+    }
+
+    public async Task<DiscountValidation> ValidateDiscount(
+        string couponCode,
+        decimal orderAmount,
+        DiscountGrpc.DiscountGrpcClient client)
+    {
+        var reply = await client.ValidateDiscountAsync(new ValidateDiscountGrpcRequest
+        {
+            CouponCode = couponCode,
+            OrderAmount = orderAmount.ToString()
+        });
+
+        return new DiscountValidation
+        {
+            IsValid = reply.IsValid,
+            Error = reply.Error,
+            DiscountAmount = decimal.TryParse(reply.DiscountAmount, out var d) ? d : 0,
+            DiscountType = reply.DiscountType,
+            CouponCode = reply.CouponCode
+        };
+    }
+
     // ── Cart ─────────────────────────────────────────
 
     [Authorize]
@@ -226,6 +257,20 @@ public class Query
     }
 
     // ── Helpers ──────────────────────────────────────
+
+    private static Coupon MapCoupon(CouponReply c) => new()
+    {
+        Id = c.Id,
+        Code = c.Code,
+        DiscountType = c.DiscountType,
+        Value = decimal.TryParse(c.Value, out var v) ? v : 0,
+        MinOrderAmount = decimal.TryParse(c.MinOrderAmount, out var m) ? m : 0,
+        MaxUses = c.MaxUses,
+        CurrentUses = c.CurrentUses,
+        ExpiresAt = c.ExpiresAt,
+        IsActive = c.IsActive,
+        CreatedAt = c.CreatedAt
+    };
 
     private static Category MapCategory(CategoryReply reply) => new()
     {

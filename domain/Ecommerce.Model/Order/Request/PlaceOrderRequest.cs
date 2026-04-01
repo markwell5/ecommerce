@@ -6,6 +6,7 @@ namespace Ecommerce.Model.Order.Request
     {
         public string CustomerId { get; set; }
         public List<OrderLineItem> Items { get; set; } = new();
+        public string CouponCode { get; set; }
     }
 
     public class OrderLineItem

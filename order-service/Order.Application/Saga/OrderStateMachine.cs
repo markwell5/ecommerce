@@ -30,6 +30,8 @@ namespace Order.Application.Saga
                         context.Saga.CustomerId = context.Message.CustomerId;
                         context.Saga.TotalAmount = context.Message.TotalAmount;
                         context.Saga.ItemsJson = context.Message.ItemsJson;
+                        context.Saga.CouponCode = context.Message.CouponCode;
+                        context.Saga.DiscountAmount = context.Message.DiscountAmount;
                         context.Saga.CreatedAt = DateTime.UtcNow;
 
                         var db = context.GetPayload<OrderDbContext>();
@@ -243,6 +245,8 @@ namespace Order.Application.Saga
                     Status = status,
                     TotalAmount = saga.TotalAmount,
                     ItemsJson = saga.ItemsJson,
+                    CouponCode = saga.CouponCode,
+                    DiscountAmount = saga.DiscountAmount,
                     CreatedAt = saga.CreatedAt,
                     UpdatedAt = saga.UpdatedAt
                 });

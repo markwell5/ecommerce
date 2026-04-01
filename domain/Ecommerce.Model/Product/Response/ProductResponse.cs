@@ -7,5 +7,7 @@ namespace Ecommerce.Model.Product.Response
         public string Description { get; set; }
         public string Category { get; set; }
         public decimal Price { get; set; }
+        public double AverageRating { get; set; }
+        public int ReviewCount { get; set; }
     }
 }

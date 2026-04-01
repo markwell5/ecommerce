@@ -13,6 +13,7 @@ public class ProductDbContext : DbContext
     public DbSet<Entities.Product> Products => Set<Entities.Product>();
     public DbSet<Entities.Category> Categories => Set<Entities.Category>();
     public DbSet<Entities.ProductCategory> ProductCategories => Set<Entities.ProductCategory>();
+    public DbSet<Entities.Review> Reviews => Set<Entities.Review>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -58,6 +59,25 @@ public class ProductDbContext : DbContext
                 .WithMany(e => e.Children)
                 .HasForeignKey(e => e.ParentId)
                 .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<Entities.Review>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).ValueGeneratedOnAdd();
+            entity.Property(e => e.CustomerId).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.Title).IsRequired().HasMaxLength(200);
+            entity.Property(e => e.Body).HasMaxLength(5000);
+            entity.Property(e => e.Rating).IsRequired();
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("NOW()");
+
+            entity.HasIndex(e => new { e.ProductId, e.CustomerId }).IsUnique();
+            entity.HasIndex(e => e.ProductId);
+
+            entity.HasOne(e => e.Product)
+                .WithMany()
+                .HasForeignKey(e => e.ProductId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<Entities.ProductCategory>(entity =>

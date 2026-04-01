@@ -21,4 +21,21 @@ public class ProductTypeExtensions
     {
         return await loader.LoadAsync(product.Id);
     }
+
+    public async Task<ProductRating> GetRating(
+        [Parent] Product product,
+        ReviewGrpc.ReviewGrpcClient client)
+    {
+        var reply = await client.GetProductRatingAsync(new GetProductRatingRequest
+        {
+            ProductId = product.Id
+        });
+
+        return new ProductRating
+        {
+            ProductId = reply.ProductId,
+            AverageRating = reply.AverageRating,
+            ReviewCount = reply.ReviewCount
+        };
+    }
 }

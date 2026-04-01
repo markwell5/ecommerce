@@ -12,7 +12,9 @@ namespace Product.Application
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
                 .ForMember(dest => dest.SearchVector, opt => opt.Ignore())
                 .ForMember(dest => dest.ProductCategories, opt => opt.Ignore());
-            CreateMap<Entities.Product, ProductResponse>();
+            CreateMap<Entities.Product, ProductResponse>()
+                .ForMember(dest => dest.AverageRating, opt => opt.Ignore())
+                .ForMember(dest => dest.ReviewCount, opt => opt.Ignore());
         }
     }
 }

@@ -60,6 +60,56 @@ public class Query
         return MapCategory(reply);
     }
 
+    // ── Reviews ──────────────────────────────────────
+
+    public async Task<ReviewConnection> GetProductReviews(
+        long productId,
+        int page,
+        int pageSize,
+        ReviewGrpc.ReviewGrpcClient client)
+    {
+        var reply = await client.GetProductReviewsAsync(new GetProductReviewsRequest
+        {
+            ProductId = productId,
+            Page = page,
+            PageSize = pageSize
+        });
+
+        return new ReviewConnection
+        {
+            Items = reply.Reviews.Select(r => new Review
+            {
+                Id = r.Id,
+                ProductId = r.ProductId,
+                CustomerId = r.CustomerId,
+                Rating = r.Rating,
+                Title = r.Title,
+                Body = r.Body,
+                CreatedAt = r.CreatedAt
+            }).ToList(),
+            TotalCount = reply.TotalCount,
+            Page = reply.Page,
+            PageSize = reply.PageSize
+        };
+    }
+
+    public async Task<ProductRating> GetProductRating(
+        long productId,
+        ReviewGrpc.ReviewGrpcClient client)
+    {
+        var reply = await client.GetProductRatingAsync(new GetProductRatingRequest
+        {
+            ProductId = productId
+        });
+
+        return new ProductRating
+        {
+            ProductId = reply.ProductId,
+            AverageRating = reply.AverageRating,
+            ReviewCount = reply.ReviewCount
+        };
+    }
+
     // ── Orders ───────────────────────────────────────
 
     [Authorize]

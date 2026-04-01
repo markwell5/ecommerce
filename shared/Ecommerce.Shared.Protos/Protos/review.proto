@@ -1,0 +1,52 @@
+syntax = "proto3";
+
+option csharp_namespace = "Ecommerce.Shared.Protos";
+
+package ecommerce.review;
+
+service ReviewGrpc {
+  rpc GetProductReviews (GetProductReviewsRequest) returns (GetProductReviewsReply);
+  rpc GetProductRating (GetProductRatingRequest) returns (ProductRatingReply);
+  rpc CreateReview (CreateReviewGrpcRequest) returns (ReviewReply);
+}
+
+message GetProductReviewsRequest {
+  int64 product_id = 1;
+  int32 page = 2;
+  int32 page_size = 3;
+}
+
+message GetProductReviewsReply {
+  repeated ReviewReply reviews = 1;
+  int32 total_count = 2;
+  int32 page = 3;
+  int32 page_size = 4;
+}
+
+message GetProductRatingRequest {
+  int64 product_id = 1;
+}
+
+message ProductRatingReply {
+  int64 product_id = 1;
+  double average_rating = 2;
+  int32 review_count = 3;
+}
+
+message CreateReviewGrpcRequest {
+  string customer_id = 1;
+  int64 product_id = 2;
+  int32 rating = 3;
+  string title = 4;
+  string body = 5;
+}
+
+message ReviewReply {
+  int64 id = 1;
+  int64 product_id = 2;
+  string customer_id = 3;
+  int32 rating = 4;
+  string title = 5;
+  string body = 6;
+  string created_at = 7;
+}

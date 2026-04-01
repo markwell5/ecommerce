@@ -203,6 +203,39 @@ public class Mutation
         };
     }
 
+    // ── Reviews ──────────────────────────────────────
+
+    public async Task<Review> CreateReview(
+        long productId,
+        int rating,
+        string title,
+        string body,
+        ClaimsPrincipal claimsPrincipal,
+        ReviewGrpc.ReviewGrpcClient client)
+    {
+        var customerId = claimsPrincipal.FindFirstValue(ClaimTypes.NameIdentifier) ?? "";
+
+        var reply = await client.CreateReviewAsync(new CreateReviewGrpcRequest
+        {
+            CustomerId = customerId,
+            ProductId = productId,
+            Rating = rating,
+            Title = title,
+            Body = body
+        });
+
+        return new Review
+        {
+            Id = reply.Id,
+            ProductId = reply.ProductId,
+            CustomerId = reply.CustomerId,
+            Rating = reply.Rating,
+            Title = reply.Title,
+            Body = reply.Body,
+            CreatedAt = reply.CreatedAt
+        };
+    }
+
     // ── Cart ─────────────────────────────────────────
 
     public async Task<Cart> AddToCart(

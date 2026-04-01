@@ -1,0 +1,181 @@
+using System.Security.Claims;
+using Ecommerce.Shared.Protos;
+using GraphQL.Api.DataLoaders;
+using HotChocolate.Authorization;
+
+namespace GraphQL.Api.Types;
+
+public class Query
+{
+    // ── Products ──────────────────────────────────────
+
+    public async Task<Product?> GetProduct(
+        long id,
+        ProductBatchDataLoader loader)
+    {
+        return await loader.LoadAsync(id);
+    }
+
+    public async Task<ProductConnection> GetProducts(
+        int page,
+        int pageSize,
+        ProductGrpc.ProductGrpcClient client)
+    {
+        var reply = await client.GetProductsAsync(new GetProductsRequest
+        {
+            Page = page,
+            PageSize = pageSize
+        });
+
+        return new ProductConnection
+        {
+            Items = reply.Products.Select(p => new Product
+            {
+                Id = p.Id,
+                Name = p.Name,
+                Description = p.Description,
+                Category = p.Category,
+                Price = decimal.TryParse(p.Price, out var price) ? price : 0
+            }).ToList(),
+            TotalCount = reply.TotalCount,
+            Page = reply.Page,
+            PageSize = reply.PageSize
+        };
+    }
+
+    // ── Orders ───────────────────────────────────────
+
+    [Authorize]
+    public async Task<Order?> GetOrder(
+        string orderId,
+        OrderGrpc.OrderGrpcClient client)
+    {
+        var reply = await client.GetOrderAsync(new GetOrderRequest { OrderId = orderId });
+        return MapOrder(reply);
+    }
+
+    // ── Stock ────────────────────────────────────────
+
+    public async Task<StockLevel?> GetStockLevel(
+        long productId,
+        StockBatchDataLoader loader)
+    {
+        return await loader.LoadAsync(productId);
+    }
+
+    // ── Users ────────────────────────────────────────
+
+    [Authorize]
+    public async Task<User?> GetMe(
+        ClaimsPrincipal claimsPrincipal,
+        UserDataLoader loader)
+    {
+        var userId = claimsPrincipal.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userId is null) return null;
+        return await loader.LoadAsync(userId);
+    }
+
+    [Authorize]
+    public async Task<List<Address>> GetMyAddresses(
+        ClaimsPrincipal claimsPrincipal,
+        UserGrpc.UserGrpcClient client)
+    {
+        var userId = claimsPrincipal.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userId is null) return [];
+
+        var reply = await client.GetAddressesAsync(new GetAddressesRequest { UserId = userId });
+        return reply.Addresses.Select(a => new Address
+        {
+            Id = a.Id,
+            Line1 = a.Line1,
+            Line2 = a.Line2,
+            City = a.City,
+            County = a.County,
+            PostCode = a.PostCode,
+            Country = a.Country,
+            IsDefault = a.IsDefault
+        }).ToList();
+    }
+
+    // ── Payments ─────────────────────────────────────
+
+    [Authorize]
+    public async Task<Payment?> GetPaymentByOrder(
+        string orderId,
+        PaymentByOrderDataLoader loader)
+    {
+        return await loader.LoadAsync(orderId);
+    }
+
+    [Authorize]
+    public async Task<List<Payment>> GetMyPayments(
+        ClaimsPrincipal claimsPrincipal,
+        PaymentGrpc.PaymentGrpcClient client)
+    {
+        var userId = claimsPrincipal.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userId is null) return [];
+
+        var reply = await client.GetPaymentsByCustomerAsync(
+            new GetPaymentsByCustomerRequest { CustomerId = userId });
+
+        return reply.Payments.Select(p => new Payment
+        {
+            Id = p.Id,
+            OrderId = p.OrderId,
+            CustomerId = p.CustomerId,
+            Amount = decimal.TryParse(p.Amount, out var a) ? a : 0,
+            Currency = p.Currency,
+            Status = p.Status,
+            StripePaymentIntentId = p.StripePaymentIntentId,
+            CreatedAt = p.CreatedAt
+        }).ToList();
+    }
+
+    // ── Cart ─────────────────────────────────────────
+
+    [Authorize]
+    public async Task<Cart?> GetMyCart(
+        ClaimsPrincipal claimsPrincipal,
+        CartGrpc.CartGrpcClient client)
+    {
+        var userId = claimsPrincipal.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userId is null) return null;
+
+        var reply = await client.GetCartAsync(new GetCartRequest { CartId = userId });
+        return new Cart
+        {
+            Id = reply.Id,
+            TotalPrice = decimal.TryParse(reply.TotalPrice, out var t) ? t : 0,
+            LastModifiedAt = reply.LastModifiedAt,
+            Items = reply.Items.Select(i => new CartItem
+            {
+                ProductId = i.ProductId,
+                ProductName = i.ProductName,
+                Quantity = i.Quantity,
+                UnitPrice = decimal.TryParse(i.UnitPrice, out var u) ? u : 0,
+                LineTotal = decimal.TryParse(i.LineTotal, out var l) ? l : 0
+            }).ToList()
+        };
+    }
+
+    // ── Helpers ──────────────────────────────────────
+
+    private static Order MapOrder(OrderReply reply) => new()
+    {
+        OrderId = reply.OrderId,
+        CustomerId = reply.CustomerId,
+        Status = reply.Status,
+        TotalAmount = decimal.TryParse(reply.TotalAmount, out var a) ? a : 0,
+        ItemsJson = reply.ItemsJson,
+        CreatedAt = reply.CreatedAt,
+        UpdatedAt = reply.UpdatedAt
+    };
+}
+
+public class ProductConnection
+{
+    public List<Product> Items { get; set; } = [];
+    public int TotalCount { get; set; }
+    public int Page { get; set; }
+    public int PageSize { get; set; }
+}

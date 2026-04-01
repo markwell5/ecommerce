@@ -7,6 +7,9 @@ package ecommerce.product;
 service ProductGrpc {
   rpc GetProduct (GetProductRequest) returns (ProductReply);
   rpc GetProducts (GetProductsRequest) returns (GetProductsReply);
+  rpc CreateProduct (CreateProductGrpcRequest) returns (ProductReply);
+  rpc UpdateProduct (UpdateProductGrpcRequest) returns (ProductReply);
+  rpc DeleteProduct (DeleteProductGrpcRequest) returns (DeleteProductGrpcReply);
 }
 
 message GetProductRequest {
@@ -31,4 +34,27 @@ message GetProductsReply {
   int32 total_count = 2;
   int32 page = 3;
   int32 page_size = 4;
+}
+
+message CreateProductGrpcRequest {
+  string name = 1;
+  string description = 2;
+  string category = 3;
+  string price = 4;
+}
+
+message UpdateProductGrpcRequest {
+  int64 id = 1;
+  string name = 2;
+  string description = 3;
+  string category = 4;
+  string price = 5;
+}
+
+message DeleteProductGrpcRequest {
+  int64 id = 1;
+}
+
+message DeleteProductGrpcReply {
+  bool success = 1;
 }

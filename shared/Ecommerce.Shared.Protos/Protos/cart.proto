@@ -6,6 +6,10 @@ package ecommerce.cart;
 
 service CartGrpc {
   rpc GetCart (GetCartRequest) returns (CartReply);
+  rpc AddToCart (AddToCartGrpcRequest) returns (CartReply);
+  rpc UpdateCartItemQuantity (UpdateCartItemQuantityGrpcRequest) returns (CartReply);
+  rpc RemoveFromCart (RemoveFromCartGrpcRequest) returns (CartReply);
+  rpc ClearCart (ClearCartGrpcRequest) returns (ClearCartGrpcReply);
 }
 
 message GetCartRequest {
@@ -25,4 +29,29 @@ message CartReply {
   repeated CartItemReply items = 2;
   string total_price = 3;
   string last_modified_at = 4;
+}
+
+message AddToCartGrpcRequest {
+  string cart_id = 1;
+  int64 product_id = 2;
+  int32 quantity = 3;
+}
+
+message UpdateCartItemQuantityGrpcRequest {
+  string cart_id = 1;
+  int64 product_id = 2;
+  int32 quantity = 3;
+}
+
+message RemoveFromCartGrpcRequest {
+  string cart_id = 1;
+  int64 product_id = 2;
+}
+
+message ClearCartGrpcRequest {
+  string cart_id = 1;
+}
+
+message ClearCartGrpcReply {
+  bool success = 1;
 }

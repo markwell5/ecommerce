@@ -1,6 +1,7 @@
 using Ecommerce.Shared.Protos;
 using Grpc.Core;
 using MediatR;
+using Stock.Application.Commands;
 using Stock.Application.Queries;
 
 namespace Stock.Service.Services;
@@ -17,6 +18,23 @@ public class StockGrpcService : StockGrpc.StockGrpcBase
     public override async Task<StockLevelReply> GetStockLevel(GetStockLevelRequest request, ServerCallContext context)
     {
         var result = await _mediator.Send(new GetStockQuery(request.ProductId), context.CancellationToken);
+
+        if (result is null)
+            throw new RpcException(new Status(StatusCode.NotFound, $"Stock for product {request.ProductId} not found"));
+
+        return new StockLevelReply
+        {
+            ProductId = result.ProductId,
+            AvailableQuantity = result.AvailableQuantity,
+            ReservedQuantity = result.ReservedQuantity
+        };
+    }
+
+    public override async Task<StockLevelReply> UpdateStock(UpdateStockGrpcRequest request, ServerCallContext context)
+    {
+        var result = await _mediator.Send(
+            new UpdateStockCommand(request.ProductId, request.Quantity),
+            context.CancellationToken);
 
         if (result is null)
             throw new RpcException(new Status(StatusCode.NotFound, $"Stock for product {request.ProductId} not found"));

@@ -6,6 +6,11 @@ package ecommerce.order;
 
 service OrderGrpc {
   rpc GetOrder (GetOrderRequest) returns (OrderReply);
+  rpc PlaceOrder (PlaceOrderGrpcRequest) returns (OrderReply);
+  rpc CancelOrder (OrderActionRequest) returns (OrderActionReply);
+  rpc ShipOrder (OrderActionRequest) returns (OrderActionReply);
+  rpc DeliverOrder (OrderActionRequest) returns (OrderActionReply);
+  rpc ReturnOrder (OrderActionRequest) returns (OrderActionReply);
 }
 
 message GetOrderRequest {
@@ -20,4 +25,24 @@ message OrderReply {
   string items_json = 5;
   string created_at = 6;
   string updated_at = 7;
+}
+
+message PlaceOrderGrpcRequest {
+  string customer_id = 1;
+  repeated OrderLineItemGrpc items = 2;
+}
+
+message OrderLineItemGrpc {
+  int64 product_id = 1;
+  string product_name = 2;
+  int32 quantity = 3;
+  string unit_price = 4;
+}
+
+message OrderActionRequest {
+  string order_id = 1;
+}
+
+message OrderActionReply {
+  bool success = 1;
 }

@@ -164,6 +164,99 @@ public class Query
         }).ToList();
     }
 
+    // ── Admin: Customers ─────────────────────────────
+
+    [Authorize]
+    public async Task<UserConnection> GetUsers(
+        int page,
+        int pageSize,
+        string? search,
+        UserGrpc.UserGrpcClient client)
+    {
+        var reply = await client.GetUsersAsync(new GetUsersRequest
+        {
+            Page = page,
+            PageSize = pageSize,
+            Search = search ?? string.Empty
+        });
+
+        return new UserConnection
+        {
+            Items = reply.Users.Select(u => new User
+            {
+                Id = u.Id,
+                Email = u.Email,
+                FirstName = u.FirstName,
+                LastName = u.LastName,
+                Phone = u.Phone,
+                Role = u.Role,
+                CreatedAt = u.CreatedAt
+            }).ToList(),
+            TotalCount = reply.TotalCount,
+            Page = reply.Page,
+            PageSize = reply.PageSize
+        };
+    }
+
+    [Authorize]
+    public async Task<User?> GetUser(
+        string userId,
+        UserDataLoader loader)
+    {
+        return await loader.LoadAsync(userId);
+    }
+
+    [Authorize]
+    public async Task<List<Address>> GetUserAddresses(
+        string userId,
+        UserGrpc.UserGrpcClient client)
+    {
+        var reply = await client.GetAddressesAsync(new GetAddressesRequest { UserId = userId });
+        return reply.Addresses.Select(a => new Address
+        {
+            Id = a.Id,
+            Line1 = a.Line1,
+            Line2 = a.Line2,
+            City = a.City,
+            County = a.County,
+            PostCode = a.PostCode,
+            Country = a.Country,
+            IsDefault = a.IsDefault
+        }).ToList();
+    }
+
+    [Authorize]
+    public async Task<List<Order>> GetOrdersByCustomer(
+        string customerId,
+        OrderGrpc.OrderGrpcClient client)
+    {
+        var reply = await client.GetOrdersByCustomerAsync(
+            new GetOrdersByCustomerRequest { CustomerId = customerId });
+
+        return reply.Orders.Select(MapOrder).ToList();
+    }
+
+    [Authorize]
+    public async Task<List<Payment>> GetPaymentsByCustomer(
+        string customerId,
+        PaymentGrpc.PaymentGrpcClient client)
+    {
+        var reply = await client.GetPaymentsByCustomerAsync(
+            new GetPaymentsByCustomerRequest { CustomerId = customerId });
+
+        return reply.Payments.Select(p => new Payment
+        {
+            Id = p.Id,
+            OrderId = p.OrderId,
+            CustomerId = p.CustomerId,
+            Amount = decimal.TryParse(p.Amount, out var a) ? a : 0,
+            Currency = p.Currency,
+            Status = p.Status,
+            StripePaymentIntentId = p.StripePaymentIntentId,
+            CreatedAt = p.CreatedAt
+        }).ToList();
+    }
+
     // ── Payments ─────────────────────────────────────
 
     [Authorize]
@@ -296,6 +389,14 @@ public class Query
 public class ProductConnection
 {
     public List<Product> Items { get; set; } = [];
+    public int TotalCount { get; set; }
+    public int Page { get; set; }
+    public int PageSize { get; set; }
+}
+
+public class UserConnection
+{
+    public List<User> Items { get; set; } = [];
     public int TotalCount { get; set; }
     public int Page { get; set; }
     public int PageSize { get; set; }

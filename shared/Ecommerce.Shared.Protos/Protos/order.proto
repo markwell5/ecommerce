@@ -6,6 +6,7 @@ package ecommerce.order;
 
 service OrderGrpc {
   rpc GetOrder (GetOrderRequest) returns (OrderReply);
+  rpc GetOrdersByCustomer (GetOrdersByCustomerRequest) returns (GetOrdersByCustomerReply);
   rpc PlaceOrder (PlaceOrderGrpcRequest) returns (OrderReply);
   rpc CancelOrder (OrderActionRequest) returns (OrderActionReply);
   rpc ShipOrder (OrderActionRequest) returns (OrderActionReply);
@@ -37,6 +38,14 @@ message OrderLineItemGrpc {
   string product_name = 2;
   int32 quantity = 3;
   string unit_price = 4;
+}
+
+message GetOrdersByCustomerRequest {
+  string customer_id = 1;
+}
+
+message GetOrdersByCustomerReply {
+  repeated OrderReply orders = 1;
 }
 
 message OrderActionRequest {

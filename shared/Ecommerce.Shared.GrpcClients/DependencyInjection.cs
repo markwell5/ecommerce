@@ -122,4 +122,17 @@ public static class DependencyInjection
 
         return services;
     }
+
+    public static IServiceCollection AddAnalyticsGrpcClient(
+        this IServiceCollection services, IConfiguration configuration)
+    {
+        var address = configuration["GrpcClients:AnalyticsService"] ?? "http://analytics:8080";
+
+        services.AddGrpcClient<AnalyticsGrpc.AnalyticsGrpcClient>(o =>
+        {
+            o.Address = new Uri(address);
+        });
+
+        return services;
+    }
 }

@@ -54,9 +54,13 @@ namespace Order.Application.Commands
                     && (coupon.MaxUses == 0 || coupon.CurrentUses < coupon.MaxUses)
                     && subtotal >= coupon.MinOrderAmount)
                 {
-                    discountAmount = coupon.DiscountType == "percentage"
-                        ? Math.Round(subtotal * coupon.Value / 100, 2)
-                        : Math.Min(coupon.Value, subtotal);
+                    discountAmount = coupon.DiscountType switch
+                    {
+                        "percentage" => Math.Round(subtotal * coupon.Value / 100, 2),
+                        "fixed" => Math.Min(coupon.Value, subtotal),
+                        "freeshipping" => 0,
+                        _ => 0
+                    };
 
                     couponCode = coupon.Code;
                     coupon.CurrentUses++;

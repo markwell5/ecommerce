@@ -53,9 +53,21 @@ namespace Order.Application.Queries
             if (request.OrderAmount < coupon.MinOrderAmount)
                 return new DiscountValidationResponse { IsValid = false, Error = $"Minimum order amount is {coupon.MinOrderAmount}" };
 
-            var discountAmount = coupon.DiscountType == "percentage"
-                ? Math.Round(request.OrderAmount * coupon.Value / 100, 2)
-                : Math.Min(coupon.Value, request.OrderAmount);
+            decimal discountAmount;
+            switch (coupon.DiscountType)
+            {
+                case "percentage":
+                    discountAmount = Math.Round(request.OrderAmount * coupon.Value / 100, 2);
+                    break;
+                case "fixed":
+                    discountAmount = Math.Min(coupon.Value, request.OrderAmount);
+                    break;
+                case "freeshipping":
+                    discountAmount = 0;
+                    break;
+                default:
+                    return new DiscountValidationResponse { IsValid = false, Error = $"Unknown discount type: {coupon.DiscountType}" };
+            }
 
             return new DiscountValidationResponse
             {

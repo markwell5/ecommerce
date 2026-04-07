@@ -6,7 +6,7 @@ namespace Order.Application.Entities
     {
         public long Id { get; set; }
         public string Code { get; set; } = string.Empty;
-        public string DiscountType { get; set; } = "percentage"; // percentage, fixed
+        public string DiscountType { get; set; } = "percentage"; // percentage, fixed, freeshipping
         public decimal Value { get; set; }
         public decimal MinOrderAmount { get; set; }
         public int MaxUses { get; set; }

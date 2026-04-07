@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Ecommerce.Events.Order.Messages;
 using Ecommerce.Model.Order.Request;
 using Ecommerce.Model.Order.Response;
+using Ecommerce.Shared.Infrastructure.Audit;
 using MassTransit;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -26,11 +27,13 @@ namespace Order.Application.Commands
     {
         private readonly ISendEndpointProvider _sendEndpointProvider;
         private readonly OrderDbContext _dbContext;
+        private readonly IAuditPublisher _auditPublisher;
 
-        public PlaceOrderCommandHandler(ISendEndpointProvider sendEndpointProvider, OrderDbContext dbContext)
+        public PlaceOrderCommandHandler(ISendEndpointProvider sendEndpointProvider, OrderDbContext dbContext, IAuditPublisher auditPublisher)
         {
             _sendEndpointProvider = sendEndpointProvider;
             _dbContext = dbContext;
+            _auditPublisher = auditPublisher;
         }
 
         public async Task<OrderResponse> Handle(PlaceOrderCommand command, CancellationToken cancellationToken)
@@ -81,6 +84,9 @@ namespace Order.Application.Commands
                 CouponCode = couponCode,
                 DiscountAmount = discountAmount
             }, cancellationToken);
+
+            await _auditPublisher.PublishAsync("OrderPlaced", "Order", orderId.ToString(),
+                request.CustomerId, afterState: $"amount={totalAmount}");
 
             return new OrderResponse
             {

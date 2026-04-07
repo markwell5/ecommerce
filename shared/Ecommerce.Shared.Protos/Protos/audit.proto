@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+option csharp_namespace = "Ecommerce.Shared.Protos";
+
+package ecommerce.audit;
+
+service AuditGrpc {
+  rpc SearchAuditEntries (SearchAuditEntriesRequest) returns (SearchAuditEntriesReply);
+}
+
+message SearchAuditEntriesRequest {
+  string actor_id = 1;
+  string entity_type = 2;
+  string entity_id = 3;
+  string service = 4;
+  string action = 5;
+  string correlation_id = 6;
+  string from = 7;
+  string to = 8;
+  int32 page = 9;
+  int32 page_size = 10;
+}
+
+message AuditEntryReply {
+  int64 id = 1;
+  string service = 2;
+  string action = 3;
+  string actor_id = 4;
+  string actor_type = 5;
+  string entity_type = 6;
+  string entity_id = 7;
+  string before_state = 8;
+  string after_state = 9;
+  string correlation_id = 10;
+  string ip_address = 11;
+  string hash = 12;
+  string previous_hash = 13;
+  string timestamp = 14;
+}
+
+message SearchAuditEntriesReply {
+  repeated AuditEntryReply entries = 1;
+  int32 total_count = 2;
+  int32 page = 3;
+  int32 page_size = 4;
+}

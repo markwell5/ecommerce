@@ -26,7 +26,7 @@ public class PlaceOrderCommandTests
         var sendEndpointProvider = Substitute.For<ISendEndpointProvider>();
         sendEndpointProvider.GetSendEndpoint(Arg.Any<Uri>()).Returns(sendEndpoint);
 
-        var handler = new PlaceOrderCommandHandler(sendEndpointProvider, CreateInMemoryDb());
+        var handler = new PlaceOrderCommandHandler(sendEndpointProvider, CreateInMemoryDb(), NSubstitute.Substitute.For<Ecommerce.Shared.Infrastructure.Audit.IAuditPublisher>());
         var command = new PlaceOrderCommand(new PlaceOrderRequest
         {
             CustomerId = "customer-1",
@@ -53,7 +53,7 @@ public class PlaceOrderCommandTests
         var sendEndpointProvider = Substitute.For<ISendEndpointProvider>();
         sendEndpointProvider.GetSendEndpoint(Arg.Any<Uri>()).Returns(sendEndpoint);
 
-        var handler = new PlaceOrderCommandHandler(sendEndpointProvider, CreateInMemoryDb());
+        var handler = new PlaceOrderCommandHandler(sendEndpointProvider, CreateInMemoryDb(), NSubstitute.Substitute.For<Ecommerce.Shared.Infrastructure.Audit.IAuditPublisher>());
         var command = new PlaceOrderCommand(new PlaceOrderRequest
         {
             CustomerId = "customer-1",

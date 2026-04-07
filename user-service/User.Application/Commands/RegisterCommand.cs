@@ -1,6 +1,7 @@
 using Ecommerce.Events.User;
 using Ecommerce.Model.User.Request;
 using Ecommerce.Model.User.Response;
+using Ecommerce.Shared.Infrastructure.Audit;
 using MassTransit;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
@@ -16,15 +17,18 @@ namespace User.Application.Commands
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ITokenService _tokenService;
         private readonly IPublishEndpoint _publishEndpoint;
+        private readonly IAuditPublisher _auditPublisher;
 
         public RegisterCommandHandler(
             UserManager<ApplicationUser> userManager,
             ITokenService tokenService,
-            IPublishEndpoint publishEndpoint)
+            IPublishEndpoint publishEndpoint,
+            IAuditPublisher auditPublisher)
         {
             _userManager = userManager;
             _tokenService = tokenService;
             _publishEndpoint = publishEndpoint;
+            _auditPublisher = auditPublisher;
         }
 
         public async Task<AuthResponse> Handle(RegisterCommand command, CancellationToken cancellationToken)
@@ -58,6 +62,7 @@ namespace User.Application.Commands
                 Email = user.Email
             }, cancellationToken);
 
+            await _auditPublisher.PublishAsync("Register", "User", user.Id.ToString(), user.Id.ToString());
             return await _tokenService.GenerateTokensAsync(user, new[] { "User" });
         }
     }

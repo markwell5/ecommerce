@@ -1,5 +1,6 @@
 using Ecommerce.Model.User.Request;
 using Ecommerce.Model.User.Response;
+using Ecommerce.Shared.Infrastructure.Audit;
 using FluentAssertions;
 using Microsoft.AspNetCore.Identity;
 using NSubstitute;
@@ -13,6 +14,7 @@ namespace User.Application.Tests.Commands
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ITokenService _tokenService;
+        private readonly IAuditPublisher _auditPublisher;
 
         public LoginCommandTests()
         {
@@ -21,6 +23,7 @@ namespace User.Application.Tests.Commands
                 store, null, null, null, null, null, null, null, null);
 
             _tokenService = Substitute.For<ITokenService>();
+            _auditPublisher = Substitute.For<IAuditPublisher>();
         }
 
         [Fact]
@@ -45,7 +48,7 @@ namespace User.Application.Tests.Commands
             };
             _tokenService.GenerateTokensAsync(user).Returns(expectedResponse);
 
-            var handler = new LoginCommandHandler(_userManager, _tokenService);
+            var handler = new LoginCommandHandler(_userManager, _tokenService, _auditPublisher);
             var result = await handler.Handle(
                 new LoginCommand(new LoginRequest { Email = "test@example.com", Password = "Password123" }),
                 CancellationToken.None);
@@ -59,7 +62,7 @@ namespace User.Application.Tests.Commands
         {
             _userManager.FindByEmailAsync("wrong@example.com").Returns((ApplicationUser)null);
 
-            var handler = new LoginCommandHandler(_userManager, _tokenService);
+            var handler = new LoginCommandHandler(_userManager, _tokenService, _auditPublisher);
             var result = await handler.Handle(
                 new LoginCommand(new LoginRequest { Email = "wrong@example.com", Password = "Password123" }),
                 CancellationToken.None);
@@ -74,7 +77,7 @@ namespace User.Application.Tests.Commands
             _userManager.FindByEmailAsync("test@example.com").Returns(user);
             _userManager.CheckPasswordAsync(user, "wrongpassword").Returns(false);
 
-            var handler = new LoginCommandHandler(_userManager, _tokenService);
+            var handler = new LoginCommandHandler(_userManager, _tokenService, _auditPublisher);
             var result = await handler.Handle(
                 new LoginCommand(new LoginRequest { Email = "test@example.com", Password = "wrongpassword" }),
                 CancellationToken.None);

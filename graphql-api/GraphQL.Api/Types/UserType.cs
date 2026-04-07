@@ -7,6 +7,7 @@ public class User
     public string FirstName { get; set; } = default!;
     public string LastName { get; set; } = default!;
     public string Phone { get; set; } = default!;
+    public string Role { get; set; } = default!;
     public string CreatedAt { get; set; } = default!;
 }
 

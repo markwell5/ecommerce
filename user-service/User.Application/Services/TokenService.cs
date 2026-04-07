@@ -4,6 +4,7 @@ using System.Security.Cryptography;
 using System.Text;
 using Ecommerce.Model.User.Response;
 using Ecommerce.Shared.Infrastructure.Authentication;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -15,16 +16,20 @@ namespace User.Application.Services
     {
         private readonly UserDbContext _dbContext;
         private readonly JwtSettings _jwtSettings;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public TokenService(UserDbContext dbContext, IOptions<JwtSettings> jwtSettings)
+        public TokenService(UserDbContext dbContext, IOptions<JwtSettings> jwtSettings, UserManager<ApplicationUser> userManager)
         {
             _dbContext = dbContext;
             _jwtSettings = jwtSettings.Value;
+            _userManager = userManager;
         }
 
-        public async Task<AuthResponse> GenerateTokensAsync(ApplicationUser user)
+        public async Task<AuthResponse> GenerateTokensAsync(ApplicationUser user, IList<string> roles = null)
         {
             var expiresAt = DateTime.UtcNow.AddMinutes(_jwtSettings.AccessTokenExpiryMinutes);
+
+            roles ??= await _userManager.GetRolesAsync(user);
 
             var claims = new List<Claim>
             {
@@ -34,6 +39,11 @@ namespace User.Application.Services
                 new(ClaimTypes.Surname, user.LastName),
                 new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
+
+            foreach (var role in roles)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, role));
+            }
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Secret));
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);

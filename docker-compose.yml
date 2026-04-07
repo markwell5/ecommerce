@@ -292,6 +292,22 @@ services:
       cart:
         condition: service_healthy
 
+  cms:
+    build:
+      context: ./cms
+      dockerfile: Dockerfile
+      args:
+        - VITE_AUTH_API_URL=http://localhost:5004/api/v1.0/auth
+        - VITE_GRAPHQL_URL=http://localhost:4000/graphql
+    profiles: ["app"]
+    ports:
+      - "3001:80"
+    networks:
+      - ecommerce-network
+    depends_on:
+      graphql:
+        condition: service_healthy
+
   # ── Dev tools (profile: tools) ───────────────────
   prometheus:
     image: prom/prometheus:v2.51.0

@@ -2,6 +2,7 @@ using Ecommerce.Shared.Infrastructure;
 using Ecommerce.Shared.Infrastructure.Validation;
 using FluentValidation;
 using MassTransit;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using User.Application;
@@ -49,6 +50,13 @@ try
     {
         var db = scope.ServiceProvider.GetRequiredService<UserDbContext>();
         db.Database.Migrate();
+
+        var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
+        foreach (var role in new[] { "Admin", "User" })
+        {
+            if (!await roleManager.RoleExistsAsync(role))
+                await roleManager.CreateAsync(new IdentityRole<Guid> { Name = role });
+        }
     }
 
     app.UseServiceDefaults();

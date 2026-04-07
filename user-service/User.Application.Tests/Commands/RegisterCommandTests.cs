@@ -41,6 +41,8 @@ namespace User.Application.Tests.Commands
 
             _userManager.CreateAsync(Arg.Any<ApplicationUser>(), Arg.Any<string>())
                 .Returns(IdentityResult.Success);
+            _userManager.AddToRoleAsync(Arg.Any<ApplicationUser>(), Arg.Any<string>())
+                .Returns(IdentityResult.Success);
 
             var expectedResponse = new AuthResponse
             {
@@ -48,7 +50,7 @@ namespace User.Application.Tests.Commands
                 RefreshToken = "refresh-token",
                 ExpiresAt = DateTime.UtcNow.AddMinutes(15)
             };
-            _tokenService.GenerateTokensAsync(Arg.Any<ApplicationUser>())
+            _tokenService.GenerateTokensAsync(Arg.Any<ApplicationUser>(), Arg.Any<IList<string>>())
                 .Returns(expectedResponse);
 
             var handler = new RegisterCommandHandler(_userManager, _tokenService, _publishEndpoint);
@@ -60,6 +62,7 @@ namespace User.Application.Tests.Commands
             await _userManager.Received(1).CreateAsync(
                 Arg.Is<ApplicationUser>(u => u.Email == "test@example.com" && u.FirstName == "John"),
                 Arg.Is("Password123"));
+            await _userManager.Received(1).AddToRoleAsync(Arg.Any<ApplicationUser>(), "User");
         }
 
         [Fact]
@@ -75,8 +78,10 @@ namespace User.Application.Tests.Commands
 
             _userManager.CreateAsync(Arg.Any<ApplicationUser>(), Arg.Any<string>())
                 .Returns(IdentityResult.Success);
+            _userManager.AddToRoleAsync(Arg.Any<ApplicationUser>(), Arg.Any<string>())
+                .Returns(IdentityResult.Success);
 
-            _tokenService.GenerateTokensAsync(Arg.Any<ApplicationUser>())
+            _tokenService.GenerateTokensAsync(Arg.Any<ApplicationUser>(), Arg.Any<IList<string>>())
                 .Returns(new AuthResponse());
 
             var handler = new RegisterCommandHandler(_userManager, _tokenService, _publishEndpoint);

@@ -36,6 +36,7 @@ public class UserDataLoader : BatchDataLoader<string, User?>
                     FirstName = reply.FirstName,
                     LastName = reply.LastName,
                     Phone = reply.Phone,
+                    Role = reply.Role,
                     CreatedAt = reply.CreatedAt
                 });
             }

@@ -123,6 +123,19 @@ public static class DependencyInjection
         return services;
     }
 
+    public static IServiceCollection AddReturnsGrpcClient(
+        this IServiceCollection services, IConfiguration configuration)
+    {
+        var address = configuration["GrpcClients:ReturnService"] ?? "http://returns:8080";
+
+        services.AddGrpcClient<ReturnsGrpc.ReturnsGrpcClient>(o =>
+        {
+            o.Address = new Uri(address);
+        });
+
+        return services;
+    }
+
     public static IServiceCollection AddAnalyticsGrpcClient(
         this IServiceCollection services, IConfiguration configuration)
     {

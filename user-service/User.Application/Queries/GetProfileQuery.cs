@@ -25,7 +25,10 @@ namespace User.Application.Queries
             if (user == null)
                 return null;
 
-            return _mapper.Map<UserResponse>(user);
+            var response = _mapper.Map<UserResponse>(user);
+            var roles = await _userManager.GetRolesAsync(user);
+            response.Role = roles.FirstOrDefault() ?? "User";
+            return response;
         }
     }
 }

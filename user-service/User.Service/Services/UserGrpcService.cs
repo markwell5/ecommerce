@@ -31,7 +31,8 @@ public class UserGrpcService : UserGrpc.UserGrpcBase
             FirstName = result.FirstName ?? string.Empty,
             LastName = result.LastName ?? string.Empty,
             Phone = result.Phone ?? string.Empty,
-            CreatedAt = result.CreatedAt.ToString("O")
+            CreatedAt = result.CreatedAt.ToString("O"),
+            Role = result.Role ?? "User"
         };
     }
 

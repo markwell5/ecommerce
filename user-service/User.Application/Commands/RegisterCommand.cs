@@ -50,13 +50,15 @@ namespace User.Application.Commands
                 throw new Ecommerce.Shared.Infrastructure.Validation.ValidationException(errors);
             }
 
+            await _userManager.AddToRoleAsync(user, "User");
+
             await _publishEndpoint.Publish(new UserRegistered
             {
                 UserId = user.Id,
                 Email = user.Email
             }, cancellationToken);
 
-            return await _tokenService.GenerateTokensAsync(user);
+            return await _tokenService.GenerateTokensAsync(user, new[] { "User" });
         }
     }
 }

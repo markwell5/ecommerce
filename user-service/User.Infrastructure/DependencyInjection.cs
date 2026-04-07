@@ -25,6 +25,7 @@ namespace User.Infrastructure
                     options.Password.RequiredLength = 8;
                     options.User.RequireUniqueEmail = true;
                 })
+                .AddRoles<IdentityRole<Guid>>()
                 .AddEntityFrameworkStores<UserDbContext>()
                 .AddDefaultTokenProviders();
 

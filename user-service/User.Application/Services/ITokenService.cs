@@ -5,7 +5,7 @@ namespace User.Application.Services
 {
     public interface ITokenService
     {
-        Task<AuthResponse> GenerateTokensAsync(ApplicationUser user);
+        Task<AuthResponse> GenerateTokensAsync(ApplicationUser user, IList<string> roles = null);
         Task<AuthResponse> RefreshTokenAsync(string refreshToken);
     }
 }

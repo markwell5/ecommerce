@@ -10,7 +10,8 @@ namespace User.Application
         public MapperProfile()
         {
             CreateMap<ApplicationUser, UserResponse>()
-                .ForMember(dest => dest.Phone, opt => opt.MapFrom(src => src.PhoneNumber));
+                .ForMember(dest => dest.Phone, opt => opt.MapFrom(src => src.PhoneNumber))
+                .ForMember(dest => dest.Role, opt => opt.Ignore());
 
             CreateMap<Address, AddressResponse>();
 

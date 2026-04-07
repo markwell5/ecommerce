@@ -372,6 +372,70 @@ public class Query
         };
     }
 
+    // ── Analytics ────────────────────────────────────
+
+    [Authorize]
+    public async Task<SalesOverview> GetSalesOverview(
+        string? from,
+        string? to,
+        AnalyticsGrpc.AnalyticsGrpcClient client)
+    {
+        var reply = await client.GetSalesOverviewAsync(new GetSalesOverviewRequest
+        {
+            From = from ?? string.Empty,
+            To = to ?? string.Empty
+        });
+
+        return new SalesOverview
+        {
+            TotalRevenue = decimal.TryParse(reply.TotalRevenue, out var r) ? r : 0,
+            OrderCount = reply.OrderCount,
+            AvgOrderValue = decimal.TryParse(reply.AvgOrderValue, out var a) ? a : 0,
+            CancelledCount = reply.CancelledCount,
+            ReturnedCount = reply.ReturnedCount,
+            NewCustomerCount = reply.NewCustomerCount
+        };
+    }
+
+    [Authorize]
+    public async Task<List<StatusBreakdownItem>> GetOrderStatusBreakdown(
+        string? from,
+        string? to,
+        AnalyticsGrpc.AnalyticsGrpcClient client)
+    {
+        var reply = await client.GetOrderStatusBreakdownAsync(new GetOrderStatusBreakdownRequest
+        {
+            From = from ?? string.Empty,
+            To = to ?? string.Empty
+        });
+
+        return reply.Statuses.Select(s => new StatusBreakdownItem
+        {
+            Status = s.Status,
+            Count = s.Count
+        }).ToList();
+    }
+
+    [Authorize]
+    public async Task<List<DailyRevenuePoint>> GetDailyRevenue(
+        string? from,
+        string? to,
+        AnalyticsGrpc.AnalyticsGrpcClient client)
+    {
+        var reply = await client.GetDailyRevenueAsync(new GetDailyRevenueRequest
+        {
+            From = from ?? string.Empty,
+            To = to ?? string.Empty
+        });
+
+        return reply.Points.Select(p => new DailyRevenuePoint
+        {
+            Date = p.Date,
+            Revenue = decimal.TryParse(p.Revenue, out var rv) ? rv : 0,
+            OrderCount = p.OrderCount
+        }).ToList();
+    }
+
     // ── Helpers ──────────────────────────────────────
 
     private static Coupon MapCoupon(CouponReply c) => new()

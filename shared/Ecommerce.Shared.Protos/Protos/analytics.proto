@@ -1,0 +1,54 @@
+syntax = "proto3";
+
+option csharp_namespace = "Ecommerce.Shared.Protos";
+
+package ecommerce.analytics;
+
+service AnalyticsGrpc {
+  rpc GetSalesOverview (GetSalesOverviewRequest) returns (SalesOverviewReply);
+  rpc GetOrderStatusBreakdown (GetOrderStatusBreakdownRequest) returns (GetOrderStatusBreakdownReply);
+  rpc GetDailyRevenue (GetDailyRevenueRequest) returns (GetDailyRevenueReply);
+}
+
+message GetSalesOverviewRequest {
+  string from = 1;
+  string to = 2;
+}
+
+message SalesOverviewReply {
+  string total_revenue = 1;
+  int32 order_count = 2;
+  string avg_order_value = 3;
+  int32 cancelled_count = 4;
+  int32 returned_count = 5;
+  int32 new_customer_count = 6;
+}
+
+message GetOrderStatusBreakdownRequest {
+  string from = 1;
+  string to = 2;
+}
+
+message StatusCountReply {
+  string status = 1;
+  int32 count = 2;
+}
+
+message GetOrderStatusBreakdownReply {
+  repeated StatusCountReply statuses = 1;
+}
+
+message GetDailyRevenueRequest {
+  string from = 1;
+  string to = 2;
+}
+
+message DailyRevenuePointReply {
+  string date = 1;
+  string revenue = 2;
+  int32 order_count = 3;
+}
+
+message GetDailyRevenueReply {
+  repeated DailyRevenuePointReply points = 1;
+}

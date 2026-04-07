@@ -36,6 +36,39 @@ public class UserGrpcService : UserGrpc.UserGrpcBase
         };
     }
 
+    public override async Task<GetUsersReply> GetUsers(GetUsersRequest request, ServerCallContext context)
+    {
+        var result = await _mediator.Send(new GetUsersQuery
+        {
+            Page = request.Page > 0 ? request.Page : 1,
+            PageSize = request.PageSize > 0 ? request.PageSize : 20,
+            Search = request.Search
+        }, context.CancellationToken);
+
+        var reply = new GetUsersReply
+        {
+            TotalCount = result.TotalCount,
+            Page = result.Page,
+            PageSize = result.PageSize
+        };
+
+        foreach (var user in result.Users)
+        {
+            reply.Users.Add(new UserReply
+            {
+                Id = user.Id.ToString(),
+                Email = user.Email ?? string.Empty,
+                FirstName = user.FirstName ?? string.Empty,
+                LastName = user.LastName ?? string.Empty,
+                Phone = user.Phone ?? string.Empty,
+                CreatedAt = user.CreatedAt.ToString("O"),
+                Role = user.Role ?? "User"
+            });
+        }
+
+        return reply;
+    }
+
     public override async Task<GetAddressesReply> GetAddresses(GetAddressesRequest request, ServerCallContext context)
     {
         if (!Guid.TryParse(request.UserId, out var userId))

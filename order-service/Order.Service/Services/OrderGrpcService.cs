@@ -30,6 +30,19 @@ public class OrderGrpcService : OrderGrpc.OrderGrpcBase
         return MapToReply(result);
     }
 
+    public override async Task<GetOrdersByCustomerReply> GetOrdersByCustomer(GetOrdersByCustomerRequest request, ServerCallContext context)
+    {
+        var results = await _mediator.Send(new GetOrdersByCustomerQuery(request.CustomerId), context.CancellationToken);
+
+        var reply = new GetOrdersByCustomerReply();
+        foreach (var order in results)
+        {
+            reply.Orders.Add(MapToReply(order));
+        }
+
+        return reply;
+    }
+
     public override async Task<OrderReply> PlaceOrder(PlaceOrderGrpcRequest request, ServerCallContext context)
     {
         var orderRequest = new PlaceOrderRequest

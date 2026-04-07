@@ -1,4 +1,5 @@
 using Ecommerce.Shared.Infrastructure;
+using Ecommerce.Shared.Infrastructure.Audit;
 using Ecommerce.Shared.Infrastructure.Validation;
 using FluentValidation;
 using MassTransit;
@@ -31,6 +32,7 @@ try
     });
 
     builder.Services.AddScoped<ITokenService, TokenService>();
+    builder.Services.AddAuditPublisher("User.Service");
 
     builder.Services.AddMediatR(cfg =>
     {

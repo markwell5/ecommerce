@@ -489,6 +489,60 @@ public class Query
         ResolvedAt = string.IsNullOrEmpty(r.ResolvedAt) ? null : r.ResolvedAt
     };
 
+    // ── Audit Log ────────────────────────────────────
+
+    [Authorize]
+    public async Task<AuditConnection> SearchAuditLog(
+        int page,
+        int pageSize,
+        string? actorId,
+        string? entityType,
+        string? entityId,
+        string? service,
+        string? action,
+        string? correlationId,
+        string? from,
+        string? to,
+        AuditGrpc.AuditGrpcClient client)
+    {
+        var reply = await client.SearchAuditEntriesAsync(new SearchAuditEntriesRequest
+        {
+            Page = page,
+            PageSize = pageSize,
+            ActorId = actorId ?? string.Empty,
+            EntityType = entityType ?? string.Empty,
+            EntityId = entityId ?? string.Empty,
+            Service = service ?? string.Empty,
+            Action = action ?? string.Empty,
+            CorrelationId = correlationId ?? string.Empty,
+            From = from ?? string.Empty,
+            To = to ?? string.Empty
+        });
+
+        return new AuditConnection
+        {
+            Items = reply.Entries.Select(e => new AuditEntryItem
+            {
+                Id = e.Id,
+                Service = e.Service,
+                Action = e.Action,
+                ActorId = e.ActorId,
+                ActorType = e.ActorType,
+                EntityType = e.EntityType,
+                EntityId = e.EntityId,
+                BeforeState = e.BeforeState,
+                AfterState = e.AfterState,
+                CorrelationId = e.CorrelationId,
+                IpAddress = e.IpAddress,
+                Hash = e.Hash,
+                Timestamp = e.Timestamp
+            }).ToList(),
+            TotalCount = reply.TotalCount,
+            Page = reply.Page,
+            PageSize = reply.PageSize
+        };
+    }
+
     private static Coupon MapCoupon(CouponReply c) => new()
     {
         Id = c.Id,

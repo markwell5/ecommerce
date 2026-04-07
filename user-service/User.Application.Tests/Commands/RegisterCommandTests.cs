@@ -53,7 +53,7 @@ namespace User.Application.Tests.Commands
             _tokenService.GenerateTokensAsync(Arg.Any<ApplicationUser>(), Arg.Any<IList<string>>())
                 .Returns(expectedResponse);
 
-            var handler = new RegisterCommandHandler(_userManager, _tokenService, _publishEndpoint);
+            var handler = new RegisterCommandHandler(_userManager, _tokenService, _publishEndpoint, Substitute.For<Ecommerce.Shared.Infrastructure.Audit.IAuditPublisher>());
             var result = await handler.Handle(new RegisterCommand(request), CancellationToken.None);
 
             result.Should().NotBeNull();
@@ -84,7 +84,7 @@ namespace User.Application.Tests.Commands
             _tokenService.GenerateTokensAsync(Arg.Any<ApplicationUser>(), Arg.Any<IList<string>>())
                 .Returns(new AuthResponse());
 
-            var handler = new RegisterCommandHandler(_userManager, _tokenService, _publishEndpoint);
+            var handler = new RegisterCommandHandler(_userManager, _tokenService, _publishEndpoint, Substitute.For<Ecommerce.Shared.Infrastructure.Audit.IAuditPublisher>());
             await handler.Handle(new RegisterCommand(request), CancellationToken.None);
 
             await _publishEndpoint.Received(1).Publish(
@@ -110,7 +110,7 @@ namespace User.Application.Tests.Commands
                     Description = "Email already exists"
                 }));
 
-            var handler = new RegisterCommandHandler(_userManager, _tokenService, _publishEndpoint);
+            var handler = new RegisterCommandHandler(_userManager, _tokenService, _publishEndpoint, Substitute.For<Ecommerce.Shared.Infrastructure.Audit.IAuditPublisher>());
 
             var act = () => handler.Handle(new RegisterCommand(request), CancellationToken.None);
             await act.Should().ThrowAsync<Ecommerce.Shared.Infrastructure.Validation.ValidationException>();

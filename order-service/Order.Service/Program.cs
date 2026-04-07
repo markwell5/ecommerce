@@ -1,5 +1,6 @@
 using Ecommerce.Shared.GrpcClients;
 using Ecommerce.Shared.Infrastructure;
+using Ecommerce.Shared.Infrastructure.Audit;
 using Ecommerce.Shared.Infrastructure.Validation;
 using FluentValidation;
 using MassTransit;
@@ -57,6 +58,7 @@ try
     builder.Services.AddAutoMapper(cfg => { }, typeof(Order.Application.MapperProfile).Assembly);
 
     builder.Services.AddProductGrpcClient(builder.Configuration);
+    builder.Services.AddAuditPublisher("Order.Service");
 
     builder.Services.AddHealthChecks()
         .AddNpgSql(builder.Configuration.GetConnectionString("OrderDb")!, name: "postgresql");

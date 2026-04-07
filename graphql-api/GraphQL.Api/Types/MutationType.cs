@@ -230,6 +230,66 @@ public class Mutation
         return reply.Success;
     }
 
+    // ── Returns ─────────────────────────────────────
+
+    public async Task<ReturnRequest> CreateReturnRequest(
+        string orderId,
+        long productId,
+        int quantity,
+        string reason,
+        string deliveredAt,
+        ClaimsPrincipal claimsPrincipal,
+        ReturnsGrpc.ReturnsGrpcClient client)
+    {
+        var customerId = claimsPrincipal.FindFirstValue(ClaimTypes.NameIdentifier) ?? "";
+
+        var reply = await client.CreateReturnAsync(new CreateReturnGrpcRequest
+        {
+            OrderId = orderId,
+            CustomerId = customerId,
+            ProductId = productId,
+            Quantity = quantity,
+            Reason = reason,
+            DeliveredAt = deliveredAt
+        });
+
+        return MapReturn(reply);
+    }
+
+    public async Task<ReturnRequest> ApproveReturn(
+        long id,
+        string adminNotes,
+        ReturnsGrpc.ReturnsGrpcClient client)
+    {
+        var reply = await client.ApproveReturnAsync(new ApproveReturnGrpcRequest { Id = id, AdminNotes = adminNotes });
+        return MapReturn(reply);
+    }
+
+    public async Task<ReturnRequest> RejectReturn(
+        long id,
+        string adminNotes,
+        ReturnsGrpc.ReturnsGrpcClient client)
+    {
+        var reply = await client.RejectReturnAsync(new RejectReturnGrpcRequest { Id = id, AdminNotes = adminNotes });
+        return MapReturn(reply);
+    }
+
+    public async Task<ReturnRequest> ResolveReturn(
+        long id,
+        string resolution,
+        decimal refundAmount,
+        ReturnsGrpc.ReturnsGrpcClient client)
+    {
+        var reply = await client.ResolveReturnAsync(new ResolveReturnGrpcRequest
+        {
+            Id = id,
+            Resolution = resolution,
+            RefundAmount = refundAmount.ToString(System.Globalization.CultureInfo.InvariantCulture)
+        });
+
+        return MapReturn(reply);
+    }
+
     // ── Stock ────────────────────────────────────────
 
     public async Task<StockLevel> UpdateStock(
@@ -341,6 +401,28 @@ public class Mutation
     }
 
     // ── Helpers ──────────────────────────────────────
+
+    private static ReturnRequest MapReturn(ReturnReply r) => new()
+    {
+        Id = r.Id,
+        RmaNumber = r.RmaNumber,
+        OrderId = r.OrderId,
+        CustomerId = r.CustomerId,
+        ProductId = r.ProductId,
+        Quantity = r.Quantity,
+        Reason = r.Reason,
+        Status = r.Status,
+        Resolution = r.Resolution,
+        RefundAmount = decimal.TryParse(r.RefundAmount, out var ra) ? ra : 0,
+        RestockingFee = decimal.TryParse(r.RestockingFee, out var rf) ? rf : 0,
+        InspectionNotes = r.InspectionNotes,
+        AdminNotes = r.AdminNotes,
+        AutoApproved = r.AutoApproved,
+        CreatedAt = r.CreatedAt,
+        ApprovedAt = string.IsNullOrEmpty(r.ApprovedAt) ? null : r.ApprovedAt,
+        ReceivedAt = string.IsNullOrEmpty(r.ReceivedAt) ? null : r.ReceivedAt,
+        ResolvedAt = string.IsNullOrEmpty(r.ResolvedAt) ? null : r.ResolvedAt
+    };
 
     private static Coupon MapCoupon(CouponReply c) => new()
     {

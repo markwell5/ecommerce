@@ -275,6 +275,7 @@ services:
       - GrpcClients__PaymentService=http://payment:8080
       - GrpcClients__CartService=http://cart:8080
       - GrpcClients__AnalyticsService=http://analytics:8080
+      - GrpcClients__ReturnService=http://returns:8080
       - OpenTelemetry__OtlpEndpoint=http://jaeger:4317
     healthcheck: *app-healthcheck
     networks:
@@ -294,6 +295,8 @@ services:
         condition: service_healthy
       analytics:
         condition: service_healthy
+      returns:
+        condition: service_healthy
 
   analytics:
     build:
@@ -305,6 +308,26 @@ services:
     env_file: .env.docker
     environment:
       - ConnectionStrings__AnalyticsDb=Host=pgbouncer;Port=6432;Database=analytics_db;Username=ecommerce;Password=ecommerce
+      - OpenTelemetry__OtlpEndpoint=http://jaeger:4317
+    healthcheck: *app-healthcheck
+    networks:
+      - ecommerce-network
+    depends_on:
+      pgbouncer:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  returns:
+    build:
+      context: .
+      dockerfile: return-service/Dockerfile
+    profiles: ["app"]
+    ports:
+      - "5008:8080"
+    env_file: .env.docker
+    environment:
+      - ConnectionStrings__ReturnDb=Host=pgbouncer;Port=6432;Database=return_db;Username=ecommerce;Password=ecommerce
       - OpenTelemetry__OtlpEndpoint=http://jaeger:4317
     healthcheck: *app-healthcheck
     networks:

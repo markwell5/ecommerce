@@ -436,7 +436,58 @@ public class Query
         }).ToList();
     }
 
+    // ── Returns ──────────────────────────────────────
+
+    [Authorize]
+    public async Task<ReturnRequest?> GetReturnRequest(
+        long id,
+        ReturnsGrpc.ReturnsGrpcClient client)
+    {
+        var reply = await client.GetReturnAsync(new GetReturnRequest { Id = id });
+        return MapReturn(reply);
+    }
+
+    [Authorize]
+    public async Task<List<ReturnRequest>> GetReturnsByOrder(
+        string orderId,
+        ReturnsGrpc.ReturnsGrpcClient client)
+    {
+        var reply = await client.GetReturnsByOrderAsync(new GetReturnsByOrderRequest { OrderId = orderId });
+        return reply.Returns.Select(MapReturn).ToList();
+    }
+
+    [Authorize]
+    public async Task<List<ReturnRequest>> GetReturnsByCustomer(
+        string customerId,
+        ReturnsGrpc.ReturnsGrpcClient client)
+    {
+        var reply = await client.GetReturnsByCustomerAsync(new GetReturnsByCustomerRequest { CustomerId = customerId });
+        return reply.Returns.Select(MapReturn).ToList();
+    }
+
     // ── Helpers ──────────────────────────────────────
+
+    private static ReturnRequest MapReturn(ReturnReply r) => new()
+    {
+        Id = r.Id,
+        RmaNumber = r.RmaNumber,
+        OrderId = r.OrderId,
+        CustomerId = r.CustomerId,
+        ProductId = r.ProductId,
+        Quantity = r.Quantity,
+        Reason = r.Reason,
+        Status = r.Status,
+        Resolution = r.Resolution,
+        RefundAmount = decimal.TryParse(r.RefundAmount, out var ra) ? ra : 0,
+        RestockingFee = decimal.TryParse(r.RestockingFee, out var rf) ? rf : 0,
+        InspectionNotes = r.InspectionNotes,
+        AdminNotes = r.AdminNotes,
+        AutoApproved = r.AutoApproved,
+        CreatedAt = r.CreatedAt,
+        ApprovedAt = string.IsNullOrEmpty(r.ApprovedAt) ? null : r.ApprovedAt,
+        ReceivedAt = string.IsNullOrEmpty(r.ReceivedAt) ? null : r.ReceivedAt,
+        ResolvedAt = string.IsNullOrEmpty(r.ResolvedAt) ? null : r.ResolvedAt
+    };
 
     private static Coupon MapCoupon(CouponReply c) => new()
     {

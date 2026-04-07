@@ -1,0 +1,81 @@
+syntax = "proto3";
+
+option csharp_namespace = "Ecommerce.Shared.Protos";
+
+package ecommerce.returns;
+
+service ReturnsGrpc {
+  rpc GetReturn (GetReturnRequest) returns (ReturnReply);
+  rpc GetReturnsByOrder (GetReturnsByOrderRequest) returns (GetReturnsByOrderReply);
+  rpc GetReturnsByCustomer (GetReturnsByCustomerRequest) returns (GetReturnsByCustomerReply);
+  rpc CreateReturn (CreateReturnGrpcRequest) returns (ReturnReply);
+  rpc ApproveReturn (ApproveReturnGrpcRequest) returns (ReturnReply);
+  rpc RejectReturn (RejectReturnGrpcRequest) returns (ReturnReply);
+  rpc ResolveReturn (ResolveReturnGrpcRequest) returns (ReturnReply);
+}
+
+message GetReturnRequest {
+  int64 id = 1;
+}
+
+message GetReturnsByOrderRequest {
+  string order_id = 1;
+}
+
+message GetReturnsByCustomerRequest {
+  string customer_id = 1;
+}
+
+message GetReturnsByOrderReply {
+  repeated ReturnReply returns = 1;
+}
+
+message GetReturnsByCustomerReply {
+  repeated ReturnReply returns = 1;
+}
+
+message ReturnReply {
+  int64 id = 1;
+  string rma_number = 2;
+  string order_id = 3;
+  string customer_id = 4;
+  int64 product_id = 5;
+  int32 quantity = 6;
+  string reason = 7;
+  string status = 8;
+  string resolution = 9;
+  string refund_amount = 10;
+  string restocking_fee = 11;
+  string inspection_notes = 12;
+  string admin_notes = 13;
+  bool auto_approved = 14;
+  string created_at = 15;
+  string approved_at = 16;
+  string received_at = 17;
+  string resolved_at = 18;
+}
+
+message CreateReturnGrpcRequest {
+  string order_id = 1;
+  string customer_id = 2;
+  int64 product_id = 3;
+  int32 quantity = 4;
+  string reason = 5;
+  string delivered_at = 6;
+}
+
+message ApproveReturnGrpcRequest {
+  int64 id = 1;
+  string admin_notes = 2;
+}
+
+message RejectReturnGrpcRequest {
+  int64 id = 1;
+  string admin_notes = 2;
+}
+
+message ResolveReturnGrpcRequest {
+  int64 id = 1;
+  string resolution = 2;
+  string refund_amount = 3;
+}

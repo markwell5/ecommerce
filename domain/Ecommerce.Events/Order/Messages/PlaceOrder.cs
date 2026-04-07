@@ -8,5 +8,7 @@ namespace Ecommerce.Events.Order.Messages
         public string CustomerId { get; init; }
         public decimal TotalAmount { get; init; }
         public string ItemsJson { get; init; }
+        public string CouponCode { get; init; }
+        public decimal DiscountAmount { get; init; }
     }
 }

@@ -1,0 +1,64 @@
+syntax = "proto3";
+
+option csharp_namespace = "Ecommerce.Shared.Protos";
+
+package ecommerce.discount;
+
+service DiscountGrpc {
+  rpc GetCoupons (GetCouponsRequest) returns (GetCouponsReply);
+  rpc ValidateDiscount (ValidateDiscountGrpcRequest) returns (DiscountValidationReply);
+  rpc CreateCoupon (CreateCouponGrpcRequest) returns (CouponReply);
+  rpc UpdateCoupon (UpdateCouponGrpcRequest) returns (CouponReply);
+}
+
+message GetCouponsRequest {
+}
+
+message GetCouponsReply {
+  repeated CouponReply coupons = 1;
+}
+
+message ValidateDiscountGrpcRequest {
+  string coupon_code = 1;
+  string order_amount = 2;
+}
+
+message DiscountValidationReply {
+  bool is_valid = 1;
+  string error = 2;
+  string discount_amount = 3;
+  string discount_type = 4;
+  string coupon_code = 5;
+}
+
+message CreateCouponGrpcRequest {
+  string code = 1;
+  string discount_type = 2;
+  string value = 3;
+  string min_order_amount = 4;
+  int32 max_uses = 5;
+  string expires_at = 6;
+}
+
+message UpdateCouponGrpcRequest {
+  int64 id = 1;
+  string discount_type = 2;
+  string value = 3;
+  string min_order_amount = 4;
+  int32 max_uses = 5;
+  string expires_at = 6;
+  bool is_active = 7;
+}
+
+message CouponReply {
+  int64 id = 1;
+  string code = 2;
+  string discount_type = 3;
+  string value = 4;
+  string min_order_amount = 5;
+  int32 max_uses = 6;
+  int32 current_uses = 7;
+  string expires_at = 8;
+  bool is_active = 9;
+  string created_at = 10;
+}

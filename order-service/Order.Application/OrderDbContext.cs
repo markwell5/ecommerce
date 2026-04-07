@@ -14,6 +14,7 @@ namespace Order.Application
 
         public DbSet<Entities.Order> Orders { get; set; }
         public DbSet<OrderEvent> OrderEvents { get; set; }
+        public DbSet<Entities.Coupon> Coupons { get; set; }
 
         protected override IEnumerable<ISagaClassMap> Configurations
         {
@@ -35,6 +36,19 @@ namespace Order.Application
                 entity.Property(e => e.Status).IsRequired().HasMaxLength(50);
                 entity.Property(e => e.TotalAmount).HasPrecision(18, 2);
                 entity.Property(e => e.ItemsJson).HasColumnType("text");
+                entity.Property(e => e.CouponCode).HasMaxLength(50);
+                entity.Property(e => e.DiscountAmount).HasPrecision(18, 2);
+            });
+
+            modelBuilder.Entity<Entities.Coupon>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+                entity.Property(e => e.Code).IsRequired().HasMaxLength(50);
+                entity.HasIndex(e => e.Code).IsUnique();
+                entity.Property(e => e.DiscountType).IsRequired().HasMaxLength(20);
+                entity.Property(e => e.Value).HasPrecision(18, 2);
+                entity.Property(e => e.MinOrderAmount).HasPrecision(18, 2);
             });
 
             modelBuilder.Entity<OrderEvent>(entity =>
@@ -56,6 +70,8 @@ namespace Order.Application
             entity.Property(x => x.CustomerId).HasMaxLength(200);
             entity.Property(x => x.TotalAmount).HasPrecision(18, 2);
             entity.Property(x => x.ItemsJson).HasColumnType("text");
+            entity.Property(x => x.CouponCode).HasMaxLength(50);
+            entity.Property(x => x.DiscountAmount).HasPrecision(18, 2);
         }
     }
 }

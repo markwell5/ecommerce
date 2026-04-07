@@ -109,4 +109,17 @@ public static class DependencyInjection
 
         return services;
     }
+
+    public static IServiceCollection AddDiscountGrpcClient(
+        this IServiceCollection services, IConfiguration configuration)
+    {
+        var address = configuration["GrpcClients:OrderService"] ?? "http://order:8080";
+
+        services.AddGrpcClient<DiscountGrpc.DiscountGrpcClient>(o =>
+        {
+            o.Address = new Uri(address);
+        });
+
+        return services;
+    }
 }

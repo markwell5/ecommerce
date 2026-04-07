@@ -71,6 +71,7 @@ try
 
     app.UseServiceDefaults();
     app.MapGrpcService<OrderGrpcService>();
+    app.MapGrpcService<DiscountGrpcService>();
 
     app.Run();
 }

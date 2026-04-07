@@ -22,6 +22,7 @@ try
     builder.Services.AddCartGrpcClient(builder.Configuration);
     builder.Services.AddCategoryGrpcClient(builder.Configuration);
     builder.Services.AddReviewGrpcClient(builder.Configuration);
+    builder.Services.AddDiscountGrpcClient(builder.Configuration);
 
     // Configure Hot Chocolate GraphQL server
     builder.Services

@@ -113,6 +113,29 @@ public class Query
     // ── Orders ───────────────────────────────────────
 
     [Authorize]
+    public async Task<OrderConnection> GetOrders(
+        int page,
+        int pageSize,
+        string? status,
+        OrderGrpc.OrderGrpcClient client)
+    {
+        var reply = await client.GetOrdersAsync(new GetOrdersRequest
+        {
+            Page = page,
+            PageSize = pageSize,
+            Status = status ?? string.Empty
+        });
+
+        return new OrderConnection
+        {
+            Items = reply.Orders.Select(MapOrder).ToList(),
+            TotalCount = reply.TotalCount,
+            Page = reply.Page,
+            PageSize = reply.PageSize
+        };
+    }
+
+    [Authorize]
     public async Task<Order?> GetOrder(
         string orderId,
         OrderGrpc.OrderGrpcClient client)
@@ -389,6 +412,14 @@ public class Query
 public class ProductConnection
 {
     public List<Product> Items { get; set; } = [];
+    public int TotalCount { get; set; }
+    public int Page { get; set; }
+    public int PageSize { get; set; }
+}
+
+public class OrderConnection
+{
+    public List<Order> Items { get; set; } = [];
     public int TotalCount { get; set; }
     public int Page { get; set; }
     public int PageSize { get; set; }

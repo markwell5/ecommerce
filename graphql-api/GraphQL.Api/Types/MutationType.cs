@@ -420,7 +420,104 @@ public class Mutation
         return MapPointsTransaction(reply);
     }
 
+    // ── Gift Cards ─────────────────────────────────────
+
+    public async Task<GiftCardItem> PurchaseGiftCard(
+        decimal value,
+        string? recipientEmail,
+        string? personalMessage,
+        bool isDigital,
+        ClaimsPrincipal claimsPrincipal,
+        GiftCardGrpc.GiftCardGrpcClient client)
+    {
+        var customerId = claimsPrincipal.FindFirstValue(ClaimTypes.NameIdentifier) ?? "";
+
+        var reply = await client.PurchaseGiftCardAsync(new PurchaseGiftCardGrpcRequest
+        {
+            Value = value.ToString(System.Globalization.CultureInfo.InvariantCulture),
+            RecipientEmail = recipientEmail ?? string.Empty,
+            PersonalMessage = personalMessage ?? string.Empty,
+            PurchasedByCustomerId = customerId,
+            IsDigital = isDigital
+        });
+
+        return MapGiftCard(reply);
+    }
+
+    public async Task<GiftCardTransaction> RedeemGiftCard(
+        string code,
+        decimal amount,
+        string? orderId,
+        GiftCardGrpc.GiftCardGrpcClient client)
+    {
+        var reply = await client.RedeemGiftCardAsync(new RedeemGiftCardGrpcRequest
+        {
+            Code = code,
+            Amount = amount.ToString(System.Globalization.CultureInfo.InvariantCulture),
+            OrderId = orderId ?? string.Empty
+        });
+
+        return MapGiftCardTransaction(reply);
+    }
+
+    public async Task<GiftCardTransaction> TopUpGiftCard(
+        string code,
+        decimal amount,
+        GiftCardGrpc.GiftCardGrpcClient client)
+    {
+        var reply = await client.TopUpGiftCardAsync(new TopUpGiftCardGrpcRequest
+        {
+            Code = code,
+            Amount = amount.ToString(System.Globalization.CultureInfo.InvariantCulture)
+        });
+
+        return MapGiftCardTransaction(reply);
+    }
+
+    public async Task<GiftCardTransaction> DisableGiftCard(
+        string code,
+        string reason,
+        GiftCardGrpc.GiftCardGrpcClient client)
+    {
+        var reply = await client.DisableGiftCardAsync(new DisableGiftCardGrpcRequest
+        {
+            Code = code,
+            Reason = reason
+        });
+
+        return MapGiftCardTransaction(reply);
+    }
+
     // ── Helpers ──────────────────────────────────────
+
+    private static GiftCardItem MapGiftCard(GiftCardReply g) => new()
+    {
+        Id = g.Id,
+        Code = g.Code,
+        InitialValue = decimal.TryParse(g.InitialValue, out var iv) ? iv : 0,
+        CurrentBalance = decimal.TryParse(g.CurrentBalance, out var cb) ? cb : 0,
+        Status = g.Status,
+        RecipientEmail = string.IsNullOrEmpty(g.RecipientEmail) ? null : g.RecipientEmail,
+        PersonalMessage = string.IsNullOrEmpty(g.PersonalMessage) ? null : g.PersonalMessage,
+        PurchasedByCustomerId = g.PurchasedByCustomerId,
+        IsDigital = g.IsDigital,
+        ActivatedAt = string.IsNullOrEmpty(g.ActivatedAt) ? null : g.ActivatedAt,
+        ExpiresAt = string.IsNullOrEmpty(g.ExpiresAt) ? null : g.ExpiresAt,
+        CreatedAt = g.CreatedAt,
+        UpdatedAt = g.UpdatedAt
+    };
+
+    private static GiftCardTransaction MapGiftCardTransaction(GiftCardTransactionReply t) => new()
+    {
+        Id = t.Id,
+        GiftCardId = t.GiftCardId,
+        Type = t.Type,
+        Amount = decimal.TryParse(t.Amount, out var a) ? a : 0,
+        BalanceAfter = decimal.TryParse(t.BalanceAfter, out var b) ? b : 0,
+        OrderId = string.IsNullOrEmpty(t.OrderId) ? null : t.OrderId,
+        Description = t.Description,
+        CreatedAt = t.CreatedAt
+    };
 
     private static PointsTransaction MapPointsTransaction(PointsTransactionReply t) => new()
     {

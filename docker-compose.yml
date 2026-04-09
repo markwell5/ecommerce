@@ -278,6 +278,7 @@ services:
       - GrpcClients__ReturnService=http://returns:8080
       - GrpcClients__AuditService=http://audit:8080
       - GrpcClients__LoyaltyService=http://loyalty:8080
+      - GrpcClients__GiftCardService=http://giftcard:8080
       - OpenTelemetry__OtlpEndpoint=http://jaeger:4317
     healthcheck: *app-healthcheck
     networks:
@@ -302,6 +303,8 @@ services:
       audit:
         condition: service_healthy
       loyalty:
+        condition: service_healthy
+      giftcard:
         condition: service_healthy
 
   analytics:
@@ -374,6 +377,26 @@ services:
     env_file: .env.docker
     environment:
       - ConnectionStrings__LoyaltyDb=Host=pgbouncer;Port=6432;Database=loyalty_db;Username=ecommerce;Password=ecommerce
+      - OpenTelemetry__OtlpEndpoint=http://jaeger:4317
+    healthcheck: *app-healthcheck
+    networks:
+      - ecommerce-network
+    depends_on:
+      pgbouncer:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  giftcard:
+    build:
+      context: .
+      dockerfile: giftcard-service/Dockerfile
+    profiles: ["app"]
+    ports:
+      - "5011:8080"
+    env_file: .env.docker
+    environment:
+      - ConnectionStrings__GiftCardDb=Host=pgbouncer;Port=6432;Database=giftcard_db;Username=ecommerce;Password=ecommerce
       - OpenTelemetry__OtlpEndpoint=http://jaeger:4317
     healthcheck: *app-healthcheck
     networks:

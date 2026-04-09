@@ -187,4 +187,17 @@ public static class DependencyInjection
 
         return services;
     }
+
+    public static IServiceCollection AddSubscriptionGrpcClient(
+        this IServiceCollection services, IConfiguration configuration)
+    {
+        var address = configuration["GrpcClients:SubscriptionService"] ?? "http://subscription:8080";
+
+        services.AddGrpcClient<SubscriptionGrpc.SubscriptionGrpcClient>(o =>
+        {
+            o.Address = new Uri(address);
+        });
+
+        return services;
+    }
 }

@@ -1,0 +1,78 @@
+syntax = "proto3";
+
+option csharp_namespace = "Ecommerce.Shared.Protos";
+
+package ecommerce.subscription;
+
+service SubscriptionGrpc {
+  rpc GetSubscription (GetSubscriptionRequest) returns (SubscriptionReply);
+  rpc GetSubscriptionsByCustomer (GetSubscriptionsByCustomerRequest) returns (GetSubscriptionsByCustomerReply);
+  rpc GetUpcomingRenewals (GetUpcomingRenewalsRequest) returns (GetUpcomingRenewalsReply);
+  rpc CreateSubscription (CreateSubscriptionGrpcRequest) returns (SubscriptionReply);
+  rpc UpdateSubscription (UpdateSubscriptionGrpcRequest) returns (SubscriptionReply);
+  rpc PauseSubscription (SubscriptionActionRequest) returns (SubscriptionReply);
+  rpc ResumeSubscription (SubscriptionActionRequest) returns (SubscriptionReply);
+  rpc CancelSubscription (SubscriptionActionRequest) returns (SubscriptionReply);
+  rpc SkipNextDelivery (SubscriptionActionRequest) returns (SubscriptionReply);
+}
+
+message GetSubscriptionRequest {
+  int64 id = 1;
+}
+
+message GetSubscriptionsByCustomerRequest {
+  string customer_id = 1;
+}
+
+message GetUpcomingRenewalsRequest {
+  int32 days = 1;
+}
+
+message GetSubscriptionsByCustomerReply {
+  repeated SubscriptionReply subscriptions = 1;
+}
+
+message GetUpcomingRenewalsReply {
+  repeated SubscriptionReply subscriptions = 1;
+}
+
+message SubscriptionReply {
+  int64 id = 1;
+  string customer_id = 2;
+  int64 product_id = 3;
+  string product_name = 4;
+  int32 quantity = 5;
+  string frequency = 6;
+  int32 interval_days = 7;
+  string discount_percent = 8;
+  string status = 9;
+  int64 delivery_address_id = 10;
+  string next_renewal_at = 11;
+  string last_renewed_at = 12;
+  int32 failure_count = 13;
+  string created_at = 14;
+  string updated_at = 15;
+}
+
+message CreateSubscriptionGrpcRequest {
+  string customer_id = 1;
+  int64 product_id = 2;
+  string product_name = 3;
+  int32 quantity = 4;
+  string frequency = 5;
+  int32 interval_days = 6;
+  string discount_percent = 7;
+  int64 delivery_address_id = 8;
+}
+
+message UpdateSubscriptionGrpcRequest {
+  int64 id = 1;
+  int32 quantity = 2;
+  string frequency = 3;
+  int32 interval_days = 4;
+  int64 delivery_address_id = 5;
+}
+
+message SubscriptionActionRequest {
+  int64 id = 1;
+}

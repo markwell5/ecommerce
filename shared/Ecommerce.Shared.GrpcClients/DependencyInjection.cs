@@ -200,4 +200,17 @@ public static class DependencyInjection
 
         return services;
     }
+
+    public static IServiceCollection AddWishlistGrpcClient(
+        this IServiceCollection services, IConfiguration configuration)
+    {
+        var address = configuration["GrpcClients:WishlistService"] ?? "http://wishlist:8080";
+
+        services.AddGrpcClient<WishlistGrpc.WishlistGrpcClient>(o =>
+        {
+            o.Address = new Uri(address);
+        });
+
+        return services;
+    }
 }

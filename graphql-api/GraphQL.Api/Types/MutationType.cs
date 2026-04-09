@@ -570,7 +570,129 @@ public class Mutation
         return MapSubscription(reply);
     }
 
+    // ── Wishlists ────────────────────────────────────
+
+    public async Task<WishlistItem2> CreateWishlist(
+        string name,
+        ClaimsPrincipal claimsPrincipal,
+        WishlistGrpc.WishlistGrpcClient client)
+    {
+        var customerId = claimsPrincipal.FindFirstValue(ClaimTypes.NameIdentifier) ?? "";
+
+        var reply = await client.CreateWishlistAsync(new CreateWishlistGrpcRequest
+        {
+            CustomerId = customerId,
+            Name = name
+        });
+
+        return MapWishlist(reply);
+    }
+
+    public async Task<WishlistItem2> RenameWishlist(
+        long id,
+        string name,
+        WishlistGrpc.WishlistGrpcClient client)
+    {
+        var reply = await client.RenameWishlistAsync(new RenameWishlistGrpcRequest
+        {
+            Id = id,
+            Name = name
+        });
+
+        return MapWishlist(reply);
+    }
+
+    public async Task<bool> DeleteWishlist(
+        long id,
+        WishlistGrpc.WishlistGrpcClient client)
+    {
+        var reply = await client.DeleteWishlistAsync(new DeleteWishlistGrpcRequest { Id = id });
+        return reply.Success;
+    }
+
+    public async Task<WishlistItem2> AddToWishlist(
+        long wishlistId,
+        long productId,
+        ClaimsPrincipal claimsPrincipal,
+        WishlistGrpc.WishlistGrpcClient client)
+    {
+        var customerId = claimsPrincipal.FindFirstValue(ClaimTypes.NameIdentifier) ?? "";
+
+        var reply = await client.AddWishlistItemAsync(new AddWishlistItemGrpcRequest
+        {
+            WishlistId = wishlistId,
+            ProductId = productId,
+            CustomerId = customerId
+        });
+
+        return MapWishlist(reply);
+    }
+
+    public async Task<WishlistItem2> RemoveFromWishlist(
+        long wishlistId,
+        long productId,
+        WishlistGrpc.WishlistGrpcClient client)
+    {
+        var reply = await client.RemoveWishlistItemAsync(new RemoveWishlistItemGrpcRequest
+        {
+            WishlistId = wishlistId,
+            ProductId = productId
+        });
+
+        return MapWishlist(reply);
+    }
+
+    public async Task<WishlistItem2> ToggleWishlistVisibility(
+        long id,
+        bool isPublic,
+        WishlistGrpc.WishlistGrpcClient client)
+    {
+        var reply = await client.ToggleWishlistVisibilityAsync(new ToggleWishlistVisibilityGrpcRequest
+        {
+            Id = id,
+            IsPublic = isPublic
+        });
+
+        return MapWishlist(reply);
+    }
+
+    public async Task<WishlistItem2> SetRestockNotification(
+        long wishlistId,
+        long productId,
+        bool notify,
+        WishlistGrpc.WishlistGrpcClient client)
+    {
+        var reply = await client.SetRestockNotificationAsync(new SetRestockNotificationGrpcRequest
+        {
+            WishlistId = wishlistId,
+            ProductId = productId,
+            Notify = notify
+        });
+
+        return MapWishlist(reply);
+    }
+
     // ── Helpers ──────────────────────────────────────
+
+    private static WishlistItem2 MapWishlist(WishlistReply w) => new()
+    {
+        Id = w.Id,
+        CustomerId = w.CustomerId,
+        Name = w.Name,
+        IsDefault = w.IsDefault,
+        ShareToken = w.ShareToken,
+        IsPublic = w.IsPublic,
+        Items = w.Items.Select(i => new WishlistItemEntry
+        {
+            Id = i.Id,
+            WishlistId = i.WishlistId,
+            ProductId = i.ProductId,
+            NotifyOnRestock = i.NotifyOnRestock,
+            AddedAt = i.AddedAt
+        }).ToList(),
+        CreatedAt = w.CreatedAt,
+        UpdatedAt = w.UpdatedAt
+    };
 
     private static SubscriptionItem MapSubscription(SubscriptionReply s) => new()
     {

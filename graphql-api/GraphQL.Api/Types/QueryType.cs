@@ -511,7 +511,89 @@ public class Query
         };
     }
 
+    // ── Gift Cards ─────────────────────────────────────
+
+    public async Task<GiftCardItem?> GetGiftCardByCode(
+        string code,
+        GiftCardGrpc.GiftCardGrpcClient client)
+    {
+        var reply = await client.GetGiftCardByCodeAsync(new GetGiftCardByCodeRequest { Code = code });
+        return MapGiftCard(reply);
+    }
+
+    [Authorize]
+    public async Task<List<GiftCardItem>> GetGiftCardsByCustomer(
+        string customerId,
+        GiftCardGrpc.GiftCardGrpcClient client)
+    {
+        var reply = await client.GetGiftCardsByCustomerAsync(new GetGiftCardsByCustomerRequest { CustomerId = customerId });
+        return reply.GiftCards.Select(MapGiftCard).ToList();
+    }
+
+    [Authorize]
+    public async Task<List<GiftCardItem>> GetMyGiftCards(
+        ClaimsPrincipal claimsPrincipal,
+        GiftCardGrpc.GiftCardGrpcClient client)
+    {
+        var userId = claimsPrincipal.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userId is null) return [];
+
+        var reply = await client.GetGiftCardsByCustomerAsync(new GetGiftCardsByCustomerRequest { CustomerId = userId });
+        return reply.GiftCards.Select(MapGiftCard).ToList();
+    }
+
+    public async Task<GiftCardTransactionConnection> GetGiftCardTransactions(
+        string code,
+        int page,
+        int pageSize,
+        GiftCardGrpc.GiftCardGrpcClient client)
+    {
+        var reply = await client.GetGiftCardTransactionsAsync(new GetGiftCardTransactionsRequest
+        {
+            Code = code,
+            Page = page,
+            PageSize = pageSize
+        });
+
+        return new GiftCardTransactionConnection
+        {
+            Items = reply.Transactions.Select(MapGiftCardTransaction).ToList(),
+            TotalCount = reply.TotalCount,
+            Page = reply.Page,
+            PageSize = reply.PageSize
+        };
+    }
+
     // ── Helpers ──────────────────────────────────────
+
+    private static GiftCardItem MapGiftCard(GiftCardReply g) => new()
+    {
+        Id = g.Id,
+        Code = g.Code,
+        InitialValue = decimal.TryParse(g.InitialValue, out var iv) ? iv : 0,
+        CurrentBalance = decimal.TryParse(g.CurrentBalance, out var cb) ? cb : 0,
+        Status = g.Status,
+        RecipientEmail = string.IsNullOrEmpty(g.RecipientEmail) ? null : g.RecipientEmail,
+        PersonalMessage = string.IsNullOrEmpty(g.PersonalMessage) ? null : g.PersonalMessage,
+        PurchasedByCustomerId = g.PurchasedByCustomerId,
+        IsDigital = g.IsDigital,
+        ActivatedAt = string.IsNullOrEmpty(g.ActivatedAt) ? null : g.ActivatedAt,
+        ExpiresAt = string.IsNullOrEmpty(g.ExpiresAt) ? null : g.ExpiresAt,
+        CreatedAt = g.CreatedAt,
+        UpdatedAt = g.UpdatedAt
+    };
+
+    private static GiftCardTransaction MapGiftCardTransaction(GiftCardTransactionReply t) => new()
+    {
+        Id = t.Id,
+        GiftCardId = t.GiftCardId,
+        Type = t.Type,
+        Amount = decimal.TryParse(t.Amount, out var a) ? a : 0,
+        BalanceAfter = decimal.TryParse(t.BalanceAfter, out var b) ? b : 0,
+        OrderId = string.IsNullOrEmpty(t.OrderId) ? null : t.OrderId,
+        Description = t.Description,
+        CreatedAt = t.CreatedAt
+    };
 
     private static LoyaltyAccount MapLoyaltyAccount(LoyaltyAccountReply a) => new()
     {

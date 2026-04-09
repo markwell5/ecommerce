@@ -1,0 +1,91 @@
+syntax = "proto3";
+
+option csharp_namespace = "Ecommerce.Shared.Protos";
+
+package ecommerce.giftcard;
+
+service GiftCardGrpc {
+  rpc GetGiftCardByCode (GetGiftCardByCodeRequest) returns (GiftCardReply);
+  rpc GetGiftCardsByCustomer (GetGiftCardsByCustomerRequest) returns (GiftCardListReply);
+  rpc GetGiftCardTransactions (GetGiftCardTransactionsRequest) returns (GiftCardTransactionHistoryReply);
+  rpc PurchaseGiftCard (PurchaseGiftCardGrpcRequest) returns (GiftCardReply);
+  rpc RedeemGiftCard (RedeemGiftCardGrpcRequest) returns (GiftCardTransactionReply);
+  rpc TopUpGiftCard (TopUpGiftCardGrpcRequest) returns (GiftCardTransactionReply);
+  rpc DisableGiftCard (DisableGiftCardGrpcRequest) returns (GiftCardTransactionReply);
+}
+
+message GetGiftCardByCodeRequest {
+  string code = 1;
+}
+
+message GetGiftCardsByCustomerRequest {
+  string customer_id = 1;
+}
+
+message GetGiftCardTransactionsRequest {
+  string code = 1;
+  int32 page = 2;
+  int32 page_size = 3;
+}
+
+message GiftCardReply {
+  int64 id = 1;
+  string code = 2;
+  string initial_value = 3;
+  string current_balance = 4;
+  string status = 5;
+  string recipient_email = 6;
+  string personal_message = 7;
+  string purchased_by_customer_id = 8;
+  bool is_digital = 9;
+  string activated_at = 10;
+  string expires_at = 11;
+  string created_at = 12;
+  string updated_at = 13;
+}
+
+message GiftCardListReply {
+  repeated GiftCardReply gift_cards = 1;
+}
+
+message GiftCardTransactionReply {
+  int64 id = 1;
+  int64 gift_card_id = 2;
+  string type = 3;
+  string amount = 4;
+  string balance_after = 5;
+  string order_id = 6;
+  string description = 7;
+  string created_at = 8;
+}
+
+message GiftCardTransactionHistoryReply {
+  repeated GiftCardTransactionReply transactions = 1;
+  int32 total_count = 2;
+  int32 page = 3;
+  int32 page_size = 4;
+}
+
+message PurchaseGiftCardGrpcRequest {
+  string value = 1;
+  string recipient_email = 2;
+  string personal_message = 3;
+  string purchased_by_customer_id = 4;
+  bool is_digital = 5;
+}
+
+message RedeemGiftCardGrpcRequest {
+  string code = 1;
+  string amount = 2;
+  string order_id = 3;
+}
+
+message TopUpGiftCardGrpcRequest {
+  string code = 1;
+  string amount = 2;
+}
+
+message DisableGiftCardGrpcRequest {
+  string code = 1;
+  string reason = 2;
+}

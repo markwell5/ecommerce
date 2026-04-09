@@ -174,4 +174,17 @@ public static class DependencyInjection
 
         return services;
     }
+
+    public static IServiceCollection AddGiftCardGrpcClient(
+        this IServiceCollection services, IConfiguration configuration)
+    {
+        var address = configuration["GrpcClients:GiftCardService"] ?? "http://giftcard:8080";
+
+        services.AddGrpcClient<GiftCardGrpc.GiftCardGrpcClient>(o =>
+        {
+            o.Address = new Uri(address);
+        });
+
+        return services;
+    }
 }

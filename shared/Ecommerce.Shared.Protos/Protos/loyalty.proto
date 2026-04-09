@@ -1,0 +1,66 @@
+syntax = "proto3";
+
+option csharp_namespace = "Ecommerce.Shared.Protos";
+
+package ecommerce.loyalty;
+
+service LoyaltyGrpc {
+  rpc GetLoyaltyAccount (GetLoyaltyAccountRequest) returns (LoyaltyAccountReply);
+  rpc GetPointsHistory (GetPointsHistoryRequest) returns (PointsHistoryReply);
+  rpc CreditPoints (CreditPointsGrpcRequest) returns (PointsTransactionReply);
+  rpc RedeemPoints (RedeemPointsGrpcRequest) returns (PointsTransactionReply);
+}
+
+message GetLoyaltyAccountRequest {
+  string customer_id = 1;
+}
+
+message GetPointsHistoryRequest {
+  string customer_id = 1;
+  int32 page = 2;
+  int32 page_size = 3;
+}
+
+message LoyaltyAccountReply {
+  int64 id = 1;
+  string customer_id = 2;
+  int32 points_balance = 3;
+  int32 lifetime_points = 4;
+  string annual_spend = 5;
+  string tier = 6;
+  string points_multiplier = 7;
+  string last_activity_at = 8;
+  string tier_expires_at = 9;
+  string created_at = 10;
+}
+
+message PointsTransactionReply {
+  int64 id = 1;
+  string customer_id = 2;
+  string type = 3;
+  int32 points = 4;
+  int32 balance_after = 5;
+  string description = 6;
+  string order_id = 7;
+  string created_at = 8;
+}
+
+message PointsHistoryReply {
+  repeated PointsTransactionReply transactions = 1;
+  int32 total_count = 2;
+  int32 page = 3;
+  int32 page_size = 4;
+}
+
+message CreditPointsGrpcRequest {
+  string customer_id = 1;
+  int32 points = 2;
+  string description = 3;
+  string order_id = 4;
+}
+
+message RedeemPointsGrpcRequest {
+  string customer_id = 1;
+  int32 points = 2;
+  string order_id = 3;
+}

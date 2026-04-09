@@ -26,6 +26,7 @@ try
     builder.Services.AddReturnsGrpcClient(builder.Configuration);
     builder.Services.AddAuditGrpcClient(builder.Configuration);
     builder.Services.AddAnalyticsGrpcClient(builder.Configuration);
+    builder.Services.AddLoyaltyGrpcClient(builder.Configuration);
 
     // Configure Hot Chocolate GraphQL server
     builder.Services

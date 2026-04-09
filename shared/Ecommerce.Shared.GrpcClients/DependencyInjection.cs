@@ -161,4 +161,17 @@ public static class DependencyInjection
 
         return services;
     }
+
+    public static IServiceCollection AddLoyaltyGrpcClient(
+        this IServiceCollection services, IConfiguration configuration)
+    {
+        var address = configuration["GrpcClients:LoyaltyService"] ?? "http://loyalty:8080";
+
+        services.AddGrpcClient<LoyaltyGrpc.LoyaltyGrpcClient>(o =>
+        {
+            o.Address = new Uri(address);
+        });
+
+        return services;
+    }
 }

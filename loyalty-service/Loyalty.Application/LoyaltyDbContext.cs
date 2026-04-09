@@ -1,6 +1,6 @@
+using Loyalty.Application.Entities;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
-using Loyalty.Application.Entities;
 
 namespace Loyalty.Application
 {

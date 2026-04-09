@@ -2,9 +2,9 @@ using System.Globalization;
 using Ecommerce.Model.Loyalty.Response;
 using Ecommerce.Shared.Protos;
 using Grpc.Core;
-using MediatR;
 using Loyalty.Application.Commands;
 using Loyalty.Application.Queries;
+using MediatR;
 
 namespace Loyalty.Service.Services;
 

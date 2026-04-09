@@ -4,10 +4,10 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Ecommerce.Events.Loyalty;
 using Ecommerce.Model.Loyalty.Response;
+using Loyalty.Application.Entities;
 using MassTransit;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Loyalty.Application.Entities;
 
 namespace Loyalty.Application.Commands
 {

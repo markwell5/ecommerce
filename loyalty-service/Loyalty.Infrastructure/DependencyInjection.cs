@@ -1,7 +1,7 @@
+using Loyalty.Application;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Loyalty.Application;
 
 namespace Loyalty.Infrastructure;
 

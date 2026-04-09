@@ -278,13 +278,17 @@ public class Mutation
         long id,
         string resolution,
         decimal refundAmount,
+        long? exchangeProductId,
+        string? exchangeProductName,
         ReturnsGrpc.ReturnsGrpcClient client)
     {
         var reply = await client.ResolveReturnAsync(new ResolveReturnGrpcRequest
         {
             Id = id,
             Resolution = resolution,
-            RefundAmount = refundAmount.ToString(System.Globalization.CultureInfo.InvariantCulture)
+            RefundAmount = refundAmount.ToString(System.Globalization.CultureInfo.InvariantCulture),
+            ExchangeProductId = exchangeProductId ?? 0,
+            ExchangeProductName = exchangeProductName ?? string.Empty
         });
 
         return MapReturn(reply);
@@ -773,7 +777,10 @@ public class Mutation
         CreatedAt = r.CreatedAt,
         ApprovedAt = string.IsNullOrEmpty(r.ApprovedAt) ? null : r.ApprovedAt,
         ReceivedAt = string.IsNullOrEmpty(r.ReceivedAt) ? null : r.ReceivedAt,
-        ResolvedAt = string.IsNullOrEmpty(r.ResolvedAt) ? null : r.ResolvedAt
+        ResolvedAt = string.IsNullOrEmpty(r.ResolvedAt) ? null : r.ResolvedAt,
+        ExchangeProductId = r.ExchangeProductId == 0 ? null : r.ExchangeProductId,
+        ExchangeProductName = string.IsNullOrEmpty(r.ExchangeProductName) ? null : r.ExchangeProductName,
+        ExchangeOrderId = string.IsNullOrEmpty(r.ExchangeOrderId) ? null : r.ExchangeOrderId
     };
 
     private static Coupon MapCoupon(CouponReply c) => new()

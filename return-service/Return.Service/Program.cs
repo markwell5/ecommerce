@@ -1,3 +1,4 @@
+using Ecommerce.Shared.GrpcClients;
 using Ecommerce.Shared.Infrastructure;
 using Ecommerce.Shared.Infrastructure.Validation;
 using FluentValidation;
@@ -37,6 +38,9 @@ try
     });
     builder.Services.AddValidatorsFromAssembly(typeof(CreateReturnCommand).Assembly);
     builder.Services.AddAutoMapper(cfg => { }, typeof(Return.Application.MapperProfile).Assembly);
+
+    builder.Services.AddOrderGrpcClient(builder.Configuration);
+    builder.Services.AddProductGrpcClient(builder.Configuration);
 
     builder.Services.AddHealthChecks()
         .AddNpgSql(builder.Configuration.GetConnectionString("ReturnDb")!, name: "postgresql");

@@ -22,6 +22,9 @@ namespace Return.Application.Entities
         public DateTime? ApprovedAt { get; set; }
         public DateTime? ReceivedAt { get; set; }
         public DateTime? ResolvedAt { get; set; }
+        public long? ExchangeProductId { get; set; }
+        public string ExchangeProductName { get; set; } = string.Empty;
+        public Guid? ExchangeOrderId { get; set; }
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     }
 }

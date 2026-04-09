@@ -20,4 +20,7 @@ public class ReturnRequest
     public string? ApprovedAt { get; set; }
     public string? ReceivedAt { get; set; }
     public string? ResolvedAt { get; set; }
+    public long? ExchangeProductId { get; set; }
+    public string? ExchangeProductName { get; set; }
+    public string? ExchangeOrderId { get; set; }
 }

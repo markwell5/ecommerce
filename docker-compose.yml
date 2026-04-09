@@ -343,6 +343,8 @@ services:
     env_file: .env.docker
     environment:
       - ConnectionStrings__ReturnDb=Host=pgbouncer;Port=6432;Database=return_db;Username=ecommerce;Password=ecommerce
+      - GrpcClients__OrderService=http://order:8080
+      - GrpcClients__ProductService=http://product:8080
       - OpenTelemetry__OtlpEndpoint=http://jaeger:4317
     healthcheck: *app-healthcheck
     networks:
@@ -351,6 +353,10 @@ services:
       pgbouncer:
         condition: service_healthy
       rabbitmq:
+        condition: service_healthy
+      order:
+        condition: service_healthy
+      product:
         condition: service_healthy
 
   audit:

@@ -5,6 +5,7 @@ COPY domain/Ecommerce.Events/Ecommerce.Events.csproj domain/Ecommerce.Events/
 COPY domain/Ecommerce.Model/Ecommerce.Model.csproj domain/Ecommerce.Model/
 COPY shared/Ecommerce.Shared.Infrastructure/Ecommerce.Shared.Infrastructure.csproj shared/Ecommerce.Shared.Infrastructure/
 COPY shared/Ecommerce.Shared.Protos/Ecommerce.Shared.Protos.csproj shared/Ecommerce.Shared.Protos/
+COPY shared/Ecommerce.Shared.GrpcClients/Ecommerce.Shared.GrpcClients.csproj shared/Ecommerce.Shared.GrpcClients/
 COPY return-service/Return.Application/Return.Application.csproj return-service/Return.Application/
 COPY return-service/Return.Infrastructure/Return.Infrastructure.csproj return-service/Return.Infrastructure/
 COPY return-service/Return.Service/Return.Service.csproj return-service/Return.Service/

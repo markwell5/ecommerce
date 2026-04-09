@@ -22,5 +22,8 @@ namespace Ecommerce.Model.Return.Response
         public DateTime? ApprovedAt { get; set; }
         public DateTime? ReceivedAt { get; set; }
         public DateTime? ResolvedAt { get; set; }
+        public long? ExchangeProductId { get; set; }
+        public string ExchangeProductName { get; set; } = string.Empty;
+        public Guid? ExchangeOrderId { get; set; }
     }
 }

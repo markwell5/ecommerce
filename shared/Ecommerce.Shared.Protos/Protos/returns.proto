@@ -12,6 +12,9 @@ service ReturnsGrpc {
   rpc ApproveReturn (ApproveReturnGrpcRequest) returns (ReturnReply);
   rpc RejectReturn (RejectReturnGrpcRequest) returns (ReturnReply);
   rpc ResolveReturn (ResolveReturnGrpcRequest) returns (ReturnReply);
+  rpc GenerateReturnLabel (GenerateReturnLabelRequest) returns (ReturnShipmentReply);
+  rpc GetReturnShipment (GetReturnShipmentRequest) returns (ReturnShipmentReply);
+  rpc UpdateShipmentStatus (UpdateShipmentStatusRequest) returns (ReturnShipmentReply);
 }
 
 message GetReturnRequest {
@@ -83,4 +86,30 @@ message ResolveReturnGrpcRequest {
   string refund_amount = 3;
   int64 exchange_product_id = 4;
   string exchange_product_name = 5;
+}
+
+message GenerateReturnLabelRequest {
+  int64 return_request_id = 1;
+  string carrier = 2;
+}
+
+message GetReturnShipmentRequest {
+  int64 return_request_id = 1;
+}
+
+message UpdateShipmentStatusRequest {
+  int64 return_request_id = 1;
+}
+
+message ReturnShipmentReply {
+  int64 id = 1;
+  int64 return_request_id = 2;
+  string carrier = 3;
+  string tracking_number = 4;
+  string label_url = 5;
+  string status = 6;
+  string drop_off_location = 7;
+  string shipped_at = 8;
+  string delivered_at = 9;
+  string created_at = 10;
 }

@@ -465,7 +465,79 @@ public class Query
         return reply.Returns.Select(MapReturn).ToList();
     }
 
+    // ── Loyalty ──────────────────────────────────────
+
+    [Authorize]
+    public async Task<LoyaltyAccount?> GetLoyaltyAccount(
+        string customerId,
+        LoyaltyGrpc.LoyaltyGrpcClient client)
+    {
+        var reply = await client.GetLoyaltyAccountAsync(new GetLoyaltyAccountRequest { CustomerId = customerId });
+        return MapLoyaltyAccount(reply);
+    }
+
+    [Authorize]
+    public async Task<LoyaltyAccount?> GetMyLoyaltyAccount(
+        ClaimsPrincipal claimsPrincipal,
+        LoyaltyGrpc.LoyaltyGrpcClient client)
+    {
+        var userId = claimsPrincipal.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userId is null) return null;
+
+        var reply = await client.GetLoyaltyAccountAsync(new GetLoyaltyAccountRequest { CustomerId = userId });
+        return MapLoyaltyAccount(reply);
+    }
+
+    [Authorize]
+    public async Task<PointsHistoryConnection> GetPointsHistory(
+        string customerId,
+        int page,
+        int pageSize,
+        LoyaltyGrpc.LoyaltyGrpcClient client)
+    {
+        var reply = await client.GetPointsHistoryAsync(new GetPointsHistoryRequest
+        {
+            CustomerId = customerId,
+            Page = page,
+            PageSize = pageSize
+        });
+
+        return new PointsHistoryConnection
+        {
+            Items = reply.Transactions.Select(MapPointsTransaction).ToList(),
+            TotalCount = reply.TotalCount,
+            Page = reply.Page,
+            PageSize = reply.PageSize
+        };
+    }
+
     // ── Helpers ──────────────────────────────────────
+
+    private static LoyaltyAccount MapLoyaltyAccount(LoyaltyAccountReply a) => new()
+    {
+        Id = a.Id,
+        CustomerId = a.CustomerId,
+        PointsBalance = a.PointsBalance,
+        LifetimePoints = a.LifetimePoints,
+        AnnualSpend = decimal.TryParse(a.AnnualSpend, out var s) ? s : 0,
+        Tier = a.Tier,
+        PointsMultiplier = double.TryParse(a.PointsMultiplier, out var m) ? m : 1.0,
+        LastActivityAt = string.IsNullOrEmpty(a.LastActivityAt) ? null : a.LastActivityAt,
+        TierExpiresAt = a.TierExpiresAt,
+        CreatedAt = a.CreatedAt
+    };
+
+    private static PointsTransaction MapPointsTransaction(PointsTransactionReply t) => new()
+    {
+        Id = t.Id,
+        CustomerId = t.CustomerId,
+        Type = t.Type,
+        Points = t.Points,
+        BalanceAfter = t.BalanceAfter,
+        Description = t.Description,
+        OrderId = string.IsNullOrEmpty(t.OrderId) ? null : t.OrderId,
+        CreatedAt = t.CreatedAt
+    };
 
     private static ReturnRequest MapReturn(ReturnReply r) => new()
     {

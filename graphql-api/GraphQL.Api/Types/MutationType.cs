@@ -400,7 +400,39 @@ public class Mutation
         return reply.Success;
     }
 
+    // ── Loyalty ────────────────────────────────────
+
+    public async Task<PointsTransaction> RedeemPoints(
+        int points,
+        string? orderId,
+        ClaimsPrincipal claimsPrincipal,
+        LoyaltyGrpc.LoyaltyGrpcClient client)
+    {
+        var customerId = claimsPrincipal.FindFirstValue(ClaimTypes.NameIdentifier) ?? "";
+
+        var reply = await client.RedeemPointsAsync(new RedeemPointsGrpcRequest
+        {
+            CustomerId = customerId,
+            Points = points,
+            OrderId = orderId ?? string.Empty
+        });
+
+        return MapPointsTransaction(reply);
+    }
+
     // ── Helpers ──────────────────────────────────────
+
+    private static PointsTransaction MapPointsTransaction(PointsTransactionReply t) => new()
+    {
+        Id = t.Id,
+        CustomerId = t.CustomerId,
+        Type = t.Type,
+        Points = t.Points,
+        BalanceAfter = t.BalanceAfter,
+        Description = t.Description,
+        OrderId = string.IsNullOrEmpty(t.OrderId) ? null : t.OrderId,
+        CreatedAt = t.CreatedAt
+    };
 
     private static ReturnRequest MapReturn(ReturnReply r) => new()
     {

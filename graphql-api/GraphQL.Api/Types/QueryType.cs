@@ -605,7 +605,65 @@ public class Query
         return reply.Subscriptions.Select(MapSubscription).ToList();
     }
 
+    // ── Wishlists ────────────────────────────────────
+
+    [Authorize]
+    public async Task<List<WishlistItem2>> GetMyWishlists(
+        ClaimsPrincipal claimsPrincipal,
+        WishlistGrpc.WishlistGrpcClient client)
+    {
+        var userId = claimsPrincipal.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userId is null) return [];
+
+        var reply = await client.GetWishlistsByCustomerAsync(new GetWishlistsByCustomerRequest { CustomerId = userId });
+        return reply.Wishlists.Select(MapWishlist).ToList();
+    }
+
+    [Authorize]
+    public async Task<List<WishlistItem2>> GetWishlistsByCustomer(
+        string customerId,
+        WishlistGrpc.WishlistGrpcClient client)
+    {
+        var reply = await client.GetWishlistsByCustomerAsync(new GetWishlistsByCustomerRequest { CustomerId = customerId });
+        return reply.Wishlists.Select(MapWishlist).ToList();
+    }
+
+    public async Task<WishlistItem2?> GetSharedWishlist(
+        string shareToken,
+        WishlistGrpc.WishlistGrpcClient client)
+    {
+        try
+        {
+            var reply = await client.GetWishlistByShareTokenAsync(new GetWishlistByShareTokenRequest { ShareToken = shareToken });
+            return MapWishlist(reply);
+        }
+        catch (Grpc.Core.RpcException ex) when (ex.StatusCode == Grpc.Core.StatusCode.NotFound)
+        {
+            return null;
+        }
+    }
+
     // ── Helpers ──────────────────────────────────────
+
+    private static WishlistItem2 MapWishlist(WishlistReply w) => new()
+    {
+        Id = w.Id,
+        CustomerId = w.CustomerId,
+        Name = w.Name,
+        IsDefault = w.IsDefault,
+        ShareToken = w.ShareToken,
+        IsPublic = w.IsPublic,
+        Items = w.Items.Select(i => new WishlistItemEntry
+        {
+            Id = i.Id,
+            WishlistId = i.WishlistId,
+            ProductId = i.ProductId,
+            NotifyOnRestock = i.NotifyOnRestock,
+            AddedAt = i.AddedAt
+        }).ToList(),
+        CreatedAt = w.CreatedAt,
+        UpdatedAt = w.UpdatedAt
+    };
 
     private static SubscriptionItem MapSubscription(SubscriptionReply s) => new()
     {

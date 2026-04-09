@@ -564,7 +564,67 @@ public class Query
         };
     }
 
+    // ── Subscriptions ─────────────────────────────────
+
+    [Authorize]
+    public async Task<SubscriptionItem?> GetSubscription(
+        long id,
+        SubscriptionGrpc.SubscriptionGrpcClient client)
+    {
+        var reply = await client.GetSubscriptionAsync(new GetSubscriptionRequest { Id = id });
+        return MapSubscription(reply);
+    }
+
+    [Authorize]
+    public async Task<List<SubscriptionItem>> GetMySubscriptions(
+        ClaimsPrincipal claimsPrincipal,
+        SubscriptionGrpc.SubscriptionGrpcClient client)
+    {
+        var userId = claimsPrincipal.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userId is null) return [];
+
+        var reply = await client.GetSubscriptionsByCustomerAsync(new GetSubscriptionsByCustomerRequest { CustomerId = userId });
+        return reply.Subscriptions.Select(MapSubscription).ToList();
+    }
+
+    [Authorize]
+    public async Task<List<SubscriptionItem>> GetSubscriptionsByCustomer(
+        string customerId,
+        SubscriptionGrpc.SubscriptionGrpcClient client)
+    {
+        var reply = await client.GetSubscriptionsByCustomerAsync(new GetSubscriptionsByCustomerRequest { CustomerId = customerId });
+        return reply.Subscriptions.Select(MapSubscription).ToList();
+    }
+
+    [Authorize]
+    public async Task<List<SubscriptionItem>> GetUpcomingRenewals(
+        int days,
+        SubscriptionGrpc.SubscriptionGrpcClient client)
+    {
+        var reply = await client.GetUpcomingRenewalsAsync(new GetUpcomingRenewalsRequest { Days = days });
+        return reply.Subscriptions.Select(MapSubscription).ToList();
+    }
+
     // ── Helpers ──────────────────────────────────────
+
+    private static SubscriptionItem MapSubscription(SubscriptionReply s) => new()
+    {
+        Id = s.Id,
+        CustomerId = s.CustomerId,
+        ProductId = s.ProductId,
+        ProductName = s.ProductName,
+        Quantity = s.Quantity,
+        Frequency = s.Frequency,
+        IntervalDays = s.IntervalDays,
+        DiscountPercent = decimal.TryParse(s.DiscountPercent, out var d) ? d : 0,
+        Status = s.Status,
+        DeliveryAddressId = s.DeliveryAddressId,
+        NextRenewalAt = s.NextRenewalAt,
+        LastRenewedAt = string.IsNullOrEmpty(s.LastRenewedAt) ? null : s.LastRenewedAt,
+        FailureCount = s.FailureCount,
+        CreatedAt = s.CreatedAt,
+        UpdatedAt = s.UpdatedAt
+    };
 
     private static GiftCardItem MapGiftCard(GiftCardReply g) => new()
     {

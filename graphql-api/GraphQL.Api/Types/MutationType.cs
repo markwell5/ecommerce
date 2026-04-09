@@ -488,7 +488,108 @@ public class Mutation
         return MapGiftCardTransaction(reply);
     }
 
+    // ── Subscriptions ─────────────────────────────────
+
+    public async Task<SubscriptionItem> CreateSubscription(
+        long productId,
+        string productName,
+        int quantity,
+        string frequency,
+        int intervalDays,
+        decimal discountPercent,
+        long deliveryAddressId,
+        ClaimsPrincipal claimsPrincipal,
+        SubscriptionGrpc.SubscriptionGrpcClient client)
+    {
+        var customerId = claimsPrincipal.FindFirstValue(ClaimTypes.NameIdentifier) ?? "";
+
+        var reply = await client.CreateSubscriptionAsync(new CreateSubscriptionGrpcRequest
+        {
+            CustomerId = customerId,
+            ProductId = productId,
+            ProductName = productName,
+            Quantity = quantity,
+            Frequency = frequency,
+            IntervalDays = intervalDays,
+            DiscountPercent = discountPercent.ToString(System.Globalization.CultureInfo.InvariantCulture),
+            DeliveryAddressId = deliveryAddressId
+        });
+
+        return MapSubscription(reply);
+    }
+
+    public async Task<SubscriptionItem> UpdateSubscription(
+        long id,
+        int quantity,
+        string frequency,
+        int intervalDays,
+        long deliveryAddressId,
+        SubscriptionGrpc.SubscriptionGrpcClient client)
+    {
+        var reply = await client.UpdateSubscriptionAsync(new UpdateSubscriptionGrpcRequest
+        {
+            Id = id,
+            Quantity = quantity,
+            Frequency = frequency,
+            IntervalDays = intervalDays,
+            DeliveryAddressId = deliveryAddressId
+        });
+
+        return MapSubscription(reply);
+    }
+
+    public async Task<SubscriptionItem> PauseSubscription(
+        long id,
+        SubscriptionGrpc.SubscriptionGrpcClient client)
+    {
+        var reply = await client.PauseSubscriptionAsync(new SubscriptionActionRequest { Id = id });
+        return MapSubscription(reply);
+    }
+
+    public async Task<SubscriptionItem> ResumeSubscription(
+        long id,
+        SubscriptionGrpc.SubscriptionGrpcClient client)
+    {
+        var reply = await client.ResumeSubscriptionAsync(new SubscriptionActionRequest { Id = id });
+        return MapSubscription(reply);
+    }
+
+    public async Task<SubscriptionItem> CancelSubscription(
+        long id,
+        SubscriptionGrpc.SubscriptionGrpcClient client)
+    {
+        var reply = await client.CancelSubscriptionAsync(new SubscriptionActionRequest { Id = id });
+        return MapSubscription(reply);
+    }
+
+    public async Task<SubscriptionItem> SkipNextDelivery(
+        long id,
+        SubscriptionGrpc.SubscriptionGrpcClient client)
+    {
+        var reply = await client.SkipNextDeliveryAsync(new SubscriptionActionRequest { Id = id });
+        return MapSubscription(reply);
+    }
+
     // ── Helpers ──────────────────────────────────────
+
+    private static SubscriptionItem MapSubscription(SubscriptionReply s) => new()
+    {
+        Id = s.Id,
+        CustomerId = s.CustomerId,
+        ProductId = s.ProductId,
+        ProductName = s.ProductName,
+        Quantity = s.Quantity,
+        Frequency = s.Frequency,
+        IntervalDays = s.IntervalDays,
+        DiscountPercent = decimal.TryParse(s.DiscountPercent, out var d) ? d : 0,
+        Status = s.Status,
+        DeliveryAddressId = s.DeliveryAddressId,
+        NextRenewalAt = s.NextRenewalAt,
+        LastRenewedAt = string.IsNullOrEmpty(s.LastRenewedAt) ? null : s.LastRenewedAt,
+        FailureCount = s.FailureCount,
+        CreatedAt = s.CreatedAt,
+        UpdatedAt = s.UpdatedAt
+    };
 
     private static GiftCardItem MapGiftCard(GiftCardReply g) => new()
     {

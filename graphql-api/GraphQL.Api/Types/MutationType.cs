@@ -294,6 +294,32 @@ public class Mutation
         return MapReturn(reply);
     }
 
+    public async Task<ReturnShipment> GenerateReturnLabel(
+        long returnRequestId,
+        string? carrier,
+        ReturnsGrpc.ReturnsGrpcClient client)
+    {
+        var reply = await client.GenerateReturnLabelAsync(new GenerateReturnLabelRequest
+        {
+            ReturnRequestId = returnRequestId,
+            Carrier = carrier ?? "royal_mail"
+        });
+
+        return MapReturnShipment(reply);
+    }
+
+    public async Task<ReturnShipment> UpdateReturnShipmentStatus(
+        long returnRequestId,
+        ReturnsGrpc.ReturnsGrpcClient client)
+    {
+        var reply = await client.UpdateShipmentStatusAsync(new UpdateShipmentStatusRequest
+        {
+            ReturnRequestId = returnRequestId
+        });
+
+        return MapReturnShipment(reply);
+    }
+
     // ── Stock ────────────────────────────────────────
 
     public async Task<StockLevel> UpdateStock(
@@ -756,6 +782,20 @@ public class Mutation
         Description = t.Description,
         OrderId = string.IsNullOrEmpty(t.OrderId) ? null : t.OrderId,
         CreatedAt = t.CreatedAt
+    };
+
+    private static ReturnShipment MapReturnShipment(ReturnShipmentReply s) => new()
+    {
+        Id = s.Id,
+        ReturnRequestId = s.ReturnRequestId,
+        Carrier = s.Carrier,
+        TrackingNumber = s.TrackingNumber,
+        LabelUrl = s.LabelUrl,
+        Status = s.Status,
+        DropOffLocation = string.IsNullOrEmpty(s.DropOffLocation) ? null : s.DropOffLocation,
+        ShippedAt = string.IsNullOrEmpty(s.ShippedAt) ? null : s.ShippedAt,
+        DeliveredAt = string.IsNullOrEmpty(s.DeliveredAt) ? null : s.DeliveredAt,
+        CreatedAt = s.CreatedAt
     };
 
     private static ReturnRequest MapReturn(ReturnReply r) => new()

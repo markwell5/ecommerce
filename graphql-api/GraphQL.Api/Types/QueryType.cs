@@ -465,6 +465,15 @@ public class Query
         return reply.Returns.Select(MapReturn).ToList();
     }
 
+    [Authorize]
+    public async Task<ReturnShipment?> GetReturnShipment(
+        long returnRequestId,
+        ReturnsGrpc.ReturnsGrpcClient client)
+    {
+        var reply = await client.GetReturnShipmentAsync(new GetReturnShipmentRequest { ReturnRequestId = returnRequestId });
+        return MapReturnShipment(reply);
+    }
+
     // ── Loyalty ──────────────────────────────────────
 
     [Authorize]
@@ -737,6 +746,20 @@ public class Query
         Description = t.Description,
         OrderId = string.IsNullOrEmpty(t.OrderId) ? null : t.OrderId,
         CreatedAt = t.CreatedAt
+    };
+
+    private static ReturnShipment MapReturnShipment(ReturnShipmentReply s) => new()
+    {
+        Id = s.Id,
+        ReturnRequestId = s.ReturnRequestId,
+        Carrier = s.Carrier,
+        TrackingNumber = s.TrackingNumber,
+        LabelUrl = s.LabelUrl,
+        Status = s.Status,
+        DropOffLocation = string.IsNullOrEmpty(s.DropOffLocation) ? null : s.DropOffLocation,
+        ShippedAt = string.IsNullOrEmpty(s.ShippedAt) ? null : s.ShippedAt,
+        DeliveredAt = string.IsNullOrEmpty(s.DeliveredAt) ? null : s.DeliveredAt,
+        CreatedAt = s.CreatedAt
     };
 
     private static ReturnRequest MapReturn(ReturnReply r) => new()

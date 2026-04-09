@@ -5,6 +5,7 @@ using FluentValidation;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Return.Application;
+using Return.Application.Carriers;
 using Return.Application.Commands;
 using Return.Infrastructure;
 using Return.Service.Services;
@@ -39,6 +40,7 @@ try
     builder.Services.AddValidatorsFromAssembly(typeof(CreateReturnCommand).Assembly);
     builder.Services.AddAutoMapper(cfg => { }, typeof(Return.Application.MapperProfile).Assembly);
 
+    builder.Services.AddSingleton<ICarrierAdapter, StubCarrierAdapter>();
     builder.Services.AddOrderGrpcClient(builder.Configuration);
     builder.Services.AddProductGrpcClient(builder.Configuration);
 

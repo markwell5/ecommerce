@@ -9,6 +9,7 @@ namespace Return.Application
         public MapperProfile()
         {
             CreateMap<ReturnRequest, ReturnResponse>();
+            CreateMap<Entities.ReturnShipment, Ecommerce.Model.Return.Response.ReturnShipmentResponse>();
         }
     }
 }

@@ -91,6 +91,35 @@ public class ReturnsGrpcService : ReturnsGrpc.ReturnsGrpcBase
         return MapToReply(result);
     }
 
+    public override async Task<ReturnShipmentReply> GenerateReturnLabel(GenerateReturnLabelRequest request, ServerCallContext context)
+    {
+        var result = await _mediator.Send(new GenerateReturnLabelCommand
+        {
+            ReturnRequestId = request.ReturnRequestId,
+            Carrier = string.IsNullOrEmpty(request.Carrier) ? "royal_mail" : request.Carrier
+        }, context.CancellationToken);
+
+        return MapToShipmentReply(result);
+    }
+
+    public override async Task<ReturnShipmentReply> GetReturnShipment(GetReturnShipmentRequest request, ServerCallContext context)
+    {
+        var result = await _mediator.Send(new GetReturnShipmentQuery(request.ReturnRequestId), context.CancellationToken);
+        if (result == null)
+            throw new RpcException(new Status(StatusCode.NotFound, $"Shipment for return {request.ReturnRequestId} not found"));
+        return MapToShipmentReply(result);
+    }
+
+    public override async Task<ReturnShipmentReply> UpdateShipmentStatus(UpdateShipmentStatusRequest request, ServerCallContext context)
+    {
+        var result = await _mediator.Send(new UpdateShipmentStatusCommand
+        {
+            ReturnRequestId = request.ReturnRequestId
+        }, context.CancellationToken);
+
+        return MapToShipmentReply(result);
+    }
+
     private static ReturnReply MapToReply(ReturnResponse r) => new()
     {
         Id = r.Id,
@@ -114,5 +143,19 @@ public class ReturnsGrpcService : ReturnsGrpc.ReturnsGrpcBase
         ExchangeProductId = r.ExchangeProductId ?? 0,
         ExchangeProductName = r.ExchangeProductName ?? string.Empty,
         ExchangeOrderId = r.ExchangeOrderId?.ToString() ?? string.Empty
+    };
+
+    private static ReturnShipmentReply MapToShipmentReply(ReturnShipmentResponse s) => new()
+    {
+        Id = s.Id,
+        ReturnRequestId = s.ReturnRequestId,
+        Carrier = s.Carrier,
+        TrackingNumber = s.TrackingNumber,
+        LabelUrl = s.LabelUrl,
+        Status = s.Status,
+        DropOffLocation = s.DropOffLocation ?? string.Empty,
+        ShippedAt = s.ShippedAt?.ToString("O") ?? string.Empty,
+        DeliveredAt = s.DeliveredAt?.ToString("O") ?? string.Empty,
+        CreatedAt = s.CreatedAt.ToString("O")
     };
 }

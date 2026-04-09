@@ -24,3 +24,17 @@ public class ReturnRequest
     public string? ExchangeProductName { get; set; }
     public string? ExchangeOrderId { get; set; }
 }
+
+public class ReturnShipment
+{
+    public long Id { get; set; }
+    public long ReturnRequestId { get; set; }
+    public string Carrier { get; set; } = default!;
+    public string TrackingNumber { get; set; } = default!;
+    public string LabelUrl { get; set; } = default!;
+    public string Status { get; set; } = default!;
+    public string? DropOffLocation { get; set; }
+    public string? ShippedAt { get; set; }
+    public string? DeliveredAt { get; set; }
+    public string CreatedAt { get; set; } = default!;
+}

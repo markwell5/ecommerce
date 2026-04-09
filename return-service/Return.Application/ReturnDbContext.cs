@@ -11,6 +11,7 @@ namespace Return.Application
         }
 
         public DbSet<ReturnRequest> ReturnRequests { get; set; }
+        public DbSet<ReturnShipment> ReturnShipments { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -35,6 +36,19 @@ namespace Return.Application
                 entity.HasIndex(e => e.CustomerId);
                 entity.Property(e => e.ExchangeProductName).HasMaxLength(200);
                 entity.HasIndex(e => e.ExchangeOrderId);
+            });
+
+            modelBuilder.Entity<ReturnShipment>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+                entity.HasIndex(e => e.ReturnRequestId).IsUnique();
+                entity.HasIndex(e => e.TrackingNumber).IsUnique();
+                entity.Property(e => e.Carrier).HasMaxLength(50).IsRequired();
+                entity.Property(e => e.TrackingNumber).HasMaxLength(100).IsRequired();
+                entity.Property(e => e.LabelUrl).HasMaxLength(500).IsRequired();
+                entity.Property(e => e.Status).HasMaxLength(30).IsRequired();
+                entity.Property(e => e.DropOffLocation).HasMaxLength(500);
             });
         }
     }

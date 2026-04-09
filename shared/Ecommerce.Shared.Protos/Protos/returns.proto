@@ -53,6 +53,9 @@ message ReturnReply {
   string approved_at = 16;
   string received_at = 17;
   string resolved_at = 18;
+  int64 exchange_product_id = 19;
+  string exchange_product_name = 20;
+  string exchange_order_id = 21;
 }
 
 message CreateReturnGrpcRequest {
@@ -78,4 +81,6 @@ message ResolveReturnGrpcRequest {
   int64 id = 1;
   string resolution = 2;
   string refund_amount = 3;
+  int64 exchange_product_id = 4;
+  string exchange_product_name = 5;
 }

@@ -18,6 +18,7 @@
     <ProjectReference Include="..\..\domain\Ecommerce.Events\Ecommerce.Events.csproj" />
     <ProjectReference Include="..\..\domain\Ecommerce.Model\Ecommerce.Model.csproj" />
     <ProjectReference Include="..\..\shared\Ecommerce.Shared.Infrastructure\Ecommerce.Shared.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\shared\Ecommerce.Shared.Protos\Ecommerce.Shared.Protos.csproj" />
   </ItemGroup>
 
 </Project>

@@ -81,7 +81,9 @@ public class ReturnsGrpcService : ReturnsGrpc.ReturnsGrpcBase
         {
             ReturnRequestId = request.Id,
             Resolution = request.Resolution,
-            RefundAmount = decimal.TryParse(request.RefundAmount, CultureInfo.InvariantCulture, out var a) ? a : 0
+            RefundAmount = decimal.TryParse(request.RefundAmount, CultureInfo.InvariantCulture, out var a) ? a : 0,
+            ExchangeProductId = request.ExchangeProductId == 0 ? null : request.ExchangeProductId,
+            ExchangeProductName = request.ExchangeProductName
         }, context.CancellationToken);
 
         if (result == null)
@@ -108,6 +110,9 @@ public class ReturnsGrpcService : ReturnsGrpc.ReturnsGrpcBase
         CreatedAt = r.CreatedAt.ToString("O"),
         ApprovedAt = r.ApprovedAt?.ToString("O") ?? string.Empty,
         ReceivedAt = r.ReceivedAt?.ToString("O") ?? string.Empty,
-        ResolvedAt = r.ResolvedAt?.ToString("O") ?? string.Empty
+        ResolvedAt = r.ResolvedAt?.ToString("O") ?? string.Empty,
+        ExchangeProductId = r.ExchangeProductId ?? 0,
+        ExchangeProductName = r.ExchangeProductName ?? string.Empty,
+        ExchangeOrderId = r.ExchangeOrderId?.ToString() ?? string.Empty
     };
 }

@@ -33,6 +33,8 @@ namespace Return.Application
                 entity.Property(e => e.AdminNotes).HasMaxLength(1000);
                 entity.HasIndex(e => e.OrderId);
                 entity.HasIndex(e => e.CustomerId);
+                entity.Property(e => e.ExchangeProductName).HasMaxLength(200);
+                entity.HasIndex(e => e.ExchangeOrderId);
             });
         }
     }
